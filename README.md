@@ -1,5 +1,5 @@
 # Celk
-A tool that tries to solve one of the Bitcoin private key space puzzles.
+A tool that tries to solve one of the Bitcoin private key puzzles.
 
 Summary
 -------
@@ -13,3 +13,7 @@ which is the following:
 - Private key range: `20000000000000000:3ffffffffffffffff` (2^65 -> 2^66-1).
 - Balance / Price: `6.60036213 BTC`.
 
+Similarly to the [66 Bit Collective Bitcoin Private Key Cracking Pool](http://www.ttdsales.com/66bit/login.php),
+the workload will be split into ranges from `0000000000` to `FFFFFFFFFF` which corresponds to 1,099,511,627,776 keys.
+After one range is completed, the next one will be started, and the previous one will be marked as completed in the database
+(which is an internal JSON file).
