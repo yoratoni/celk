@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 import { sys } from "typescript";
 
 import logger from "utils/logger";
@@ -9,7 +9,10 @@ import logger from "utils/logger";
  * @param databaseName The name of the database to connect to.
  * @returns The MongoDB database.
  */
-export async function connectToDB(dbName = process.env.MONGODB_DB) {
+export async function connectToDB(dbName = process.env.MONGODB_DB): Promise<{
+    mongoClient: MongoClient;
+    mongoDB: Db;
+} | undefined> {
     const uri = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_HOST}/?authMechanism=SCRAM-SHA-256&tls=true`;
     const mongoClient = new MongoClient(uri, {});
 
@@ -44,7 +47,7 @@ export async function connectToDB(dbName = process.env.MONGODB_DB) {
  * Close the MongoDB connection.
  * @param mongoClient The MongoDB client.
  */
-export async function closeDBConnection(mongoClient: MongoClient) {
+export async function closeDBConnection(mongoClient: MongoClient): Promise<void> {
     try {
         if (mongoClient !== null) {
             await mongoClient.close();
