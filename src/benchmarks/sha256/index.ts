@@ -47,7 +47,7 @@ export default function main(iterations: number): void {
     );
 
     console.log("");
-    logger.info("VM TESTS: SHA256 ALGORITHM");
+    logger.info("VM TESTS: SHA256 ALGORITHM (CPU)");
 
     // VM Test 1 ("")
     const VMTest1 = sha256Engine.CPU_sha256("");

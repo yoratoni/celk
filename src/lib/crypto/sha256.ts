@@ -266,5 +266,5 @@ export default class SHA256Engine {
         return this.UTF8ToHex(rawOutput);
     };
 
-    // TODO: GPU implementation
+    // TODO: Convert CPU to GPU implementation
 }
