@@ -7,5 +7,4 @@ import logger from "utils/logger";
 logger.info("Starting benchmarking of the algorithms.");
 console.log("");
 
-logger.info("BENCHMARK: SHA256 ALGORITHM");
 benchmark_sha256(131072);

@@ -1,6 +1,5 @@
 /*
- * A GPU accelerated TypeScript implementation of the Secure Hash Algorithm, SHA-256, as defined
- * in FIPS 180-2.
+ * A CPU TypeScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-2.
  *
  * Version 2.2 Copyright Angel Marin, Paul Johnston 2000 - 2009.
  * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet.
@@ -13,23 +12,14 @@
  * And the JS implementation from Bryan Chow.
  * See https://gist.github.com/bryanchow/1649353
  */
-
-import { GPU as GPUJS } from "gpu.js";
-
-
-/**
- * GPU accelerated SHA-256 engine, supplying the final SHA-256 function.
- */
-export default class SHA256Engine {
-    private _gpuInstance: GPUJS;
+export default class CPU_SHA256_ENGINE {
     private _encoder: TextEncoder;
 
 
     /**
      * Construct a new SHA-256 engine.
      */
-    constructor(gpuInstance: GPUJS) {
-        this._gpuInstance = gpuInstance;
+    constructor() {
         this._encoder = new TextEncoder();
     }
 
@@ -107,12 +97,12 @@ export default class SHA256Engine {
     };
 
     /**
-     * **[CPU]** SHA-256 internal hash computation.
+     * SHA-256 internal hash computation.
      * @param m The message to hash.
      * @param l The length of the message.
      * @returns The hash of the message.
      */
-    private _CPU_SHA256 = (m: number[], l: number) => {
+    private _sha256 = (m: number[], l: number) => {
         const HASH = [
             0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
             0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
@@ -256,15 +246,13 @@ export default class SHA256Engine {
      * @param input The string to hash.
      * @returns The hash of the string.
      */
-    CPU_sha256 = (input: string): string => {
+    sha256 = (input: string): string => {
         const UTF8 = this.strToUTF8(input);
         const bigEndianWords = this.UTF8ToBigEndianWords(UTF8);
 
-        const hash = this._CPU_SHA256(bigEndianWords, UTF8.length * 8);
+        const hash = this._sha256(bigEndianWords, UTF8.length * 8);
 
         const rawOutput = this.bigEndianWordsToUTF8(hash);
         return this.UTF8ToHex(rawOutput);
     };
-
-    // TODO: Convert CPU to GPU implementation
 }

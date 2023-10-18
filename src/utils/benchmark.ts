@@ -122,7 +122,7 @@ export function measureComputeSpeedFormatted(
     const res = measureComputeSpeed(fn, iterations, inputFn);
 
     logger.info(`>> Benchmark: ${benchmarkName}`);
-    logger.info(`   >> Iterations: ${iterations}`);
+    logger.info(`   >> Iterations: ${iterations.toLocaleString("en-US")}`);
     logger.info(`   >> Total time: ${formatTime(res.total)}`);
     logger.info(`   >> Average time: ${formatTime(res.average)}`);
 }
