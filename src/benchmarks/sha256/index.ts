@@ -14,25 +14,19 @@ export default function main(): void {
     const gpuInstance = new GPUJS();
     const sha256Engine = new SHA256Engine(gpuInstance);
     const randomStrFn = () => generateRandomString(128);
+    const randomUTF8Fn = () => sha256Engine.strToUTF8(randomStrFn());
 
     measureComputeSpeedFormatted(
         "SHA256 STRING TO UTF-8",
         sha256Engine.strToUTF8,
         8192,
-        randomStrFn
+        () => randomStrFn()
     );
 
     measureComputeSpeedFormatted(
-        "SHA256 STRING TO UTF-16",
-        () => sha256Engine.strToUTF16,
+        "SHA256 UTF8 (Uint8Array) TO BIG-ENDIAN WORDS",
+        () => sha256Engine.utf8ToBigEndianWords,
         8192,
-        randomStrFn
-    );
-
-    measureComputeSpeedFormatted(
-        "SHA256 STRING TO BIG-ENDIAN WORDS",
-        () => sha256Engine.strToBigEndianWords,
-        8192,
-        randomStrFn
+        randomUTF8Fn
     );
 }
