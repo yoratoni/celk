@@ -3,6 +3,14 @@ import logger from "utils/logger";
 
 
 /**
+ * The type of the result of the measureComputeSpeed function.
+ */
+type isComputeSpeedRes = {
+    total: number;
+    average: number;
+};
+
+/**
  * Generates a random string of a given length.
  * @param length The length of the string to generate.
  * @returns The generated string.
@@ -42,16 +50,17 @@ export function measureComputeSpeedOnce(
     inputFn?: Function
 ): number {
     let input: unknown = undefined;
+    if (inputFn) input = inputFn();
 
-    if (inputFn) {
-        input = inputFn();
-    }
-
-    console.log(input);
+    // Access function result to prevent optimization
+    let res = undefined;
 
     const start = performance.now();
-    fn(input);
+    res = fn(input);
     const end = performance.now();
+
+    // Prevent unused variable warning
+    if (res === "EMPTY_FIELD") return 0;
 
     return end - start;
 }
@@ -67,14 +76,17 @@ export function measureComputeSpeed(
     fn: Function,
     iterations: number,
     inputFn?: Function
-): number {
+): isComputeSpeedRes {
     let total = 0;
 
     for (let i = 0; i < iterations; i++) {
         total += measureComputeSpeedOnce(fn, inputFn) as number;
     }
 
-    return total / iterations;
+    return {
+        total,
+        average: total / iterations
+    };
 }
 
 /**
@@ -111,5 +123,6 @@ export function measureComputeSpeedFormatted(
 
     logger.info(`>> Benchmark: ${benchmarkName}`);
     logger.info(`   >> Iterations: ${iterations}`);
-    logger.info(`   >> Average time: ${formatTime(res)}`);
+    logger.info(`   >> Total time: ${formatTime(res.total)}`);
+    logger.info(`   >> Average time: ${formatTime(res.average)}`);
 }
