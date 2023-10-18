@@ -12,21 +12,6 @@
  * See http://www.quadibloc.com/crypto/mi060501.htm
  * And the JS implementation from Bryan Chow.
  * See https://gist.github.com/bryanchow/1649353
- *
- * hex
- * - hex_sha256
- * - rstr2hex
- * - rstr_sha256
- *   - binb2rstr
- *   - binb_sha256
- *     > safeAdd
- *     > sha256_Gamma0256 / sha256_Gamma1256
- *     > sha256_Sigma0256 / sha256_Sigma1256
- *     > sha256_K
- *     > sha256_Ch
- *     > sha256_Maj
- *   - rstr2binb
- * - str2rstr_utf8
  */
 
 import { GPU as GPUJS } from "gpu.js";
@@ -63,15 +48,7 @@ export default class SHA256Engine {
     ];
 
     /**
-     * Initial hash values.
-     */
-    private readonly H: number[] = [
-        0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
-        0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
-    ];
-
-    /**
-     * **[GPU]** Perform the "circular shift right" (CSR) operation, needed for the hash computation.
+     * Perform the "circular shift right" (CSR) operation, needed for the hash computation.
      * @param x The number to shift.
      * @param n The number of bits to shift.
      * @returns The shifted number.
@@ -79,7 +56,7 @@ export default class SHA256Engine {
     private CSR = (x: number, n: number): number => (x >>> n) | (x << (32 - n));
 
     /**
-     * **[GPU]** Perform the "logical right shift" (LRS) operation, needed for the hash computation.
+     * Perform the "logical right shift" (LRS) operation, needed for the hash computation.
      * @param x The number to shift.
      * @param n The number of bits to shift.
      * @returns The shifted number.
@@ -87,7 +64,7 @@ export default class SHA256Engine {
     private LRS = (x: number, n: number): number => (x >>> n);
 
     /**
-     * **[GPU]** Perform the "choose" operation, needed for the hash computation.
+     * Perform the "choose" operation, needed for the hash computation.
      * @param x The first number.
      * @param y The second number.
      * @param z The third number.
@@ -96,7 +73,7 @@ export default class SHA256Engine {
     private choose = (x: number, y: number, z: number): number => (x & y) ^ ((~x) & z);
 
     /**
-     * **[GPU]** Perform the "majority" operation, needed for the hash computation.
+     * Perform the "majority" operation, needed for the hash computation.
      * @param x The first number.
      * @param y The second number.
      * @param z The third number.
@@ -104,22 +81,20 @@ export default class SHA256Engine {
      */
     private majority = (x: number, y: number, z: number): number => (x & y) ^ (x & z) ^ (y & z);
 
-
-    /** **[GPU]** Perform the "SIGMA 0" operation. */
+    /** Perform the "SIGMA 0" operation. */
     private sigma0 = (x: number): number => this.CSR(x, 2) ^ this.CSR(x, 13) ^ this.CSR(x, 22);
 
-    /** **[GPU]** Perform the "SIGMA 1" operation. */
+    /** Perform the "SIGMA 1" operation. */
     private sigma1 = (x: number): number => this.CSR(x, 6) ^ this.CSR(x, 11) ^ this.CSR(x, 25);
 
-    /** **[GPU]** Perform the "GAMMA 0" operation. */
+    /** Perform the "GAMMA 0" operation. */
     private gamma0 = (x: number): number => this.CSR(x, 7) ^ this.CSR(x, 18) ^ this.LRS(x, 3);
 
-    /** **[GPU]** Perform the "GAMMA 1" operation. */
+    /** Perform the "GAMMA 1" operation. */
     private gamma1 = (x: number): number => this.CSR(x, 17) ^ this.CSR(x, 19) ^ this.LRS(x, 10);
 
-
     /**
-     * **[GPU]** Safe addition operation, needed for the hash computation.
+     * Safe addition operation, needed for the hash computation.
      * @param x The first number to add.
      * @param y The second number to add.
      * @returns The sum of the two numbers.
@@ -132,42 +107,164 @@ export default class SHA256Engine {
     };
 
     /**
-     * Encode a string as UTF-8.
-     * @param str The string to encode.
-     * @returns The UTF-8 encoded string as an Uint8Array.
+     * **[CPU]** SHA-256 internal hash computation.
+     * @param m The message to hash.
+     * @param l The length of the message.
+     * @returns The hash of the message.
      */
-    strToUTF8 = (str: string): Uint8Array => {
-        const utf8 = new Uint8Array(str.length);
-        this._encoder.encodeInto(str, utf8);
+    private _CPU_SHA256 = (m: number[], l: number) => {
+        const HASH = [
+            0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
+            0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
+        ];
 
-        return utf8;
+        const W = new Array(64);
+        let a, b, c, d, e, f, g, h;
+        let i, j, t1, t2;
+
+        // Append padding
+        m[l >> 5] |= 0x80 << (24 - l % 32);
+        m[((l + 64 >> 9) << 4) + 15] = l;
+
+        for (i = 0; i < m.length; i += 16) {
+            a = HASH[0];
+            b = HASH[1];
+            c = HASH[2];
+            d = HASH[3];
+            e = HASH[4];
+            f = HASH[5];
+            g = HASH[6];
+            h = HASH[7];
+
+            for (j = 0; j < 64; j++) {
+                if (j < 16) {
+                    W[j] = m[j + i];
+                } else {
+                    W[j] = this.safeAdd(
+                        this.safeAdd(
+                            this.safeAdd(
+                                this.gamma1(W[j - 2]),
+                                W[j - 7]
+                            ),
+                            this.gamma0(W[j - 15])
+                        ),
+                        W[j - 16]
+                    );
+                }
+
+                t1 = this.safeAdd(
+                    this.safeAdd(
+                        this.safeAdd(
+                            this.safeAdd(
+                                h,
+                                this.sigma1(e)
+                            ),
+                            this.choose(e, f, g)
+                        ),
+                        this.K[j]
+                    ),
+                    W[j]
+                );
+
+                t2 = this.safeAdd(this.sigma0(a), this.majority(a, b, c));
+
+                // Update working variables
+                h = g;
+                g = f;
+                f = e;
+                e = this.safeAdd(d, t1);
+                d = c;
+                c = b;
+                b = a;
+                a = this.safeAdd(t1, t2);
+
+            }
+
+            HASH[0] = this.safeAdd(a, HASH[0]);
+            HASH[1] = this.safeAdd(b, HASH[1]);
+            HASH[2] = this.safeAdd(c, HASH[2]);
+            HASH[3] = this.safeAdd(d, HASH[3]);
+            HASH[4] = this.safeAdd(e, HASH[4]);
+            HASH[5] = this.safeAdd(f, HASH[5]);
+            HASH[6] = this.safeAdd(g, HASH[6]);
+            HASH[7] = this.safeAdd(h, HASH[7]);
+        }
+
+        return HASH;
     };
 
     /**
-     * Converts an Uint8Array raw UTF8 string to an array of big-endian words.
-     * @param utf8 The UTF-8 encoded string.
+     * **[CPU]** Encode a string as UTF-8.
+     * @param input The string to encode.
+     * @returns The UTF-8 encoded string as an Uint8Array.
+     */
+    strToUTF8 = (input: string): Uint8Array => {
+        const UTF8 = new Uint8Array(input.length);
+        this._encoder.encodeInto(input, UTF8);
+
+        return UTF8;
+    };
+
+    /**
+     * **[CPU]** Converts an Uint8Array raw UTF-8 string to an array of big-endian words.
+     * @param input The UTF-8 encoded string.
      * @returns The array of big-endian words.
      */
-    utf8ToBigEndianWords = (utf8: Uint8Array): number[] => {
-        const output = Array(utf8.length >> 2);
+    UTF8ToBigEndianWords = (input: Uint8Array): number[] => {
+        const output = new Array(input.length >> 2);
 
-        for (let i = 0; i < output.length; i++) {
-            output[i] = 0;
-        }
-
-        for (let i = 0; i < utf8.length * 8; i += 8) {
-            output[i >> 5] |= (utf8[i / 8] & 0xFF) << (24 - i % 32);
+        for (let i = 0; i < input.length * 8; i += 8) {
+            output[i >> 5] |= (input[i / 8] & 0xFF) << (24 - i % 32);
         }
 
         return output;
     };
 
     /**
-     * **[GPU]** SHA-256 internal hash computation.
-     * @param m The message to hash.
-     * @param l The length of the message.
+     * **[CPU]** Converts an array of big-endian words to an UTF-8 Uint8Array.
+     * @param input The array of big-endian words.
+     * @returns The UTF-8 Uint8Array.
      */
-    private sha256Internal = (m: number[], l: number) => {
-        // const hash = 
+    bigEndianWordsToUTF8 = (input: number[]): Uint8Array => {
+        const output = new Uint8Array(input.length * 4);
+
+        for (let i = 0; i < input.length * 32; i += 8) {
+            output[i / 8] = (input[i >> 5] >>> (24 - i % 32)) & 0xFF;
+        }
+
+        return output;
     };
+
+    /**
+     * **[CPU]** Converts an UTF-8 Uint8Array to an hex string (final SHA-256 hash).
+     * @param input The UTF-8 Uint8Array.
+     * @returns The hex string.
+     */
+    UTF8ToHex = (input: Uint8Array): string => {
+        const hex = new Array(input.length * 2);
+
+        for (let i = 0; i < input.length; i++) {
+            hex[i * 2] = (input[i] >>> 4).toString(16);
+            hex[i * 2 + 1] = (input[i] & 0xF).toString(16);
+        }
+
+        return hex.join("");
+    };
+
+    /**
+     * **[CPU]** Main function for the SHA-256 hash computation.
+     * @param input The string to hash.
+     * @returns The hash of the string.
+     */
+    CPU_sha256 = (input: string): string => {
+        const UTF8 = this.strToUTF8(input);
+        const bigEndianWords = this.UTF8ToBigEndianWords(UTF8);
+
+        const hash = this._CPU_SHA256(bigEndianWords, UTF8.length * 8);
+
+        const rawOutput = this.bigEndianWordsToUTF8(hash);
+        return this.UTF8ToHex(rawOutput);
+    };
+
+    // TODO: GPU implementation
 }
