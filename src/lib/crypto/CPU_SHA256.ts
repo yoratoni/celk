@@ -1,11 +1,13 @@
 /*
  * A CPU TypeScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-2.
 
- * Based on the SHA256 explanation from Quadibloc.
+ * Based on the SHA256 explanation by Quadibloc.
  *   See http://www.quadibloc.com/crypto/mi060501.htm
- * And the JS implementation from Bryan Chow.
+ * And the JS implementation by Bryan Chow.
  *   See https://gist.github.com/bryanchow/1649353
  */
+
+
 export default class CPU_SHA256_ENGINE {
     private _encoder: TextEncoder;
 
