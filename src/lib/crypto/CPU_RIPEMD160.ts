@@ -59,13 +59,4 @@ export default class CPU_RIPEMD160_ENGINE {
      * @returns The shifted number.
      */
     private CSR = (x: number, n: number): number => (x << n) | (x >>> (32 - n));
-
-    /**
-     * Get
-     * @returns 
-     */
-    protected get(): [number, number, number, number, number] {
-        const { h0, h1, h2, h3, h4 } = this;
-        return [h0, h1, h2, h3, h4];
-    }
 }
