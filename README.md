@@ -6,10 +6,11 @@ Technical details
 - The tool is written in Typescript.
 - The database is a MongoDB collection hosted on my server.
 - The tool is using `GPU.js` to use the GPU for the computation.
-- GPU implementation of:
+- For now, the CPU implementation of:
     - `secp256k1` (ECDSA curve used by Bitcoin).
     - `SHA256`.
     - `RIPEMD160`.
+- These algorithms will be, later, implemented on the GPU.
 
 Summary (1000 BTC Bitcoin Challenge)
 ------------------------------------
@@ -40,3 +41,7 @@ About the puzzle #130, which is the following:
 Similarly to the [66 Bit Collective Bitcoin Private Key Cracking Pool](http://www.ttdsales.com/66bit/login.php),
 the workload will be split into ranges from `0000000000` to `FFFFFFFFFF` which corresponds to 1,099,511,627,776 keys.
 After one range is completed, the next one will be started, and the previous one will be marked as completed in the database.
+
+Notes
+-----
+- The Bitcoin address generation procedure can be found [here](https://www.crypto-lyon.fr/how-to-get-an-address-from-a-private-key-on-bitcoin.html).
