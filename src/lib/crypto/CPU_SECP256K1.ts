@@ -32,7 +32,7 @@ const POW_2_128 = 2n ** BigInt(128);
  * @param b The second number (optional, defaults to CURVE.P).
  * @returns The sum.
  */
-function mod(a: bigint, b = CURVE.P) {
+function mod(a: bigint, b = CURVE.P): bigint {
     const result = a % b;
 
     return result >= 0 ? result : b + result;
@@ -44,7 +44,7 @@ function mod(a: bigint, b = CURVE.P) {
  * @param modulo The modulo  (optional, defaults to CURVE.P).
  * @returns The inverse.
  */
-function invert(number: bigint, modulo = CURVE.P) {
+function invert(number: bigint, modulo = CURVE.P): bigint {
     if (number === 0n || modulo <= 0n) {
         throw new Error(`[CPU_SECP256K1] invert: Expected positive integers, got n=${number} mod=${modulo}.`);
     }
@@ -98,7 +98,7 @@ function normalizeScalar(num: number | bigint): bigint {
  * @param a The first number.
  * @param b The second number.
  */
-function divNearest(a: bigint, b: bigint) {
+function divNearest(a: bigint, b: bigint): bigint {
     return (a + b / 2n) / b;
 }
 
@@ -106,7 +106,12 @@ function divNearest(a: bigint, b: bigint) {
  * Split 256-bit K into 2 128-bit (k1, k2) for which k1 + k2 * lambda = K.
  * @link [SECP256K1 Endomorphism](https://gist.github.com/paulmillr/eb670806793e84df628a7c434a873066).
  */
-function splitScalarEndo(k: bigint) {
+function splitScalarEndo(k: bigint): {
+    k1neg: boolean;
+    k1: bigint;
+    k2neg: boolean;
+    k2: bigint;
+} {
     const { n } = CURVE;
 
     const a1 = BigInt("0x3086d221a7d46bcde86c90e49284eb15");
@@ -118,11 +123,14 @@ function splitScalarEndo(k: bigint) {
 
     let k1 = mod(k - c1 * a1 - c2 * a2, n);
     let k2 = mod(-c1 * b1 - c2 * b2, n);
+
     const k1neg = k1 > POW_2_128;
     const k2neg = k2 > POW_2_128;
     if (k1neg) k1 = n - k1;
     if (k2neg) k2 = n - k2;
+
     if (k1 > POW_2_128 || k2 > POW_2_128) throw new Error("splitScalarEndo: Endomorphism failed");
+
     return { k1neg, k1, k2neg, k2 };
 }
 
@@ -152,7 +160,7 @@ export class Point {
     }
 
 
-    multiply(scalar: bigint) {
+    multiply(scalar: bigint): Point {
         return JacobianPoint.fromAffine(this).multiplyUnsafe(scalar).toAffine();
     }
 }
@@ -345,7 +353,7 @@ export default class CPU_SECP256K1_ENGINE {
 
 
     /**
-     * Construct a new SECP256K1 engine.
+     * Construct a new CPU SECP256K1 engine.
      */
     constructor() {}
 
@@ -354,7 +362,7 @@ export default class CPU_SECP256K1_ENGINE {
      * Execute the SECP256K1 algorithm.
      * @param privateKey The private key.
      */
-    secp256k1 = (privateKey: bigint) => {
+    secp256k1 = (privateKey: bigint): bigint => {
         const point = this.G.multiply(privateKey);
         return BigInt(`${point.x}${point.y}`);
     };

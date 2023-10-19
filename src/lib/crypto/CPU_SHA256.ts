@@ -25,7 +25,7 @@ export default class CPU_SHA256_ENGINE {
 
 
     /**
-     * Construct a new SHA-256 engine.
+     * Construct a new CPU SHA-256 engine.
      */
     constructor() {
         this._encoder = new TextEncoder();
@@ -233,7 +233,7 @@ export default class CPU_SHA256_ENGINE {
             hex[i * 2 + 1] = (input[i] & 0xF).toString(16);
         }
 
-        return hex.join("");
+        return hex.join("").toUpperCase();
     };
 
     /**
