@@ -27,6 +27,20 @@ export function generateRandomString(length: number): string {
 }
 
 /**
+ * Generates a random private key (bigint - 78 digits).
+ * @returns The generated private key.
+ */
+export function generateRandomPrivateKey(): bigint {
+    let str = "";
+
+    for (let i = 0; i < 64; i++) {
+        str += Math.floor(Math.random() * 10);
+    }
+
+    return BigInt(str);
+}
+
+/**
  * Format a time in ms, into a responsive string with the en-US locale format.
  * @param time The time in ms.
  */

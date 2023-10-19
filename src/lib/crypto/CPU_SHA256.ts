@@ -1,31 +1,15 @@
 /*
  * A CPU TypeScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-2.
- *
- * Version 2.2 Copyright Angel Marin, Paul Johnston 2000 - 2009.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet.
- * Distributed under the BSD License.
- * See http://pajhome.org.uk/crypt/md5 for details.
- * Also http://anmar.eu.org/projects/jssha2/
- *
+
  * Based on the SHA256 explanation from Quadibloc.
- * See http://www.quadibloc.com/crypto/mi060501.htm
+ *   See http://www.quadibloc.com/crypto/mi060501.htm
  * And the JS implementation from Bryan Chow.
- * See https://gist.github.com/bryanchow/1649353
+ *   See https://gist.github.com/bryanchow/1649353
  */
 export default class CPU_SHA256_ENGINE {
     private _encoder: TextEncoder;
 
-
-    /**
-     * Construct a new SHA-256 engine.
-     */
-    constructor() {
-        this._encoder = new TextEncoder();
-    }
-
-    /**
-     * 64-bit words constants.
-     */
+    /** 64-bit words constants. */
     private readonly K: number[] = [
         0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
         0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
@@ -36,6 +20,15 @@ export default class CPU_SHA256_ENGINE {
         0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
         0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
     ];
+
+
+    /**
+     * Construct a new SHA-256 engine.
+     */
+    constructor() {
+        this._encoder = new TextEncoder();
+    }
+
 
     /**
      * Perform the "circular shift right" (CSR) operation, needed for the hash computation.
