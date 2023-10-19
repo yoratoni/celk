@@ -89,6 +89,7 @@ function isWithinCurveOrder(num: bigint): boolean {
 function normalizeScalar(num: number | bigint): bigint {
     if (typeof num === "number" && num > 0 && Number.isSafeInteger(num)) return BigInt(num);
     if (typeof num === "bigint" && isWithinCurveOrder(num)) return num;
+
     throw new TypeError("[CPU_SECP256K1] normalizeScalar: Expected valid private scalar: 0 < scalar < curve.n.");
 }
 
