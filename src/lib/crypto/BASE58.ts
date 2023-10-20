@@ -1,4 +1,4 @@
-import { stringToUint8Array } from "utils/conversions";
+import { hexToUint8Array } from "utils/conversions";
 
 
 /**
@@ -20,15 +20,15 @@ export default class BASE58_ENGINE {
 
     /**
      * Execute the BASE58 algorithm.
-     * @param str The string to encode.
-     * @returns The BASE58 encoded string.
+     * @param hex The hexadecimal string to hash.
+     * @returns The BASE58 encoded version of hexadecimal string.
      */
-    execute = (str: string): string => {
-        if (str.length === 0) {
+    execute = (hex: `0x${string}`): string => {
+        if (hex.length === 0) {
             return "";
         }
 
-        const bytes = stringToUint8Array(str);
+        const bytes = hexToUint8Array(hex);
         const digits = [0];
 
         for (let i = 0; i < bytes.length; i++) {

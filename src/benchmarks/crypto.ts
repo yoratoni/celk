@@ -21,39 +21,33 @@ export default function main(): void {
     const randomHexStrFn = () => generateRandomHexString(128);
     const randomPrivateKeyFn = () => generateRandomPrivateKey();
 
-    // logger.info("BASE58 BINARY-TO-TEXT ENCODER:");
-    // benchmark(
-    //     base58Engine.execute,
-    //     randomStrFn
-    // );
+    logger.info("BASE58 BINARY-TO-TEXT ENCODER:");
+    benchmark(
+        base58Engine.execute,
+        randomStrFn
+    );
 
-    // logger.info("RIPEMD-160 ALGORITHM:");
-    // benchmark(
-    //     ripemd160Engine.execute,
-    //     randomHexStrFn
-    // );
+    logger.info("RIPEMD-160 ALGORITHM:");
+    benchmark(
+        ripemd160Engine.execute,
+        randomHexStrFn
+    );
 
-    // logger.info("SECP256K1 ALGORITHM:");
-    // benchmark(
-    //     secp256k1Engine.execute,
-    //     randomPrivateKeyFn
-    // );
+    logger.info("SECP256K1 ALGORITHM:");
+    benchmark(
+        secp256k1Engine.execute,
+        randomPrivateKeyFn
+    );
 
-    // logger.info("SHA-256 ALGORITHM:");
-    // benchmark(
-    //     sha256Engine.execute,
-    //     randomHexStrFn
-    // );
+    logger.info("SHA-256 ALGORITHM:");
+    benchmark(
+        sha256Engine.execute,
+        randomHexStrFn
+    );
 
-    const privateKey = "0xEDCC6224FEE390A57C76C13A9BECC9502A6F3B1BF6F72B6ED11B83A0F0E3E9FC";
-
-    const test = generator.execute(privateKey);
-    console.log(test);
-
-
-    // logger.info("BENCHMARK: ADDRESS GENERATOR");
-    // benchmark(
-    //     generator.execute,
-    //     randomPrivateKeyFn
-    // );
+    logger.info("BENCHMARK: ADDRESS GENERATOR");
+    benchmark(
+        generator.execute,
+        randomPrivateKeyFn
+    );
 }
