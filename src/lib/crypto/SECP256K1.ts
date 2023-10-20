@@ -362,8 +362,18 @@ export default class SECP256K1_ENGINE {
      * @param privateKey The private key.
      * @returns The public key.
      */
-    execute = (privateKey: string): string => {
+    execute = (privateKey: `0x${string}`): `0x${string}` => {
         const point = this.G.multiply(BigInt(privateKey));
-        return `${point.x}${point.y}`;
+
+        // Base 16 X & Y coordinates of the public key
+        let x = point.x.toString(16);
+        let y = point.y.toString(16);
+
+        // Fill up the missing zeros
+        while (x.length < 64) x = `0${x}`;
+        while (y.length < 64) y = `0${y}`;
+
+        // Prefixed with 04 to indicate that it is uncompressed
+        return ("0x" + `04${x}${y}`.toUpperCase()) as `0x${string}`;
     };
 }

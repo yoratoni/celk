@@ -17,7 +17,7 @@ type isComputeSpeedRes = {
  */
 export function generateRandomString(length: number): string {
     let result = "";
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * characters.length));
@@ -27,17 +27,27 @@ export function generateRandomString(length: number): string {
 }
 
 /**
- * Generates a random private key (bigint - 78 digits).
+ * Generates a random hexadecimal string of a given length.
+ * @param length The length of the string to generate.
+ * @returns The generated hexadecimal string.
+ */
+export function generateRandomHexString(length: number): `0x${string}` {
+    let result = "";
+    const characters = "0123456789ABCDEF";
+
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    return `0x${result}`;
+}
+
+/**
+ * Generates a random private key (bigint - 64 digits).
  * @returns The generated private key.
  */
 export function generateRandomPrivateKey(): bigint {
-    let str = "";
-
-    for (let i = 0; i < 64; i++) {
-        str += Math.floor(Math.random() * 10);
-    }
-
-    return BigInt(str);
+    return BigInt(generateRandomHexString(64));
 }
 
 /**
@@ -116,7 +126,7 @@ export function measureComputeSpeedOnceFormatted(
 ): void {
     const res = measureComputeSpeedOnce(fn, inputFn);
 
-    logger.info(`>> Benchmark: ${benchmarkName}`);
+    logger.info(`>> Benchmark: ${benchmarkName} (1 iteration)`);
     logger.info(`   >> Time: ${formatTime(res)}`);
 }
 
@@ -135,8 +145,44 @@ export function measureComputeSpeedFormatted(
 ): void {
     const res = measureComputeSpeed(fn, iterations, inputFn);
 
-    logger.info(`>> Benchmark: ${benchmarkName}`);
-    logger.info(`   >> Iterations: ${iterations.toLocaleString("en-US")}`);
-    logger.info(`   >> Total time: ${formatTime(res.total)}`);
+    logger.info(`>> Benchmark: ${benchmarkName} (${iterations.toLocaleString("en-US")} iterations)`);
     logger.info(`   >> Average time: ${formatTime(res.average)}`);
+    logger.info(`   >> Total time: ${formatTime(res.total)}`);
+}
+
+/**
+ * Main benchmarking function, executing from 1 to 50,000 iterations of a given function.
+ */
+export function benchmark(
+    fn: Function,
+    inputFn?: Function
+) {
+    measureComputeSpeedOnceFormatted(
+        "EXECUTION TIME",
+        fn,
+        inputFn
+    );
+
+    measureComputeSpeedFormatted(
+        "EXECUTION TIME",
+        fn,
+        1000,
+        inputFn
+    );
+
+    measureComputeSpeedFormatted(
+        "EXECUTION TIME",
+        fn,
+        10_000,
+        inputFn
+    );
+
+    measureComputeSpeedFormatted(
+        "EXECUTION TIME",
+        fn,
+        50_000,
+        inputFn
+    );
+
+    console.log("");
 }

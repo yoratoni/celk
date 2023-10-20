@@ -1,3 +1,6 @@
+import { stringToUint8Array } from "utils/conversions";
+
+
 /**
  * A TypeScript implementation of the binary-to-text encoder, BASE58.
  *
@@ -5,43 +8,27 @@
  *   - https://github.com/jimeh/node-base58/blob/master/src/base58.js
  */
 export default class BASE58_ENGINE {
-    private readonly ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    private readonly ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";  // BTC BASE58 alphabet
     private readonly BASE = this.ALPHABET.length;
 
-    private _encoder: TextEncoder;
-
 
     /**
-     * Construct a new base58 engine.
+     * Construct a new BASE58 engine.
      */
-    constructor() {
-        this._encoder = new TextEncoder();
-    }
+    constructor() {}
 
 
     /**
-     * Encode a string as UTF-8 Uint8Array.
-     * @param input The string to encode.
-     * @returns The UTF-8 Uint8Array.
-     */
-    strToUTF8 = (input: string): Uint8Array => {
-        const UTF8 = new Uint8Array(input.length);
-        this._encoder.encodeInto(input, UTF8);
-
-        return UTF8;
-    };
-
-    /**
-     * Encode a string to base58.
+     * Execute the BASE58 algorithm.
      * @param str The string to encode.
-     * @returns The base58 encoded string.
+     * @returns The BASE58 encoded string.
      */
     execute = (str: string): string => {
         if (str.length === 0) {
             return "";
         }
 
-        const bytes = this.strToUTF8(str);
+        const bytes = stringToUint8Array(str);
         const digits = [0];
 
         for (let i = 0; i < bytes.length; i++) {

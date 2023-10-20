@@ -1,3 +1,11 @@
+import {
+    littleEndianWordsToUint8Array,
+    stringToUint8Array,
+    uint8ArrayToHex,
+    uint8ArrayToLittleEndianWords
+} from "utils/conversions";
+
+
 /**
  * A TypeScript implementation of the RIPE Message Digest, RIPEMD-160, as defined in "The hash function RIPEMD-160".
  *
@@ -38,15 +46,11 @@ export default class RIPEMD160_ENGINE {
         8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
     ];
 
-    private _encoder: TextEncoder;
-
 
     /**
      * Construct a new RIPEMD-160 engine.
      */
-    constructor() {
-        this._encoder = new TextEncoder();
-    }
+    constructor() {}
 
 
     /**
@@ -186,75 +190,17 @@ export default class RIPEMD160_ENGINE {
     };
 
     /**
-     * Encode a string as UTF-8.
-     * @param input The string to encode.
-     * @returns The UTF-8 encoded string as an Uint8Array.
-     */
-    strToUTF8 = (input: string): Uint8Array => {
-        const UTF8 = new Uint8Array(input.length);
-        this._encoder.encodeInto(input, UTF8);
-
-        return UTF8;
-    };
-
-    /**
-     * Converts an UTF-8 Uint8Array to an array of little-endian words.
-     * @param input The UTF-8 encoded string.
-     * @returns The array of little-endian words.
-     */
-    UTF8ToLittleEndianWords = (input: Uint8Array): number[] => {
-        const output = new Array(input.length >> 2);
-
-        for (let i = 0; i < input.length * 8; i += 8) {
-            output[i >> 5] |= (input[i / 8] & 0xFF) << (i % 32);
-        }
-
-        return output;
-    };
-
-    /**
-     * Converts an array of little-endian words to an UTF-8 Uint8Array.
-     * @param input The array of little-endian words.
-     * @returns The UTF-8 Uint8Array.
-     */
-    littleEndianWordsToUTF8 = (input: number[]): Uint8Array => {
-        const output = new Uint8Array(input.length * 4);
-
-        for (let i = 0; i < input.length * 32; i += 8) {
-            output[i / 8] = (input[i >> 5] >>> (i % 32)) & 0xFF;
-        }
-
-        return output;
-    };
-
-    /**
-     * Converts an UTF-8 Uint8Array to an hex string.
-     * @param input The UTF-8 Uint8Array.
-     * @returns The hex string.
-     */
-    UTF8ToHex = (input: Uint8Array): string => {
-        const hex = new Array(input.length * 2);
-
-        for (let i = 0; i < input.length; i++) {
-            hex[i * 2] = (input[i] >>> 4).toString(16);
-            hex[i * 2 + 1] = (input[i] & 0xF).toString(16);
-        }
-
-        return hex.join("").toUpperCase();
-    };
-
-    /**
      * Execute the RIPEMD-160 algorithm.
-     * @param message The message to hash.
-     * @returns The hash of the message.
+     * @param str The string to hash.
+     * @returns The hexadecimal hash of the string.
      */
-    execute = (message: string): string => {
-        const UTF8 = this.strToUTF8(message);
-        const littleEndianWords = this.UTF8ToLittleEndianWords(UTF8);
+    execute = (str: string): `0x${string}` => {
+        const uint8Array = stringToUint8Array(str);
+        const littleEndianWords = uint8ArrayToLittleEndianWords(uint8Array);
 
-        const hash = this.ripemd160(littleEndianWords, UTF8.length * 8);
+        const hash = this.ripemd160(littleEndianWords, uint8Array.length * 8);
 
-        const rawOutput = this.littleEndianWordsToUTF8(hash);
-        return this.UTF8ToHex(rawOutput);
+        const rawOutput = littleEndianWordsToUint8Array(hash);
+        return uint8ArrayToHex(rawOutput);
     };
 }

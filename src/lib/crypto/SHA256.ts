@@ -1,3 +1,11 @@
+import {
+    bigEndianWordsToUint8Array,
+    hexToUint8Array,
+    uint8ArrayToBigEndianWords,
+    uint8ArrayToHex
+} from "utils/conversions";
+
+
 /**
  * A TypeScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-2.
  *
@@ -20,15 +28,11 @@ export default class SHA256_ENGINE {
         0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
     ];
 
-    private _encoder: TextEncoder;
-
 
     /**
      * Construct a new SHA-256 engine.
      */
-    constructor() {
-        this._encoder = new TextEncoder();
-    }
+    constructor() {}
 
 
     /**
@@ -178,75 +182,17 @@ export default class SHA256_ENGINE {
     };
 
     /**
-     * Encode a string as UTF-8 Uint8Array.
-     * @param input The string to encode.
-     * @returns The UTF-8 Uint8Array.
-     */
-    strToUTF8 = (input: string): Uint8Array => {
-        const UTF8 = new Uint8Array(input.length);
-        this._encoder.encodeInto(input, UTF8);
-
-        return UTF8;
-    };
-
-    /**
-     * Converts an UTF-8 Uint8Array to an array of big-endian words.
-     * @param input The UTF-8 encoded string.
-     * @returns The array of big-endian words.
-     */
-    UTF8ToBigEndianWords = (input: Uint8Array): number[] => {
-        const output = new Array(input.length >> 2);
-
-        for (let i = 0; i < input.length * 8; i += 8) {
-            output[i >> 5] |= (input[i / 8] & 0xFF) << (24 - i % 32);
-        }
-
-        return output;
-    };
-
-    /**
-     * Converts an array of big-endian words to an UTF-8 Uint8Array.
-     * @param input The array of big-endian words.
-     * @returns The UTF-8 Uint8Array.
-     */
-    bigEndianWordsToUTF8 = (input: number[]): Uint8Array => {
-        const output = new Uint8Array(input.length * 4);
-
-        for (let i = 0; i < input.length * 32; i += 8) {
-            output[i / 8] = (input[i >> 5] >>> (24 - i % 32)) & 0xFF;
-        }
-
-        return output;
-    };
-
-    /**
-     * Converts an UTF-8 Uint8Array to an hex string.
-     * @param input The UTF-8 Uint8Array.
-     * @returns The hex string.
-     */
-    UTF8ToHex = (input: Uint8Array): string => {
-        const hex = new Array(input.length * 2);
-
-        for (let i = 0; i < input.length; i++) {
-            hex[i * 2] = (input[i] >>> 4).toString(16);
-            hex[i * 2 + 1] = (input[i] & 0xF).toString(16);
-        }
-
-        return hex.join("").toUpperCase();
-    };
-
-    /**
      * Execute the SHA-256 algorithm.
-     * @param message The message to hash.
-     * @returns The hash of the message.
+     * @param hex The hexadecimal string to hash.
+     * @returns The hexadecimal hash of the hexadecimal string.
      */
-    execute = (message: string): string => {
-        const UTF8 = this.strToUTF8(message);
-        const bigEndianWords = this.UTF8ToBigEndianWords(UTF8);
+    execute = (hex: `0x${string}`): `0x${string}` => {
+        const uint8Array = hexToUint8Array(hex);
+        const bigEndianWords = uint8ArrayToBigEndianWords(uint8Array);
 
-        const hash = this.sha256(bigEndianWords, UTF8.length * 8);
+        const hash = this.sha256(bigEndianWords, uint8Array.length * 8);
 
-        const rawOutput = this.bigEndianWordsToUTF8(hash);
-        return this.UTF8ToHex(rawOutput);
+        const rawOutput = bigEndianWordsToUint8Array(hash);
+        return uint8ArrayToHex(rawOutput);
     };
 }

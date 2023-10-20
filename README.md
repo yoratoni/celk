@@ -45,3 +45,4 @@ After one range is completed, the next one will be started, and the previous one
 Notes
 -----
 - The Bitcoin address generation procedure can be found [here](https://www.crypto-lyon.fr/how-to-get-an-address-from-a-private-key-on-bitcoin.html).
+- Another source of information about the Bitcoin address generation procedure can be found [here](https://www.oreilly.com/library/view/mastering-bitcoin-2nd/9781491954379/ch04.html).
