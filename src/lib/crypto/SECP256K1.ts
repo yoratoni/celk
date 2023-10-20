@@ -35,7 +35,7 @@ function mod(a: bigint, b = CURVE.P): bigint {
  */
 function invert(number: bigint, modulo = CURVE.P): bigint {
     if (number === 0n || modulo <= 0n) {
-        throw new Error(`[CPU_SECP256K1] invert: Expected positive integers, got n=${number} mod=${modulo}.`);
+        throw new Error(`[SECP256K1] invert: Expected positive integers, got n=${number} mod=${modulo}.`);
     }
 
     // Euclidean GCD
@@ -56,7 +56,7 @@ function invert(number: bigint, modulo = CURVE.P): bigint {
     }
 
     const gcd = b;
-    if (gcd !== 1n) throw new Error("[CPU_SECP256K1] invert: Does not exist.");
+    if (gcd !== 1n) throw new Error("[SECP256K1] invert: Does not exist.");
 
     return mod(x, modulo);
 }
@@ -79,7 +79,7 @@ function normalizeScalar(num: number | bigint): bigint {
     if (typeof num === "number" && num > 0 && Number.isSafeInteger(num)) return BigInt(num);
     if (typeof num === "bigint" && isWithinCurveOrder(num)) return num;
 
-    throw new TypeError("[CPU_SECP256K1] normalizeScalar: Expected valid private scalar: 0 < scalar < curve.n.");
+    throw new TypeError("[SECP256K1] normalizeScalar: Expected valid private scalar: 0 < scalar < curve.n.");
 }
 
 /**
@@ -252,7 +252,7 @@ export class JacobianPoint {
      */
     add(other: JacobianPoint): JacobianPoint {
         if (!(other instanceof JacobianPoint)) {
-            throw new TypeError("[CPU_SECP256K1] JacobianPoint#add: expected JacobianPoint.");
+            throw new TypeError("[SECP256K1] JacobianPoint#add: expected JacobianPoint.");
         }
 
         const X1 = this.x;
@@ -338,7 +338,7 @@ export class JacobianPoint {
 }
 
 /**
- * A CPU TypeScript implementation of the Elliptic Curve, SECP256K1, as defined in SEC 2.
+ * A TypeScript implementation of the Elliptic Curve, SECP256K1, as defined in SEC 2.
  *
  * Based on the "Learning fast elliptic-curve cryptography" explanation by "Paul Miller":
  *   - https://paulmillr.com/posts/noble-secp256k1-fast-ecc/
@@ -347,23 +347,23 @@ export class JacobianPoint {
  * And the TS implementation by Hanabi1224:
  *   - https://github.com/hanabi1224/Programming-Language-Benchmarks/blob/main/bench/algorithm/secp256k1/1.ts
  */
-export default class CPU_SECP256K1_ENGINE {
+export default class SECP256K1_ENGINE {
     private readonly G = new Point(CURVE.Gx, CURVE.Gy);
 
 
     /**
-     * Construct a new CPU SECP256K1 engine.
+     * Construct a new SECP256K1 engine.
      */
     constructor() {}
 
 
     /**
-     * **[CPU]** Execute the SECP256K1 algorithm.
+     * Execute the SECP256K1 algorithm.
      * @param privateKey The private key.
      * @returns The public key.
      */
-    secp256k1 = (privateKey: bigint): string => {
-        const point = this.G.multiply(privateKey);
+    secp256k1 = (privateKey: string): string => {
+        const point = this.G.multiply(BigInt(privateKey));
         return `${point.x}${point.y}`;
     };
 }

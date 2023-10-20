@@ -1,5 +1,5 @@
 /**
- * A CPU TypeScript implementation of the RIPE Message Digest, RIPEMD-160, as defined in "The hash function RIPEMD-160".
+ * A TypeScript implementation of the RIPE Message Digest, RIPEMD-160, as defined in "The hash function RIPEMD-160".
  *
  * Based on the "The hash function RIPEMD-160" documents:
  *   - https://homes.esat.kuleuven.be/~bosselae/ripemd160.html
@@ -8,7 +8,7 @@
  * And the TS implementation by Paul Miller:
  *   - https://github.com/paulmillr/noble-hashes/blob/main/src/ripemd160.ts
  */
-export default class CPU_RIPEMD160_ENGINE {
+export default class RIPEMD160_ENGINE {
     private _encoder: TextEncoder;
 
     private readonly R1 = [
@@ -42,7 +42,7 @@ export default class CPU_RIPEMD160_ENGINE {
 
 
     /**
-     * Construct a new CPU RIPEMD-160 engine.
+     * Construct a new RIPEMD-160 engine.
      */
     constructor() {
         this._encoder = new TextEncoder();
@@ -69,7 +69,7 @@ export default class CPU_RIPEMD160_ENGINE {
                             "ERROR";
 
         if (res === "ERROR") {
-            throw new Error("[CPU_RIPEMD160] F: j is out of range.");
+            throw new Error("[RIPEMD160] F: j is out of range.");
         }
 
         return res;
@@ -87,7 +87,7 @@ export default class CPU_RIPEMD160_ENGINE {
                             "ERROR";
 
         if (res === "ERROR") {
-            throw new Error("[CPU_RIPEMD160] K1: j is out of range.");
+            throw new Error("[RIPEMD160] K1: j is out of range.");
         }
 
         return res;
@@ -105,7 +105,7 @@ export default class CPU_RIPEMD160_ENGINE {
                             "ERROR";
 
         if (res === "ERROR") {
-            throw new Error("[CPU_RIPEMD160] K2: j is out of range.");
+            throw new Error("[RIPEMD160] K2: j is out of range.");
         }
 
         return res;
@@ -244,7 +244,7 @@ export default class CPU_RIPEMD160_ENGINE {
     };
 
     /**
-     * **[CPU]** Execute the RIPEMD-160 algorithm.
+     * Execute the RIPEMD-160 algorithm.
      * @param message The message to hash.
      * @returns The hash of the message.
      */

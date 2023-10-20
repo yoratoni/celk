@@ -6,10 +6,10 @@ Technical details
 - The tool is written in Typescript.
 - The database is a MongoDB collection hosted on my server.
 - The tool is using `GPU.js` to use the GPU for the computation.
-- For now, the CPU implementation of:
+- For now, implemented the following algorithms:
     - `secp256k1` (ECDSA curve used by Bitcoin).
-    - `SHA256`.
-    - `RIPEMD160`.
+    - `SHA-256`.
+    - `RIPEMD-160`.
 - These algorithms will be, later, implemented on the GPU.
 
 Summary (1000 BTC Bitcoin Challenge)
@@ -29,7 +29,7 @@ complex than the puzzle #66, with a range from 2^129 to 2^130-1, but one thing t
 have been shared by the author, and the first available public key in the list (wallet still full) is from the puzzle #130.
 
 A difference between no public key and an available public key is the computation time, because, to convert the public key
-into a valid Bitcoin address, it is necessary to compute the SHA256 and RIPEMD160 hashes, which is a bit more complex than
+into a valid Bitcoin address, it is necessary to compute the SHA-256 and RIPEMD160 hashes, which is a bit more complex than
 just computing the `secp256k1` of the private key.
 
 About the puzzle #130, which is the following:
