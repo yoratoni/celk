@@ -1,14 +1,13 @@
-/*
+/**
  * A CPU TypeScript implementation of the RIPE Message Digest, RIPEMD-160, as defined in "The hash function RIPEMD-160".
  *
- * Based on the "The hash function RIPEMD-160" documents.
- *   See https://homes.esat.kuleuven.be/~bosselae/ripemd160.html
- *   And https://homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
- * And the TS implementation by Paul Miller.
- *   See https://github.com/paulmillr/noble-hashes/blob/main/src/ripemd160.ts
+ * Based on the "The hash function RIPEMD-160" documents:
+ *   - https://homes.esat.kuleuven.be/~bosselae/ripemd160.html
+ *   - https://homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
+ *
+ * And the TS implementation by Paul Miller:
+ *   - https://github.com/paulmillr/noble-hashes/blob/main/src/ripemd160.ts
  */
-
-
 export default class CPU_RIPEMD160_ENGINE {
     private _encoder: TextEncoder;
 

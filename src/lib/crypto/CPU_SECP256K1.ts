@@ -1,14 +1,3 @@
-/*
- * A CPU TypeScript implementation of the Elliptic Curve, SECP256K1, as defined in SEC 2.
- *
- * Based on the "Learning fast elliptic-curve cryptography" explanation by "Paul Miller".
- *   See https://paulmillr.com/posts/noble-secp256k1-fast-ecc/
- *   And https://github.com/paulmillr/noble-secp256k1/blob/main/index.ts
- * And the TS implementation by Hanabi1224.
- *   See https://github.com/hanabi1224/Programming-Language-Benchmarks/blob/main/bench/algorithm/secp256k1/1.ts
- */
-
-
 /**
  * [Official parameters](https://www.secg.org/sec2-v2.pdf):
  * Page 9, section 2.4.1.
@@ -348,6 +337,16 @@ export class JacobianPoint {
     }
 }
 
+/**
+ * A CPU TypeScript implementation of the Elliptic Curve, SECP256K1, as defined in SEC 2.
+ *
+ * Based on the "Learning fast elliptic-curve cryptography" explanation by "Paul Miller":
+ *   - https://paulmillr.com/posts/noble-secp256k1-fast-ecc/
+ *   - https://github.com/paulmillr/noble-secp256k1/blob/main/index.ts
+ *
+ * And the TS implementation by Hanabi1224:
+ *   - https://github.com/hanabi1224/Programming-Language-Benchmarks/blob/main/bench/algorithm/secp256k1/1.ts
+ */
 export default class CPU_SECP256K1_ENGINE {
     private readonly G = new Point(CURVE.Gx, CURVE.Gy);
 
