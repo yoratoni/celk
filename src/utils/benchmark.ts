@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+import BENCHMARK_CONFIG from "configs/benchmark.config";
 import logger from "utils/logger";
 
 
@@ -114,40 +115,31 @@ export function measureComputeSpeed(
 }
 
 /**
- * Formatted output of the time it took to run a function (1 iteration) in milliseconds.
- * @param benchmarkName The name of the benchmark.
+ * Formatted output of the time it took to run a function (1 iteration).
  * @param fn The function to run.
  * @param inputFn The function to get the input from (optional).
  */
 export function measureComputeSpeedOnceFormatted(
-    benchmarkName: string,
     fn: Function,
     inputFn?: Function
 ): void {
     const res = measureComputeSpeedOnce(fn, inputFn);
-
-    logger.info(`>> Benchmark: ${benchmarkName} (1 iteration)`);
-    logger.info(`   >> Time: ${formatTime(res)}`);
+    logger.info(`[1] Avg: ${formatTime(res)} | Total: ${formatTime(res)}`);
 }
 
 /**
- * Formatted output of the time it took to run a function (multiple iterations) in milliseconds.
- * @param benchmarkName The name of the benchmark.
+ * Formatted output of the time it took to run a function (multiple iterations).
  * @param fn The function to run.
  * @param iterations The number of iterations to run the function.
  * @param inputFn The function to get the input from at each iteration (optional).
  */
 export function measureComputeSpeedFormatted(
-    benchmarkName: string,
     fn: Function,
     iterations: number,
     inputFn?: Function
 ): void {
     const res = measureComputeSpeed(fn, iterations, inputFn);
-
-    logger.info(`>> Benchmark: ${benchmarkName} (${iterations.toLocaleString("en-US")} iterations)`);
-    logger.info(`   >> Average time: ${formatTime(res.average)}`);
-    logger.info(`   >> Total time: ${formatTime(res.total)}`);
+    logger.info(`[${iterations.toLocaleString("en-US")}] Avg: ${formatTime(res.average)} | Total: ${formatTime(res.total)}`);
 }
 
 /**
@@ -157,32 +149,11 @@ export function benchmark(
     fn: Function,
     inputFn?: Function
 ) {
-    measureComputeSpeedOnceFormatted(
-        "EXECUTION TIME",
-        fn,
-        inputFn
-    );
+    measureComputeSpeedOnceFormatted(fn, inputFn);
 
-    measureComputeSpeedFormatted(
-        "EXECUTION TIME",
-        fn,
-        1000,
-        inputFn
-    );
-
-    measureComputeSpeedFormatted(
-        "EXECUTION TIME",
-        fn,
-        10_000,
-        inputFn
-    );
-
-    measureComputeSpeedFormatted(
-        "EXECUTION TIME",
-        fn,
-        50_000,
-        inputFn
-    );
+    for (const cycle of BENCHMARK_CONFIG.cycles) {
+        measureComputeSpeedFormatted(fn, cycle, inputFn);
+    }
 
     console.log("");
 }

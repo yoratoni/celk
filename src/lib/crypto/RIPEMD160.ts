@@ -1,6 +1,6 @@
 import {
+    hexToUint8Array,
     littleEndianWordsToUint8Array,
-    stringToUint8Array,
     uint8ArrayToHex,
     uint8ArrayToLittleEndianWords
 } from "utils/conversions";
@@ -191,11 +191,11 @@ export default class RIPEMD160_ENGINE {
 
     /**
      * Execute the RIPEMD-160 algorithm.
-     * @param str The string to hash.
-     * @returns The hexadecimal hash of the string.
+     * @param hex The hexadecimal string to hash.
+     * @returns The hexadecimal hash of the hexadecimal string.
      */
-    execute = (str: string): `0x${string}` => {
-        const uint8Array = stringToUint8Array(str);
+    execute = (hex: `0x${string}`): `0x${string}` => {
+        const uint8Array = hexToUint8Array(hex);
         const littleEndianWords = uint8ArrayToLittleEndianWords(uint8Array);
 
         const hash = this.ripemd160(littleEndianWords, uint8Array.length * 8);

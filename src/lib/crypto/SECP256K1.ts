@@ -358,14 +358,14 @@ export default class SECP256K1_ENGINE {
 
 
     /**
-     * Execute the SECP256K1 algorithm.
+     * Execute the SECP256K1 algorithm (uncompressed key).
      * @param privateKey The private key.
-     * @returns The public key.
+     * @returns The public key (65 bytes, 1 byte prefix (04) + 32 bytes X coordinate + 32 bytes Y coordinate).
      */
-    execute = (privateKey: `0x${string}`): `0x${string}` => {
+    executeUncompressed = (privateKey: `0x${string}`): `0x${string}` => {
         const point = this.G.multiply(BigInt(privateKey));
 
-        // Base 16 X & Y coordinates of the public key
+        // X & Y coordinates of the public key (base 16)
         let x = point.x.toString(16);
         let y = point.y.toString(16);
 
@@ -374,6 +374,26 @@ export default class SECP256K1_ENGINE {
         while (y.length < 64) y = `0${y}`;
 
         // Prefixed with 04 to indicate that it is uncompressed
-        return ("0x" + `04${x}${y}`.toUpperCase()) as `0x${string}`;
+        return `0x04${x}${y}`;
+    };
+
+    /**
+     * Execute the SECP256K1 algorithm (compressed key).
+     * @param privateKey The private key.
+     * @returns The public key (33 bytes, 1 byte prefix + 32 bytes X coordinate).
+     */
+    execute = (privateKey: `0x${string}`): `0x${string}` => {
+        const point = this.G.multiply(BigInt(privateKey));
+
+        // X coordinate of the public key (base 16)
+        let x = point.x.toString(16);
+
+        // Fill up the missing zeros
+        while (x.length < 64) x = `0${x}`;
+
+        // Prefixed with 02 or 03 to indicate that it is compressed (02: Even / 03: Odd)
+        const prefix = point.y % 2n === 0n ? "02" : "03";
+
+        return `0x${prefix}${x}`;
     };
 }
