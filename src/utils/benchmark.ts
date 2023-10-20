@@ -9,6 +9,8 @@ import logger from "utils/logger";
 type isComputeSpeedRes = {
     total: number;
     average: number;
+    slowest: number;
+    fastest: number;
 };
 
 /**
@@ -103,14 +105,22 @@ export function measureComputeSpeed(
     inputFn?: Function
 ): isComputeSpeedRes {
     let total = 0;
+    let slowest = 0;
+    let fastest = Infinity;
 
     for (let i = 0; i < iterations; i++) {
-        total += measureComputeSpeedOnce(fn, inputFn) as number;
+        const tmpSpd = measureComputeSpeedOnce(fn, inputFn) as number;
+        total += tmpSpd;
+
+        if (tmpSpd > slowest) slowest = tmpSpd;
+        if (tmpSpd < fastest) fastest = tmpSpd;
     }
 
     return {
         total,
-        average: total / iterations
+        average: total / iterations,
+        slowest,
+        fastest
     };
 }
 
@@ -139,11 +149,15 @@ export function measureComputeSpeedFormatted(
     inputFn?: Function
 ): void {
     const res = measureComputeSpeed(fn, iterations, inputFn);
-    logger.info(`[${iterations.toLocaleString("en-US")}] Avg: ${formatTime(res.average)} | Total: ${formatTime(res.total)}`);
+    logger.info(
+        `[${iterations.toLocaleString("en-US")}] Avg: ${formatTime(res.average)} | Total: ${formatTime(res.total)}`
+    );
 }
 
 /**
- * Main benchmarking function, executing from 1 to 50,000 iterations of a given function.
+ * Main benchmarking function, executing cycles of different iterations.
+ * @param fn The function to run.
+ * @param inputFn The function to get the input from at each iteration (optional).
  */
 export function benchmark(
     fn: Function,
