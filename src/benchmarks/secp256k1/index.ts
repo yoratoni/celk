@@ -1,3 +1,5 @@
+// SECP256K1 algorithm benchmarking.
+
 import CPU_SECP256K1_ENGINE from "lib/crypto/CPU_SECP256K1";
 import { generateRandomPrivateKey, measureComputeSpeedFormatted } from "utils/benchmark";
 import logger from "utils/logger";

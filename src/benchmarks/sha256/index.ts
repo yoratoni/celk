@@ -1,4 +1,4 @@
-// SHA256 benchmark (CPU & GPU comparison)
+// SHA256 algorithm benchmarking.
 
 import CPU_SHA256_ENGINE from "lib/crypto/CPU_SHA256";
 import { generateRandomString, measureComputeSpeedFormatted } from "utils/benchmark";

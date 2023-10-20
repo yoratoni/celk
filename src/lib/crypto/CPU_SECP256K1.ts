@@ -359,11 +359,12 @@ export default class CPU_SECP256K1_ENGINE {
 
 
     /**
-     * Execute the SECP256K1 algorithm.
+     * **[CPU]** Execute the SECP256K1 algorithm.
      * @param privateKey The private key.
+     * @returns The public key.
      */
-    secp256k1 = (privateKey: bigint): bigint => {
+    secp256k1 = (privateKey: bigint): string => {
         const point = this.G.multiply(privateKey);
-        return BigInt(`${point.x}${point.y}`);
+        return `${point.x}${point.y}`;
     };
 }

@@ -93,11 +93,11 @@ export default class CPU_SHA256_ENGINE {
 
     /**
      * SHA-256 internal hash computation.
-     * @param m The message to hash.
+     * @param m The message to hash (big-endian words array).
      * @param l The length of the message.
      * @returns The hash of the message.
      */
-    private _sha256 = (m: number[], l: number) => {
+    private _sha256 = (m: number[], l: number): number[] => {
         const HASH = [
             0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
             0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
@@ -107,9 +107,9 @@ export default class CPU_SHA256_ENGINE {
         let a, b, c, d, e, f, g, h;
         let i, j, t1, t2;
 
-        // Append padding
+        // Append padding (Big Endian)
         m[l >> 5] |= 0x80 << (24 - l % 32);
-        m[((l + 64 >> 9) << 4) + 15] = l;
+        m[(((l + 64) >>> 9) << 4) + 15] = l;
 
         for (i = 0; i < m.length; i += 16) {
             a = HASH[0];
@@ -179,9 +179,9 @@ export default class CPU_SHA256_ENGINE {
     };
 
     /**
-     * **[CPU]** Encode a string as UTF-8.
+     * Encode a string as UTF-8 Uint8Array.
      * @param input The string to encode.
-     * @returns The UTF-8 encoded string as an Uint8Array.
+     * @returns The UTF-8 Uint8Array.
      */
     strToUTF8 = (input: string): Uint8Array => {
         const UTF8 = new Uint8Array(input.length);
@@ -191,7 +191,7 @@ export default class CPU_SHA256_ENGINE {
     };
 
     /**
-     * **[CPU]** Converts an Uint8Array raw UTF-8 string to an array of big-endian words.
+     * Converts an UTF-8 Uint8Array to an array of big-endian words.
      * @param input The UTF-8 encoded string.
      * @returns The array of big-endian words.
      */
@@ -206,7 +206,7 @@ export default class CPU_SHA256_ENGINE {
     };
 
     /**
-     * **[CPU]** Converts an array of big-endian words to an UTF-8 Uint8Array.
+     * Converts an array of big-endian words to an UTF-8 Uint8Array.
      * @param input The array of big-endian words.
      * @returns The UTF-8 Uint8Array.
      */
@@ -221,7 +221,7 @@ export default class CPU_SHA256_ENGINE {
     };
 
     /**
-     * **[CPU]** Converts an UTF-8 Uint8Array to an hex string (final SHA-256 hash).
+     * Converts an UTF-8 Uint8Array to an hex string.
      * @param input The UTF-8 Uint8Array.
      * @returns The hex string.
      */
@@ -237,12 +237,12 @@ export default class CPU_SHA256_ENGINE {
     };
 
     /**
-     * **[CPU]** Main function for the SHA-256 hash computation.
-     * @param input The string to hash.
-     * @returns The hash of the string.
+     * **[CPU]** Execute the SHA256 algorithm.
+     * @param message The message to hash.
+     * @returns The hash of the message.
      */
-    sha256 = (input: string): string => {
-        const UTF8 = this.strToUTF8(input);
+    sha256 = (message: string): string => {
+        const UTF8 = this.strToUTF8(message);
         const bigEndianWords = this.UTF8ToBigEndianWords(UTF8);
 
         const hash = this._sha256(bigEndianWords, UTF8.length * 8);
