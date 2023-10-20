@@ -9,8 +9,6 @@
  *   - https://github.com/paulmillr/noble-hashes/blob/main/src/ripemd160.ts
  */
 export default class RIPEMD160_ENGINE {
-    private _encoder: TextEncoder;
-
     private readonly R1 = [
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
         7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8,
@@ -39,6 +37,8 @@ export default class RIPEMD160_ENGINE {
         15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8,
         8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
     ];
+
+    private _encoder: TextEncoder;
 
 
     /**
@@ -129,7 +129,7 @@ export default class RIPEMD160_ENGINE {
      * @param m The message to hash (little-endian words array).
      * @param l The length of the message.
      */
-    private _ripemd160 = (m: number[], l: number): number[] => {
+    private ripemd160 = (m: number[], l: number): number[] => {
         const HASH = [
             0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476,
             0xC3D2E1F0
@@ -248,11 +248,11 @@ export default class RIPEMD160_ENGINE {
      * @param message The message to hash.
      * @returns The hash of the message.
      */
-    ripemd160 = (message: string): string => {
+    execute = (message: string): string => {
         const UTF8 = this.strToUTF8(message);
         const littleEndianWords = this.UTF8ToLittleEndianWords(UTF8);
 
-        const hash = this._ripemd160(littleEndianWords, UTF8.length * 8);
+        const hash = this.ripemd160(littleEndianWords, UTF8.length * 8);
 
         const rawOutput = this.littleEndianWordsToUTF8(hash);
         return this.UTF8ToHex(rawOutput);

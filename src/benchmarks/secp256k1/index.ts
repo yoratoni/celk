@@ -16,8 +16,8 @@ export default function main(iterations: number): void {
     const randomPrivateKey = () => generateRandomPrivateKey();
 
     measureComputeSpeedFormatted(
-        "SECP256K1 MAIN FUNCTION",
-        secp256k1Engine.secp256k1,
+        "EXECUTE SECP256K1",
+        secp256k1Engine.execute,
         iterations,
         randomPrivateKey
     );

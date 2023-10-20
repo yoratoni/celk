@@ -46,8 +46,8 @@ export default function main(iterations: number): void {
     );
 
     measureComputeSpeedFormatted(
-        "RIPEMD-160 MAIN FUNCTION",
-        () => ripemd160Engine.ripemd160,
+        "EXECUTE RIPEMD-160",
+        () => ripemd160Engine.execute,
         iterations,
         randomStrFn
     );

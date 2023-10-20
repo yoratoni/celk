@@ -362,7 +362,7 @@ export default class SECP256K1_ENGINE {
      * @param privateKey The private key.
      * @returns The public key.
      */
-    secp256k1 = (privateKey: string): string => {
+    execute = (privateKey: string): string => {
         const point = this.G.multiply(BigInt(privateKey));
         return `${point.x}${point.y}`;
     };

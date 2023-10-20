@@ -46,8 +46,8 @@ export default function main(iterations: number): void {
     );
 
     measureComputeSpeedFormatted(
-        "SHA-256 MAIN FUNCTION",
-        () => sha256Engine.sha256,
+        "EXECUTE SHA-256",
+        () => sha256Engine.execute,
         iterations,
         randomStrFn
     );
