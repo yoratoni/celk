@@ -1,21 +1,27 @@
-import Generator from "lib/classes/generator";
-import BASE58_ENGINE from "lib/crypto/BASE58";
-import RIPEMD160_ENGINE from "lib/crypto/RIPEMD160";
-import SECP256K1_ENGINE from "lib/crypto/SECP256K1";
-import SHA256_ENGINE from "lib/crypto/SHA256";
-import { benchmark, generateRandomHexString, generateRandomPrivateKey, generateRandomString } from "utils/benchmark";
+import BASE58_ENGINE from "lib/algorithms/BASE58";
+import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
+import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
+import SHA256_ENGINE from "lib/algorithms/SHA256";
+import {
+    benchmark,
+    generateRandomHexString,
+    generateRandomPrivateKey,
+    generateRandomString
+} from "utils/benchmark";
 import logger from "utils/logger";
 
 
 /**
  * Main function for the benchmarking of the encoders / algorithms.
  */
-export default function main(): void {
+function main() {
+    logger.info("Starting benchmarking of the encoders / algorithms.");
+    console.log("");
+
     const base58Engine = new BASE58_ENGINE();
     const ripemd160Engine = new RIPEMD160_ENGINE();
     const secp256k1Engine = new SECP256K1_ENGINE();
     const sha256Engine = new SHA256_ENGINE();
-    const generator = new Generator();
 
     const randomStrFn = () => generateRandomString(128);
     const randomHexStrFn = () => generateRandomHexString(128);
@@ -44,10 +50,7 @@ export default function main(): void {
         sha256Engine.execute,
         randomHexStrFn
     );
-
-    logger.info("BENCHMARK: ADDRESS GENERATOR");
-    benchmark(
-        generator.execute,
-        randomPrivateKeyFn
-    );
 }
+
+
+main();

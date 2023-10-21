@@ -54,16 +54,42 @@ export function generateRandomPrivateKey(): bigint {
 }
 
 /**
+ * Format a number of generated addresses per second (as xK/s).
+ * @param addressesPerSecond The number of addresses generated per second.
+ * @returns The formatted string.
+ */
+export function formatAddressesPerSecond(addressesPerSecond: number): string {
+    if (addressesPerSecond > Math.pow(10, 12)) return `${(Math.round(addressesPerSecond / Math.pow(10, 12))).toLocaleString("en-US")}TK/s`;     // T = tera
+    if (addressesPerSecond > Math.pow(10, 9)) return `${(Math.round(addressesPerSecond / Math.pow(10, 9))).toLocaleString("en-US")}GK/s`;       // G = giga
+    if (addressesPerSecond > Math.pow(10, 6)) return `${(Math.round(addressesPerSecond / Math.pow(10, 6))).toLocaleString("en-US")}MK/s`;       // M = mega
+
+    return `${Math.round(addressesPerSecond).toLocaleString("en-US")} K/s`;
+}
+
+/**
  * Format a time in ms, into a responsive string with the en-US locale format.
  * @param time The time in ms.
+ * @param decimalsForSeconds The number of decimals to use for seconds (optional, defaults to 2).
+ * @param decimalsForMilliseconds The number of decimals to use for milliseconds (optional, defaults to 6).
+ * @returns The formatted string.
  */
-export function formatTime(time: number): string {
+export function formatTime(
+    time: number,
+    decimalsForSeconds = 2,
+    decimalsForMilliseconds = 6
+): string {
     if (time > 1000) {
-        return `${(time / 1000).toLocaleString("en-US", { minimumFractionDigits: 2 })}s`;
+        return `${(time / 1000).toLocaleString("en-US", {
+            minimumFractionDigits: decimalsForSeconds,
+            maximumFractionDigits: decimalsForSeconds
+        })}s`;
     }
 
     // EN US format with 6 decimals
-    return `${time.toLocaleString("en-US", { minimumFractionDigits: 6 })}ms`;
+    return `${time.toLocaleString("en-US", {
+        minimumFractionDigits: decimalsForMilliseconds,
+        maximumFractionDigits: decimalsForMilliseconds
+    })}ms`;
 }
 
 /**
@@ -170,4 +196,39 @@ export function benchmark(
     }
 
     console.log("");
+}
+
+/**
+ * Benchmarking function specifically made for the address generator.
+ * @param fn The function to run.
+ * @param inputFn The function to get the input from at each iteration (optional).
+ */
+export function benchmarkAddressGenerator(
+    fn: Function,
+    privateKeyFn: Function
+) {
+    let input: string;
+
+    let total = 0;
+    let avg = 0;
+
+    // Access function result to prevent optimization
+    let res = undefined;
+
+    for (let i = 1; i < Infinity; i++) {
+        input = privateKeyFn();
+
+        const start = performance.now();
+        res = fn(input);
+        const end = performance.now();
+
+        const time = end - start;
+        total += time;
+        avg = total / i;
+        const addressesPerSecond = formatAddressesPerSecond(1000 / avg);
+
+        logger.info(
+            `Avg: ${formatTime(avg, 2, 2)} | Total: ${formatTime(total, 2, 2)} | APS: ${addressesPerSecond} | Sample: ${res} | Private key: ${BigInt(input).toString(16)}`
+        );
+    }
 }

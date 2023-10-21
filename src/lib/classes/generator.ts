@@ -1,7 +1,7 @@
-import BASE58_ENGINE from "lib/crypto/BASE58";
-import RIPEMD160_ENGINE from "lib/crypto/RIPEMD160";
-import SECP256K1_ENGINE from "lib/crypto/SECP256K1";
-import SHA256_ENGINE from "lib/crypto/SHA256";
+import BASE58_ENGINE from "lib/algorithms/BASE58";
+import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
+import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
+import SHA256_ENGINE from "lib/algorithms/SHA256";
 import logger from "utils/logger";
 
 
@@ -37,9 +37,6 @@ export default class Generator {
      * @param privateKey The private key to generate the address from.
      * @param compressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
      * @returns The Bitcoin address.
-     * @link [Get an address from a private key](https://www.oreilly.com/library/view/mastering-bitcoin-2nd/9781491954379/ch04.html).
-     * @link [Bitcoin address](https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses).
-     * @link [Testing - Addresses](https://gobittest.appspot.com/Address).
      */
     executeDebug = (privateKey: `0x${string}`, compressedPublicKey = true): string => {
         logger.info(`PRV: ${privateKey}`);
@@ -97,9 +94,6 @@ export default class Generator {
      * @param privateKey The private key to generate the address from.
      * @param compressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
      * @returns The Bitcoin address.
-     * @link [Get an address from a private key](https://www.oreilly.com/library/view/mastering-bitcoin-2nd/9781491954379/ch04.html).
-     * @link [Bitcoin address](https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses).
-     * @link [Testing - Addresses](https://gobittest.appspot.com/Address).
      */
     execute = (privateKey: `0x${string}`, compressedPublicKey = true): string => {
         const publicKey = compressedPublicKey ? this.secp256k1Engine.execute(privateKey) : this.secp256k1Engine.executeUncompressed(privateKey);

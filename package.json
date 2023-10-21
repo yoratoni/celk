@@ -9,7 +9,8 @@
     "scripts": {
         "v-bump": "yarn version --patch",
         "main": "ts-node src/scripts/main.ts",
-        "benchmark": "ts-node src/benchmarks/index.ts"
+        "benchmark:algorithms": "ts-node src/benchmarks/algorithms.ts",
+        "benchmark:generator": "ts-node src/benchmarks/generator.ts"
     },
     "dependencies": {
         "date-and-time": "^3.0.3",

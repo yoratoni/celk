@@ -36,7 +36,7 @@ About the puzzle #130, which is the following:
 - Address: `1Fo65aKq8s8iquMt6weF1rku1moWVEd5Ua `.
 - Public key: `03633cbe3ec02b9401c5effa144c5b4d22f87940259634858fc7e59b1c09937852`
 - Private key range: `200000000000000000000000000000000...3ffffffffffffffffffffffffffffffff` (2^129 -> 2^130-1).
-- Balance / Price: `6.60036213 BTC`.
+- Balance / Price: `13 BTC`.
 
 Similarly to the [66 Bit Collective Bitcoin Private Key Cracking Pool](http://www.ttdsales.com/66bit/login.php),
 the workload will be split into ranges from `0000000000` to `FFFFFFFFFF` which corresponds to 1,099,511,627,776 keys.
@@ -46,3 +46,9 @@ Notes
 -----
 - The Bitcoin address generation procedure can be found [here](https://www.crypto-lyon.fr/how-to-get-an-address-from-a-private-key-on-bitcoin.html).
 - Another source of information about the Bitcoin address generation procedure can be found [here](https://www.oreilly.com/library/view/mastering-bitcoin-2nd/9781491954379/ch04.html).
+- A bit more info about the technical details of the Bitcoin address generation procedure can be found [here](https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses).
+- An address generation testing tool can be found [here](https://gobittest.appspot.com/Address) (**Warning**: Only with uncompressed public key format).
+
+Performances
+------------
+- `v1.0.0`: 396 keys/s (CPU: AMD Ryzen 5 3600X @ 3.8 GHz, GPU: NVIDIA GeForce RTX 3070).
