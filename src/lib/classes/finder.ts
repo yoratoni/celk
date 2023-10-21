@@ -21,9 +21,10 @@ export default class Finder {
 
     /**
      * Construct a new Bitcoin address finder.
+     * @param compressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
      */
-    constructor() {
-        this.generator = new Generator();
+    constructor(compressedPublicKey = true) {
+        this.generator = new Generator(compressedPublicKey);
         this.ranger = new Ranger(this.lowRange, this.highRange);
     }
 
@@ -40,10 +41,9 @@ export default class Finder {
 
     /**
      * Find a private key from a given Bitcoin address (defined inside the FINDER_CONFIG).
-     * @param compressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
      * @returns The private key.
      */
-    execute = (compressedPublicKey = true): void => {
+    execute = (): void => {
         this.initialReport();
 
         let address: string;
@@ -52,7 +52,7 @@ export default class Finder {
 
         for (let i = 1n; i <= this.highRange; i++) {
             privateKey = this.ranger.executeFullRandom();
-            address = this.generator.execute(privateKey, compressedPublicKey);
+            address = this.generator.execute(privateKey);
 
             // Report progress
             if (i % BigInt(FINDER_CONFIG.progressReportInterval) === 0n) {
@@ -67,18 +67,23 @@ export default class Finder {
 
                 // Calculate the progress percentage
                 const progressPrcNumber = Number((i * bigIntToTenPow(this.highRange, FINDER_CONFIG.percentagesPrecision)) / this.highRange);
-                const progressPrcPadding = "".padEnd(this.highRange.toString().length - progressPrcNumber.toString().length - 1, "0");
+
+                // Calculate the decimal point padding
+                const progressDecimalPointPadding = this.highRange.toString().length - progressPrcNumber.toString().length - 1;
 
                 // Format it depending on progressPrcNumber decimal point position
                 let progressPrc = "";
-                if (progressPrcNumber >= 1000) progressPrc = `${strInsert(progressPrcNumber.toString(), 3, ".")}%`;
-                else if (progressPrcNumber >= 100) progressPrc = ` ${strInsert(progressPrcNumber.toString(), 2, ".")}%`;
-                else if (progressPrcNumber >= 10) progressPrc = `  ${strInsert(progressPrcNumber.toString(), 1, ".")}%`;
-                else progressPrc = `0.${progressPrcPadding}${progressPrcNumber}%`;
 
-                logger.info(
-                    `Progress: ${progress} (${progressPrc}) | LAST_PRV: ${privateKey} | LAST_ADR: ${address}`
-                );
+                if (progressDecimalPointPadding >= 0) {
+                    // Pad the decimal point with zeros
+                    progressPrc = `0.${"".padEnd(progressDecimalPointPadding, "0")}${progressPrcNumber}`;
+                } else {
+                    // Insert the decimal point at the right position
+                    progressPrc = strInsert(progressPrcNumber.toString(), progressDecimalPointPadding * -1, ".");
+                }
+
+                // Log the progress
+                logger.info(`Progress: ${progress} (${progressPrc}%) | LAST_PRV: ${privateKey} | LAST_ADR: ${address}`);
             }
 
             // Check if the address matches the one we're looking for

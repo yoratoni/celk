@@ -20,15 +20,22 @@ export default class Generator {
     private secp256k1Engine: SECP256K1_ENGINE;
     private sha256Engine: SHA256_ENGINE;
 
+    private secp256k1ExecuteFn: (privateKey: `0x${string}`) => `0x${string}`;
+
 
     /**
      * Construct a new Bitcoin address generator.
+     * @param compressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
      */
-    constructor() {
+    constructor(compressedPublicKey = true) {
         this.base58Engine = new BASE58_ENGINE();
         this.ripemd160Engine = new RIPEMD160_ENGINE();
         this.secp256k1Engine = new SECP256K1_ENGINE();
         this.sha256Engine = new SHA256_ENGINE();
+
+        this.secp256k1ExecuteFn = compressedPublicKey ?
+            this.secp256k1Engine.execute :
+            this.secp256k1Engine.executeUncompressed;
     }
 
 
@@ -92,11 +99,10 @@ export default class Generator {
     /**
      * Generate a Bitcoin address from a private key.
      * @param privateKey The private key to generate the address from.
-     * @param compressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
      * @returns The Bitcoin address.
      */
-    execute = (privateKey: `0x${string}`, compressedPublicKey = true): string => {
-        const publicKey = compressedPublicKey ? this.secp256k1Engine.execute(privateKey) : this.secp256k1Engine.executeUncompressed(privateKey);
+    execute = (privateKey: `0x${string}`): string => {
+        const publicKey = this.secp256k1ExecuteFn(privateKey);
         const p1 = `0x00${this.ripemd160Engine.execute(this.sha256Engine.execute(publicKey)).substring(2)}` as `0x${string}`;
         const checksum = this.sha256Engine.execute(this.sha256Engine.execute(p1)).substring(2, 10);
         return this.base58Engine.execute(`${p1}${checksum}` as `0x${string}`);

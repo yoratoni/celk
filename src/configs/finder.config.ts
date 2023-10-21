@@ -12,7 +12,7 @@ const FINDER_CONFIG = {
     },
 
     tinyBenchmarkGeneratorIterations: 32,
-    progressReportInterval: 1,
+    progressReportInterval: 1000,
     percentagesPrecision: 2
 };
 
