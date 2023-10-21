@@ -35,13 +35,13 @@ Introduction about it, from the [Private Keys Database](https://privatekeys.pw/p
 
 As mentioned on this website, the best would be to focus on the puzzle #66, which is the following:
 - Address: `13zb1hQbWVsc2S7ZTZnP2G4undNNpdh5so`.
-- Private key range: `20000000000000000...3ffffffffffffffff` (2^65 -> 2^66-1).
+- Private key range: `2^65...2^66-1`.
 - Balance / Price: `6.60036213 BTC`.
 
 Now, another puzzle that is interesting is the puzzle #130, which is the following:
 - Address: `1Fo65aKq8s8iquMt6weF1rku1moWVEd5Ua `.
-- Public key: `03633cbe3ec02b9401c5effa144c5b4d22f87940259634858fc7e59b1c09937852`
-- Private key range: `200000000000000000000000000000000...3ffffffffffffffffffffffffffffffff` (2^129 -> 2^130-1).
+- Public key: `03633cbe3ec02b9401c5effa144c5b4d22f87940259634858fc7e59b1c09937852`.
+- Private key range: `2^129...2^130-1`.
 - Balance / Price: `13 BTC`.
 
 Notes about it:
