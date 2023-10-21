@@ -19,7 +19,7 @@ export default class BASE58_ENGINE {
 
 
     /**
-     * Execute the BASE58 algorithm.
+     * Execute the BASE58 encoder.
      * @param hex The hexadecimal string to hash.
      * @returns The BASE58 encoded version of hexadecimal string.
      */
