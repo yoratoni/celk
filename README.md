@@ -51,5 +51,6 @@ Notes
 
 Performances
 ------------
-- `v1.0.0`: 396 K/s (CPU: AMD Ryzen 5 3600X @ 3.8 GHz, GPU: NVIDIA GeForce RTX 3070).
-- `v1.0.1`: 792 K/s (CPU: AMD Ryzen 5 3600X @ 3.8 GHz, GPU: NVIDIA GeForce RTX 3070).
+- `v1.0.0`: 396 K/s avg (CPU: AMD Ryzen 5 3600X @ 3.8 GHz, GPU: NVIDIA GeForce RTX 3070).
+- `v1.0.1`: 792 K/s avg (CPU: AMD Ryzen 5 3600X @ 3.8 GHz, GPU: NVIDIA GeForce RTX 3070).
+- `v1.0.2`: 997 K/s avg (CPU: AMD Ryzen 5 3600X @ 3.8 GHz, GPU: NVIDIA GeForce RTX 3070).

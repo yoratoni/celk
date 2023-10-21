@@ -1,3 +1,5 @@
+import logger from "utils/logger";
+
 /**
  * Used to generate a private key between a given range.
  */
@@ -8,8 +10,10 @@ export default class Ranger {
     private high: bigint;
     private highLength: number;
 
-    private zeroPadding: `0x${string}`;
+    private currAscending: bigint;
+    private currDescending: bigint;
 
+    private readonly ZERO_PAD: `0x${string}`;
     private readonly HEX = "0123456789ABCDEF";
 
 
@@ -25,8 +29,11 @@ export default class Ranger {
         this.high = high;
         this.highLength = this.high.toString(16).length;
 
+        this.currAscending = this.low;
+        this.currDescending = this.high;
+
         // Calculate the zero padding for the private key
-        this.zeroPadding = "0x".padEnd(66 - this.highLength, "0") as `0x${string}`;
+        this.ZERO_PAD = "0x".padEnd(66 - this.highLength, "0") as `0x${string}`;
     }
 
 
@@ -35,7 +42,7 @@ export default class Ranger {
      * @returns The private key.
      */
     executeFullRandom = (): `0x${string}` => {
-        let privateKey = this.zeroPadding;
+        let privateKey = this.ZERO_PAD;
 
         for (let i = 0; i < this.highLength; i++) {
             privateKey += this.HEX[Math.floor(Math.random() * 16)];
@@ -47,5 +54,55 @@ export default class Ranger {
         }
 
         return privateKey as `0x${string}`;
+    };
+
+    /**
+     * **[ASCENDING]** Generate a private key between a given range (defined in the constructor).
+     * @returns The private key.
+     */
+    executeAscending = (): `0x${string}` => {
+        if (this.currAscending <= this.high) {
+            const padded = this.currAscending.toString(16).padStart(this.highLength, "0");
+
+            // Padded with zeroes at the end
+            let privateKey = (this.ZERO_PAD + padded) as `0x${string}`;
+            privateKey = privateKey.padEnd(66, "0") as `0x${string}`;
+
+            this.currAscending++;
+            return privateKey;
+        }
+
+        console.log("");
+        logger.error("The private key range has been exceeded, resetting the current value to the low range.");
+        console.log("");
+
+        this.currAscending = this.low;
+
+        return this.executeAscending();
+    };
+
+    /**
+     * **[DESCENDING]** Generate a private key between a given range (defined in the constructor).
+     * @returns The private key.
+     */
+    executeDescending = (): `0x${string}` => {
+        if (this.currDescending >= this.low) {
+            const padded = this.currDescending.toString(16).padStart(this.highLength, "0");
+
+            // Padded with zeroes at the beginning
+            let privateKey = (this.ZERO_PAD + padded) as `0x${string}`;
+            privateKey = privateKey.padEnd(66, "0") as `0x${string}`;
+
+            this.currDescending--;
+            return privateKey;
+        }
+
+        console.log("");
+        logger.error("The private key range has been exceeded, resetting the current value to the high range.");
+        console.log("");
+
+        this.currDescending = this.high;
+
+        return this.executeAscending();
     };
 }

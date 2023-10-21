@@ -55,7 +55,7 @@ export function generateRandomPrivateKey(): bigint {
 }
 
 /**
- * Format a number of generated stuff per second (as xK/s).
+ * Format a number of generated stuff (addresses or private keys) per second (as xK/s).
  * @param stuffPerSecond The number of stuff generated per second.
  * @returns The formatted string.
  */

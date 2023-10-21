@@ -1,7 +1,7 @@
 import Ranger from "lib/classes/ranger";
 import { benchmarkRanger } from "utils/benchmark";
-import { bigIntPow } from "utils/conversions";
 import logger from "utils/logger";
+import { bigIntPow } from "utils/maths";
 
 
 /**

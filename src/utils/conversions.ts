@@ -2,22 +2,6 @@
 
 
 /**
- * Equivalent to `Math.pow` for bigints.
- */
-export const bigIntPow = (base: bigint, exponent: bigint) => base ** exponent;
-
-/**
- * Converts a bigint into its power of 10.
- * @param input The bigint to convert.
- * @param incr The increment to add to the power of 10 (optional, defaults to 0).
- * @returns The power of 10.
- */
-export const bigIntToTenPow = (input: bigint, incr = 0): bigint => {
-    const len = input.toString().length - 1;
-    return 10n ** BigInt(len + incr);
-};
-
-/**
  * Converts a string into an Uint8Array.
  * @param input The string to convert.
  * @returns The Uint8Array.
