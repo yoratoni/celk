@@ -53,8 +53,8 @@ into a valid Bitcoin address, it is necessary to compute `3 * SHA-256 + RIPEMD-1
 - Now, the thing that always takes most of the computation time is the ECDSA algorithm..
 
 Similarly to the [66 Bit Collective Bitcoin Private Key Cracking Pool](http://www.ttdsales.com/66bit/login.php),
-the workload will be split into ranges from `0000000000` to `FFFFFFFFFF` which corresponds to 1,099,511,627,776 keys.
-After one range is completed, the next one will be started, and the previous one will be marked as completed in the database.
+the workload could be split into ranges from `0000000000` to `FFFFFFFFFF` which corresponds to 1,099,511,627,776 keys.
+After one range is completed, the next one could be started, and the previous one, marked as completed in the database.
 
 Sources & Credits
 -----------------
