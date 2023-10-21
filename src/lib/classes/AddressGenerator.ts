@@ -14,7 +14,7 @@ import logger from "utils/logger";
  *   - SECP256K1
  *   - SHA-256
  */
-export default class Generator {
+export default class AddressGenerator {
     private base58Engine: BASE58_ENGINE;
     private ripemd160Engine: RIPEMD160_ENGINE;
     private secp256k1Engine: SECP256K1_ENGINE;

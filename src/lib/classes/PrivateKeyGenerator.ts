@@ -1,7 +1,7 @@
 /**
  * Private key generator class which is used to generate a private key between a given range.
  */
-export default class Key {
+export default class PrivateKeyGenerator {
     /**
      * Generate a private key between a given range.
      * @param low The lower bound of the range.

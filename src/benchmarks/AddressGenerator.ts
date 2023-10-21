@@ -1,4 +1,4 @@
-import Generator from "lib/classes/generator";
+import AddressGenerator from "lib/classes/AddressGenerator";
 import { benchmarkAddressGenerator, generateRandomPrivateKey } from "utils/benchmark";
 import logger from "utils/logger";
 
@@ -10,13 +10,13 @@ function main() {
     logger.info("Starting benchmarking of the Bitcoin address generator.");
     console.log("");
 
-    const generator = new Generator();
+    const addressGenerator = new AddressGenerator();
 
     const randomPrivateKeyFn = () => generateRandomPrivateKey();
 
     logger.info("GENERATOR:");
     benchmarkAddressGenerator(
-        generator.execute,
+        addressGenerator.execute,
         randomPrivateKeyFn
     );
 }
