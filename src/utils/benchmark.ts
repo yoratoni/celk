@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import BENCHMARK_CONFIG from "configs/benchmark.config";
+import FINDER_CONFIG from "configs/finder.config";
 import logger from "utils/logger";
 
 
@@ -54,16 +55,16 @@ export function generateRandomPrivateKey(): bigint {
 }
 
 /**
- * Format a number of generated addresses per second (as xK/s).
- * @param addressesPerSecond The number of addresses generated per second.
+ * Format a number of generated stuff per second (as xK/s).
+ * @param stuffPerSecond The number of stuff generated per second.
  * @returns The formatted string.
  */
-export function formatAddressesPerSecond(addressesPerSecond: number): string {
-    if (addressesPerSecond > Math.pow(10, 12)) return `${(Math.round(addressesPerSecond / Math.pow(10, 12))).toLocaleString("en-US")}TK/s`;     // T = tera
-    if (addressesPerSecond > Math.pow(10, 9)) return `${(Math.round(addressesPerSecond / Math.pow(10, 9))).toLocaleString("en-US")}GK/s`;       // G = giga
-    if (addressesPerSecond > Math.pow(10, 6)) return `${(Math.round(addressesPerSecond / Math.pow(10, 6))).toLocaleString("en-US")}MK/s`;       // M = mega
+export function formatStuffPerSecond(stuffPerSecond: number): string {
+    if (stuffPerSecond > Math.pow(10, 12)) return `${(Math.round(stuffPerSecond / Math.pow(10, 12))).toLocaleString("en-US")}TK/s`;     // T = tera
+    if (stuffPerSecond > Math.pow(10, 9)) return `${(Math.round(stuffPerSecond / Math.pow(10, 9))).toLocaleString("en-US")}GK/s`;       // G = giga
+    if (stuffPerSecond > Math.pow(10, 6)) return `${(Math.round(stuffPerSecond / Math.pow(10, 6))).toLocaleString("en-US")}MK/s`;       // M = mega
 
-    return `${Math.round(addressesPerSecond).toLocaleString("en-US")} K/s`;
+    return `${Math.round(stuffPerSecond).toLocaleString("en-US")} K/s`;
 }
 
 /**
@@ -199,14 +200,11 @@ export function benchmark(
 }
 
 /**
- * Benchmarking function specifically made for the address generator.
+ * Benchmarking function specifically made for the Bitcoin address generator.
  * @param fn The function to run.
- * @param inputFn The function to get the input from at each iteration (optional).
+ * @param privateKeyFn The function to get the input from at each iteration.
  */
-export function benchmarkAddressGenerator(
-    fn: Function,
-    privateKeyFn: Function
-) {
+export function benchmarkGenerator(fn: Function, privateKeyFn: Function) {
     let input: string;
 
     let total = 0;
@@ -225,10 +223,73 @@ export function benchmarkAddressGenerator(
         const time = end - start;
         total += time;
         avg = total / i;
-        const addressesPerSecond = formatAddressesPerSecond(1000 / avg);
+        const addressesPerSecond = formatStuffPerSecond(1000 / avg);
 
         logger.info(
             `Avg: ${formatTime(avg, 2, 2)} | Total: ${formatTime(total, 2, 2)} | APS: ${addressesPerSecond} | Sample: ${res} | Private key: ${BigInt(input).toString(16)}`
+        );
+    }
+}
+
+/**
+ * Tiny benchmarking function specifically made for the Bitcoin address generator (finder report).
+ * @param fn The function to run.
+ * @param privateKeyFn The function to get the input from at each iteration.
+ */
+export function tinyBenchmarkGenerator(fn: Function, privateKeyFn: Function) {
+    let input = "0x0";
+
+    let total = 0;
+    let avg = 0;
+    let addressesPerSecond = "";
+
+    // Access function result to prevent optimization
+    let res = undefined;
+
+    for (let i = 1; i < FINDER_CONFIG.tinyBenchmarkGeneratorIterations; i++) {
+        input = privateKeyFn();
+
+        const start = performance.now();
+        res = fn(input);
+        const end = performance.now();
+
+        const time = end - start;
+        total += time;
+        avg = total / i;
+        addressesPerSecond = formatStuffPerSecond(1000 / avg);
+    }
+
+    console.log("");
+    logger.info(`>> Tiny benchmarking generator (${FINDER_CONFIG.tinyBenchmarkGeneratorIterations} iterations):`);
+    logger.info(`   >> Avg: ${formatTime(avg, 2, 2)}`);
+    logger.info(`   >> Total: ${formatTime(total, 2, 2)}`);
+    logger.info(`   >> APS: ${addressesPerSecond}`);
+    logger.info(`   >> LAST_PRV: ${input}`);
+    logger.info(`   >> LAST_ADR: ${res}`);
+    console.log("");
+}
+
+/**
+ * Benchmarking function specifically made for the Ranger (Bitcoin private key generator).
+ * @param fn The function to run.
+ */
+export function benchmarkRanger(fn: Function) {
+    let total = 0;
+
+    // Access function result to prevent optimization
+    let res = undefined;
+
+    for (let i = 1; i < BENCHMARK_CONFIG.rangerIterations; i++) {
+        const start = performance.now();
+        res = fn();
+        const end = performance.now();
+
+        const time = end - start;
+        total += time;
+        const privateKeysPerSecond = formatStuffPerSecond(1000 / (total / i));
+
+        logger.info(
+            `Total: ${formatTime(total, 2, 2)} | PKPS: ${privateKeysPerSecond} | Sample: ${res}`
         );
     }
 }

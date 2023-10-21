@@ -6,7 +6,7 @@ import logger from "utils/logger";
 
 
 /**
- * Address generator class which is used to generate Bitcoin addresses (mainnet).
+ * Used to generate Bitcoin addresses (mainnet).
  *
  * Based on the three algorithms & 1 encoder implemented by myself:
  *   - BASE58
@@ -14,7 +14,7 @@ import logger from "utils/logger";
  *   - SECP256K1
  *   - SHA-256
  */
-export default class AddressGenerator {
+export default class Generator {
     private base58Engine: BASE58_ENGINE;
     private ripemd160Engine: RIPEMD160_ENGINE;
     private secp256k1Engine: SECP256K1_ENGINE;
@@ -22,7 +22,7 @@ export default class AddressGenerator {
 
 
     /**
-     * Construct a new address generator.
+     * Construct a new Bitcoin address generator.
      */
     constructor() {
         this.base58Engine = new BASE58_ENGINE();

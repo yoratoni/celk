@@ -10,7 +10,8 @@
         "v-bump": "yarn version --patch",
         "main": "ts-node src/scripts/main.ts",
         "benchmark:algorithms": "ts-node src/benchmarks/algorithms.ts",
-        "benchmark:generator": "ts-node src/benchmarks/AddressGenerator.ts"
+        "benchmark:generator": "ts-node src/benchmarks/generator.ts",
+        "benchmark:ranger": "ts-node src/benchmarks/ranger.ts"
     },
     "dependencies": {
         "date-and-time": "^3.0.3",

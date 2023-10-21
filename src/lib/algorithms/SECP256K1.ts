@@ -354,7 +354,7 @@ export default class SECP256K1_ENGINE {
     /**
      * Construct a new SECP256K1 engine.
      */
-    constructor() {}
+    constructor() { }
 
 
     /**
