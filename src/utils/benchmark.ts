@@ -279,7 +279,7 @@ export function benchmarkRanger(fn: Function) {
     // Access function result to prevent optimization
     let res = undefined;
 
-    for (let i = 1; i < BENCHMARK_CONFIG.rangerIterations; i++) {
+    for (let i = 1; i <= BENCHMARK_CONFIG.rangerIterations; i++) {
         const start = performance.now();
         res = fn();
         const end = performance.now();

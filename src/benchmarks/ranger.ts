@@ -13,12 +13,22 @@ function main() {
 
     const ranger = new Ranger(
         bigIntPow(2n, 4n),
-        bigIntPow(2n, 5n) - 1n
+        bigIntPow(2n, 256n) - 1n
     );
 
     logger.info("RANGER (FULL RANDOM):");
     benchmarkRanger(
         ranger.executeFullRandom
+    );
+
+    logger.info("RANGER (ASCENDING):");
+    benchmarkRanger(
+        ranger.executeAscending
+    );
+
+    logger.info("RANGER (DESCENDING):");
+    benchmarkRanger(
+        ranger.executeDescending
     );
 }
 

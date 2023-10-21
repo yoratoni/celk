@@ -6,9 +6,11 @@ import logger from "utils/logger";
 export default class Ranger {
     private low: bigint;
     private lowLength: number;
-
     private high: bigint;
     private highLength: number;
+
+    private minHexIndexes: number[];
+    private maxHexIndexes: number[];
 
     private currAscending: bigint;
     private currDescending: bigint;
@@ -25,9 +27,30 @@ export default class Ranger {
     constructor(low: bigint, high: bigint) {
         this.low = low;
         this.lowLength = this.low.toString(16).length;
-
         this.high = high;
         this.highLength = this.high.toString(16).length;
+
+        this.minHexIndexes = [];
+        this.maxHexIndexes = [];
+
+        // Calculate the minimum hex indexes for the private key
+        // Matching the maximum hex indexes table length
+        const lowHexStr = this.low.toString(16);
+
+        for (let i = 0; i < this.highLength; i++) {
+            this.minHexIndexes.push(
+                this.HEX.indexOf(lowHexStr[i]?.toUpperCase() ?? 0)
+            );
+        }
+
+        // Calculate the maximum hex indexes for the private key
+        const highHexStr = this.high.toString(16);
+
+        for (let i = 0; i < this.highLength; i++) {
+            this.maxHexIndexes.push(
+                this.HEX.indexOf(highHexStr[i].toUpperCase())
+            );
+        }
 
         this.currAscending = this.low;
         this.currDescending = this.high;
@@ -45,12 +68,17 @@ export default class Ranger {
         let privateKey = this.ZERO_PAD;
 
         for (let i = 0; i < this.highLength; i++) {
-            privateKey += this.HEX[Math.floor(Math.random() * 16)];
+            const randInRange = Math.floor(Math.random() * (this.maxHexIndexes[i] - this.minHexIndexes[i] + 1)) + this.minHexIndexes[i];
+
+            console.log(this.maxHexIndexes);
+            console.log(this.minHexIndexes);
+
+            privateKey += this.HEX[randInRange];
         }
 
         // Check if the generated private key is in the range
         if (BigInt(privateKey) < this.low || BigInt(privateKey) > this.high) {
-            return this.executeFullRandom();
+            logger.warn(`Generated private key is out of bounds (${this.low} - ${this.high}).`);
         }
 
         return privateKey as `0x${string}`;

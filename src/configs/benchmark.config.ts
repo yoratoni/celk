@@ -7,7 +7,7 @@ const BENCHMARK_CONFIG = {
         100,
         1000
     ],
-    rangerIterations: 10_000
+    rangerIterations: 1
 };
 
 
