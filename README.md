@@ -7,9 +7,9 @@ Commands
 - `yarn find`: Executes the finder class with the configuration.
 
 ### Benchmarking
-- `yarn benchmark:crypto`: Executes the benchmarking of the encoders / algorithms.
-- `yarn benchmark:ranger`: Executes the benchmarking of the private key generator.
-- `yarn benchmark:generator`: Executes the benchmarking of the Bitcoin address generator.
+- `yarn benchmark:crypto`: Benchmarking of the encoders / algorithms.
+- `yarn benchmark:ranger`: Benchmarking of the private key generator.
+- `yarn benchmark:generator`: Benchmarking of the Bitcoin address generator.
 
 Configuration
 -------------
