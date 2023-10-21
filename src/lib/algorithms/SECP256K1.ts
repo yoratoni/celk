@@ -21,11 +21,11 @@ const POW_2_128 = 2n ** BigInt(128);
  * @param b The second number (optional, defaults to CURVE.P).
  * @returns The sum.
  */
-function mod(a: bigint, b = CURVE.P): bigint {
+const mod = (a: bigint, b = CURVE.P): bigint => {
     const result = a % b;
 
     return result >= 0 ? result : b + result;
-}
+};
 
 /**
  * Inverse number over modulo.
@@ -33,7 +33,7 @@ function mod(a: bigint, b = CURVE.P): bigint {
  * @param modulo The modulo  (optional, defaults to CURVE.P).
  * @returns The inverse.
  */
-function invert(number: bigint, modulo = CURVE.P): bigint {
+const invert = (number: bigint, modulo = CURVE.P): bigint => {
     if (number === 0n || modulo <= 0n) {
         throw new Error(`[SECP256K1] invert: Expected positive integers, got n=${number} mod=${modulo}.`);
     }
@@ -59,48 +59,44 @@ function invert(number: bigint, modulo = CURVE.P): bigint {
     if (gcd !== 1n) throw new Error("[SECP256K1] invert: Does not exist.");
 
     return mod(x, modulo);
-}
+};
 
 /**
  * Check if the number is within the curve order.
  * @param num The number.
  * @returns Whether the number is within the curve order.
  */
-function isWithinCurveOrder(num: bigint): boolean {
-    return 0 < num && num < CURVE.n;
-}
+const isWithinCurveOrder = (num: bigint): boolean => 0 < num && num < CURVE.n;
 
 /**
  * Normalizes the scalar.
  * @param num The number.
  * @returns The normalized scalar.
  */
-function normalizeScalar(num: number | bigint): bigint {
+const normalizeScalar = (num: number | bigint): bigint => {
     if (typeof num === "number" && num > 0 && Number.isSafeInteger(num)) return BigInt(num);
     if (typeof num === "bigint" && isWithinCurveOrder(num)) return num;
 
     throw new TypeError("[SECP256K1] normalizeScalar: Expected valid private scalar: 0 < scalar < curve.n.");
-}
+};
 
 /**
  * Divides two numbers and rounds the result to the nearest integer.
  * @param a The first number.
  * @param b The second number.
  */
-function divNearest(a: bigint, b: bigint): bigint {
-    return (a + b / 2n) / b;
-}
+const divNearest = (a: bigint, b: bigint): bigint => (a + b / 2n) / b;
 
 /**
  * Split 256-bit K into 2 128-bit (k1, k2) for which k1 + k2 * lambda = K.
  * @link [SECP256K1 Endomorphism](https://gist.github.com/paulmillr/eb670806793e84df628a7c434a873066).
  */
-function splitScalarEndo(k: bigint): {
+const splitScalarEndo = (k: bigint): {
     k1neg: boolean;
     k1: bigint;
     k2neg: boolean;
     k2: bigint;
-} {
+} => {
     const { n } = CURVE;
 
     const a1 = BigInt("0x3086d221a7d46bcde86c90e49284eb15");
@@ -121,7 +117,7 @@ function splitScalarEndo(k: bigint): {
     if (k1 > POW_2_128 || k2 > POW_2_128) throw new Error("splitScalarEndo: Endomorphism failed");
 
     return { k1neg, k1, k2neg, k2 };
-}
+};
 
 /**
  * Affine point integration.
@@ -149,9 +145,12 @@ export class Point {
     }
 
 
-    multiply(scalar: bigint): Point {
-        return JacobianPoint.fromAffine(this).multiplyUnsafe(scalar).toAffine();
-    }
+    /**
+     * Multiplies the point by a scalar using the double-and-add algorithm.
+     * @param scalar The scalar.
+     * @returns The jacobian point.
+     */
+    multiply = (scalar: bigint): Point => JacobianPoint.fromAffine(this).multiplyUnsafe(scalar).toAffine();
 }
 
 /**
@@ -188,29 +187,25 @@ export class JacobianPoint {
      * @param p The Affine point.
      * @returns The Jacobian point.
      */
-    static fromAffine(p: Point): JacobianPoint {
-        return new JacobianPoint(p.x, p.y, 1n);
-    }
+    static fromAffine = (p: Point): JacobianPoint => new JacobianPoint(p.x, p.y, 1n);
 
     /**
      * Converts the Jacobian point to an Affine point.
      * @param invZ The inverse of the z coordinate.
      * @returns The Affine point.
      */
-    toAffine(invZ: bigint = invert(this.z)): Point {
+    toAffine = (invZ: bigint = invert(this.z)): Point => {
         const invZ2 = invZ ** 2n;
         const x = mod(this.x * invZ2);
         const y = mod(this.y * invZ * invZ2);
         return new Point(x, y);
-    }
+    };
 
     /**
      * Flips point to one corresponding to (x, -y) in Affine coordinates.
      * @returns The flipped point.
      */
-    negate(): JacobianPoint {
-        return new JacobianPoint(this.x, mod(-this.y), this.z);
-    }
+    negate = (): JacobianPoint => new JacobianPoint(this.x, mod(-this.y), this.z);
 
     /**
      * Fast algo for doubling 2 Jacobian Points when curve's a=0.
@@ -221,7 +216,7 @@ export class JacobianPoint {
      *
      * @link [Jacobian coordinates with a4=0 for short Weierstrass curves](http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l).
      */
-    double(): JacobianPoint {
+    double = (): JacobianPoint => {
         const X1 = this.x;
         const Y1 = this.y;
         const Z1 = this.z;
@@ -238,7 +233,7 @@ export class JacobianPoint {
         const Z3 = mod(2n * Y1 * Z1);
 
         return new JacobianPoint(X3, Y3, Z3);
-    }
+    };
 
     /**
      * Fast algo for adding 2 Jacobian Points when curve's a=0.
@@ -250,7 +245,7 @@ export class JacobianPoint {
      *
      * @link [Jacobian coordinates with a4=0 for short Weierstrass curves](http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-1998-cmo-2).
      */
-    add(other: JacobianPoint): JacobianPoint {
+    add = (other: JacobianPoint): JacobianPoint => {
         if (!(other instanceof JacobianPoint)) {
             throw new TypeError("[SECP256K1] JacobianPoint#add: expected JacobianPoint.");
         }
@@ -296,7 +291,7 @@ export class JacobianPoint {
         const Z3 = mod(Z1 * Z2 * H);
 
         return new JacobianPoint(X3, Y3, Z3);
-    }
+    };
 
     /**
       * Non-constant-time multiplication. Uses double-and-add algorithm.
@@ -305,7 +300,7 @@ export class JacobianPoint {
       * It's faster, but should only be used when you don't care about
       * an exposed private key e.g. sig verification, which works over *public* keys.
      */
-    multiplyUnsafe(scalar: bigint): JacobianPoint {
+    multiplyUnsafe = (scalar: bigint): JacobianPoint => {
         const n = normalizeScalar(scalar);
 
         const split = splitScalarEndo(n);
@@ -334,7 +329,7 @@ export class JacobianPoint {
         k2p = new JacobianPoint(mod(k2p.x * CURVE.beta), k2p.y, k2p.z);
 
         return k1p.add(k2p);
-    }
+    };
 }
 
 /**

@@ -18,7 +18,7 @@ type isComputeSpeedRes = {
  * @param length The length of the string to generate.
  * @returns The generated string.
  */
-export function generateRandomString(length: number): string {
+export const generateRandomString = (length: number): string => {
     let result = "";
     const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -27,14 +27,14 @@ export function generateRandomString(length: number): string {
     }
 
     return result;
-}
+};
 
 /**
  * Generates a random hexadecimal string of a given length.
  * @param length The length of the string to generate.
  * @returns The generated hexadecimal string.
  */
-export function generateRandomHexString(length: number): `0x${string}` {
+export const generateRandomHexString = (length: number): `0x${string}` => {
     let result = "";
     const characters = "0123456789ABCDEF";
 
@@ -43,22 +43,20 @@ export function generateRandomHexString(length: number): `0x${string}` {
     }
 
     return `0x${result}`;
-}
+};
 
 /**
  * Generates a random private key (bigint - 64 digits).
  * @returns The generated private key.
  */
-export function generateRandomPrivateKey(): bigint {
-    return BigInt(generateRandomHexString(64));
-}
+export const generateRandomPrivateKey = (): bigint => BigInt(generateRandomHexString(64));
 
 /**
  * Format a number of generated stuff (addresses or private keys) per second (as xK/s).
  * @param stuffPerSecond The number of stuff generated per second.
  * @returns The formatted string.
  */
-export function formatStuffPerSecond(stuffPerSecond: number): string {
+export const formatStuffPerSecond = (stuffPerSecond: number): string => {
     const precision = BENCHMARK_CONFIG.percentagesPrecision;
     const padding = BENCHMARK_CONFIG.stuffPerSecondPadding;
 
@@ -98,7 +96,7 @@ export function formatStuffPerSecond(stuffPerSecond: number): string {
         "en-US",
         { minimumFractionDigits: precision, maximumFractionDigits: precision }
     )} k/s`.padStart(padding, " ");
-}
+};
 
 /**
  * Format a time in ms, into a responsive string with the en-US locale format.
@@ -107,11 +105,11 @@ export function formatStuffPerSecond(stuffPerSecond: number): string {
  * @param decimalsForMilliseconds The number of decimals to use for milliseconds (optional, defaults to 6).
  * @returns The formatted string.
  */
-export function formatTime(
+export const formatTime = (
     time: number,
     decimalsForSeconds = 2,
     decimalsForMilliseconds = 6
-): string {
+): string => {
     if (time > 1000) {
         return `${(time / 1000).toLocaleString("en-US", {
             minimumFractionDigits: decimalsForSeconds,
@@ -124,14 +122,14 @@ export function formatTime(
         minimumFractionDigits: decimalsForMilliseconds,
         maximumFractionDigits: decimalsForMilliseconds
     })}ms`;
-}
+};
 
 /**
  * Format a timestamp in the format: "xxxx:xx:xx:xx".
  * @param timestamp the timestamp to format (in ms).
  * @returns The formatted string.
  */
-export function formatTimestamp(timestamp: number): string {
+export const formatTimestamp = (timestamp: number): string => {
     let seconds = Math.floor((timestamp) / 1000);
     let minutes = Math.floor(seconds / 60);
     let hours = Math.floor(minutes / 60);
@@ -145,7 +143,7 @@ export function formatTimestamp(timestamp: number): string {
     }:${hours.toString().padStart(2, "0")
     }:${minutes.toString().padStart(2, "0")
     }:${seconds.toString().padStart(2, "0")}`;
-}
+};
 
 /**
  * Measures the time it takes to run a function (1 iteration) in milliseconds.
@@ -153,10 +151,7 @@ export function formatTimestamp(timestamp: number): string {
  * @param inputFn The function to get the input from (optional).
  * @returns The time it took to run the function in milliseconds.
  */
-export function measureComputeSpeedOnce(
-    fn: Function,
-    inputFn?: Function
-): number {
+export const measureComputeSpeedOnce = (fn: Function, inputFn?: Function): number => {
     let input: unknown = undefined;
     if (inputFn) input = inputFn();
 
@@ -171,7 +166,7 @@ export function measureComputeSpeedOnce(
     if (res === "EMPTY_FIELD") return 0;
 
     return end - start;
-}
+};
 
 /**
  * Measures the time it takes to run a function (multiple iterations) in milliseconds.
@@ -180,11 +175,11 @@ export function measureComputeSpeedOnce(
  * @param inputFn The function to get the input from at each iteration (optional).
  * @returns The time it took to run the function in milliseconds (average).
  */
-export function measureComputeSpeed(
+export const measureComputeSpeed = (
     fn: Function,
     iterations: number,
     inputFn?: Function
-): isComputeSpeedRes {
+): isComputeSpeedRes => {
     let total = 0;
     let slowest = 0;
     let fastest = Infinity;
@@ -203,20 +198,17 @@ export function measureComputeSpeed(
         slowest,
         fastest
     };
-}
+};
 
 /**
  * Formatted output of the time it took to run a function (1 iteration).
  * @param fn The function to run.
  * @param inputFn The function to get the input from (optional).
  */
-export function measureComputeSpeedOnceFormatted(
-    fn: Function,
-    inputFn?: Function
-): void {
+export const measureComputeSpeedOnceFormatted = (fn: Function, inputFn?: Function): void => {
     const res = measureComputeSpeedOnce(fn, inputFn);
     logger.info(`[1] Avg: ${formatTime(res)} | Total: ${formatTime(res)}`);
-}
+};
 
 /**
  * Formatted output of the time it took to run a function (multiple iterations).
@@ -224,26 +216,37 @@ export function measureComputeSpeedOnceFormatted(
  * @param iterations The number of iterations to run the function.
  * @param inputFn The function to get the input from at each iteration (optional).
  */
-export function measureComputeSpeedFormatted(
+export const measureComputeSpeedFormatted = (
     fn: Function,
     iterations: number,
     inputFn?: Function
-): void {
+): void => {
     const res = measureComputeSpeed(fn, iterations, inputFn);
     logger.info(
         `[${iterations.toLocaleString("en-US")}] Avg: ${formatTime(res.average)} | Total: ${formatTime(res.total)}`
     );
-}
+};
+
+/**
+ * Logs if the output of a function is correct based on an input function.
+ * @param fn The function to run.
+ * @param inputFn The function to get the input from.
+ * @param expected The expected output.
+ */
+export const logIfCorrect = (
+    fn: Function,
+    inputFn: Function,
+    expected: unknown
+): void => {
+    // TODO
+};
 
 /**
  * Main benchmarking function, executing cycles of different iterations.
  * @param fn The function to run.
  * @param inputFn The function to get the input from at each iteration (optional).
  */
-export function benchmark(
-    fn: Function,
-    inputFn?: Function
-) {
+export const benchmark = (fn: Function, inputFn?: Function): void => {
     measureComputeSpeedOnceFormatted(fn, inputFn);
 
     for (const cycle of BENCHMARK_CONFIG.cycles) {
@@ -251,14 +254,14 @@ export function benchmark(
     }
 
     console.log("");
-}
+};
 
 /**
  * Benchmarking function specifically made for the Bitcoin address generator.
  * @param fn The function to run.
  * @param privateKeyFn The function to get the input from at each iteration.
  */
-export function benchmarkGenerator(fn: Function, privateKeyFn: Function) {
+export const benchmarkGenerator = (fn: Function, privateKeyFn: Function): void => {
     let input = privateKeyFn();
 
     // Statistics
@@ -293,14 +296,14 @@ export function benchmarkGenerator(fn: Function, privateKeyFn: Function) {
             input = privateKeyFn();
         }
     }
-}
+};
 
 /**
  * Tiny benchmarking function specifically made for the Bitcoin address generator (finder report).
  * @param fn The function to run.
  * @param privateKeyFn The function to get the input from at each iteration.
  */
-export function tinyBenchmarkGenerator(fn: Function, privateKeyFn: Function) {
+export const tinyBenchmarkGenerator = (fn: Function, privateKeyFn: Function): void => {
     let input = "0x0";
 
     let total = 0;
@@ -331,13 +334,13 @@ export function tinyBenchmarkGenerator(fn: Function, privateKeyFn: Function) {
     logger.info(`   >> LAST_PRV: ${input}`);
     logger.info(`   >> LAST_ADR: ${res}`);
     console.log("");
-}
+};
 
 /**
  * Benchmarking function specifically made for the Ranger (Bitcoin private key generator).
  * @param fn The function to run.
  */
-export function benchmarkRanger(fn: Function) {
+export const benchmarkRanger = (fn: Function): void => {
     // Statistics
     const initialTime = Date.now();
 
@@ -367,4 +370,4 @@ export function benchmarkRanger(fn: Function) {
             logger.info(`PRG: ${progress} | PKPS: ${pkps} | Sample: ${res}`);
         }
     }
-}
+};

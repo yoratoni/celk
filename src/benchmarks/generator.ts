@@ -7,7 +7,7 @@ import logger from "utils/logger";
 /**
  * Main function for the benchmarking of the Bitcoin address generator.
  */
-function main() {
+const main = () => {
     logger.info("Starting benchmarking of the Bitcoin address generator.");
 
     const iterations = `${BENCHMARK_CONFIG.generatorIterations.toLocaleString("en-US")} iterations`;
@@ -22,7 +22,7 @@ function main() {
         generator.execute,
         randomPrivateKeyFn
     );
-}
+};
 
 
 main();

@@ -14,7 +14,7 @@ import logger from "utils/logger";
 /**
  * Main function for the benchmarking of the encoders / algorithms.
  */
-function main() {
+const main = () => {
     logger.info("Starting benchmarking of the encoders / algorithms.");
     console.log("");
 
@@ -50,7 +50,7 @@ function main() {
         sha256Engine.execute,
         randomHexStrFn
     );
-}
+};
 
 
 main();

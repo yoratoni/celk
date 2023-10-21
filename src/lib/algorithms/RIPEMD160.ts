@@ -50,7 +50,7 @@ export default class RIPEMD160_ENGINE {
     /**
      * Construct a new RIPEMD-160 engine.
      */
-    constructor() {}
+    constructor() { }
 
 
     /**
@@ -64,7 +64,7 @@ export default class RIPEMD160_ENGINE {
     /**
      * Specific algorithm method: "F", required for RIPEMD-160 computation.
      */
-    private F(j: number, x: number, y: number, z: number): number {
+    private F = (j: number, x: number, y: number, z: number): number => {
         const res = (0 <= j && j <= 15) ? (x ^ y ^ z) :
             (16 <= j && j <= 31) ? (x & y) | (~x & z) :
                 (32 <= j && j <= 47) ? (x | ~y) ^ z :
@@ -77,12 +77,12 @@ export default class RIPEMD160_ENGINE {
         }
 
         return res;
-    }
+    };
 
     /**
      * Specific algorithm method: "K1", required for RIPEMD-160 computation.
      */
-    private K1(j: number): number {
+    private K1 = (j: number): number => {
         const res = (0 <= j && j <= 15) ? 0x00000000 :
             (16 <= j && j <= 31) ? 0x5a827999 :
                 (32 <= j && j <= 47) ? 0x6ed9eba1 :
@@ -95,12 +95,12 @@ export default class RIPEMD160_ENGINE {
         }
 
         return res;
-    }
+    };
 
     /**
      * Specific algorithm method: "K2", required for RIPEMD-160 computation.
      */
-    private K2(j: number): number {
+    private K2 = (j: number): number => {
         const res = (0 <= j && j <= 15) ? 0x50a28be6 :
             (16 <= j && j <= 31) ? 0x5c4dd124 :
                 (32 <= j && j <= 47) ? 0x6d703ef3 :
@@ -113,7 +113,7 @@ export default class RIPEMD160_ENGINE {
         }
 
         return res;
-    }
+    };
 
     /**
      * Safe addition operation, needed for the hash computation.

@@ -1,12 +1,13 @@
 module.exports = {
     plugins: [
         "@typescript-eslint",
+        "prefer-arrow",
         "import"
     ],
     extends: [
         "plugin:@typescript-eslint/recommended",
         "plugin:import/recommended",
-        "plugin:import/typescript",
+        "plugin:import/typescript"
     ],
     parser: "@typescript-eslint/parser",
     parserOptions: {
@@ -96,6 +97,14 @@ module.exports = {
             "warn",
             {
                 count: 2
+            }
+        ],
+        "prefer-arrow/prefer-arrow-functions": [
+            "error",
+            {
+                disallowPrototype: true,
+                singleReturnOnly: false,
+                classPropertiesAllowed: true
             }
         ]
     }

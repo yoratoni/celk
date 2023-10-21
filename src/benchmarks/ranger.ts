@@ -8,7 +8,7 @@ import { bigIntPow } from "utils/maths";
 /**
  * Main function for the benchmarking of the Ranger (Bitcoin private key generator).
  */
-function main() {
+const main = () => {
     logger.info("Starting benchmarking of the Ranger (Bitcoin private key generator).");
 
     const iterations = `${BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US")} iterations`;
@@ -35,7 +35,7 @@ function main() {
     benchmarkRanger(
         ranger.executeDescending
     );
-}
+};
 
 
 main();

@@ -7,7 +7,7 @@ import { strInsert } from "utils/others";
 /**
  * Equivalent to `Math.pow` for bigints.
  */
-export const bigIntPow = (base: bigint, exponent: bigint) => base ** exponent;
+export const bigIntPow = (base: bigint, exponent: bigint): bigint => base ** exponent;
 
 /**
  * Converts a bigint into its power of 10.
