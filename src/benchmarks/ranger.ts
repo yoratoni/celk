@@ -11,7 +11,7 @@ import { bigIntPow } from "utils/maths";
 function main() {
     logger.info("Starting benchmarking of the Ranger (Bitcoin private key generator).");
 
-    const iterations = `${BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US")} iterations)`;
+    const iterations = `${BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US")} iterations`;
 
     const ranger = new Ranger(
         bigIntPow(2n, 4n),
@@ -19,19 +19,19 @@ function main() {
     );
 
     console.log("");
-    logger.info(`RANGER (FULL RANDOM - ${iterations}:`);
+    logger.info(`RANGER (FULL RANDOM - ${iterations}):`);
     benchmarkRanger(
         ranger.executeFullRandom
     );
 
     console.log("");
-    logger.info(`RANGER (ASCENDING - ${iterations}:`);
+    logger.info(`RANGER (ASCENDING - ${iterations}):`);
     benchmarkRanger(
         ranger.executeAscending
     );
 
     console.log("");
-    logger.info(`RANGER (DESCENDING - ${iterations}:`);
+    logger.info(`RANGER (DESCENDING - ${iterations}):`);
     benchmarkRanger(
         ranger.executeDescending
     );

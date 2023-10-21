@@ -1,3 +1,4 @@
+import BENCHMARK_CONFIG from "configs/benchmark.config";
 import Generator from "lib/classes/generator";
 import { benchmarkGenerator, generateRandomPrivateKey } from "utils/benchmark";
 import logger from "utils/logger";
@@ -8,13 +9,15 @@ import logger from "utils/logger";
  */
 function main() {
     logger.info("Starting benchmarking of the Bitcoin address generator.");
-    console.log("");
+
+    const iterations = `${BENCHMARK_CONFIG.generatorIterations.toLocaleString("en-US")} iterations`;
 
     const generator = new Generator();
 
     const randomPrivateKeyFn = () => generateRandomPrivateKey();
 
-    logger.info("GENERATOR:");
+    console.log("");
+    logger.info(`GENERATOR (NEW PK PER REPORT - ${iterations}):`);
     benchmarkGenerator(
         generator.execute,
         randomPrivateKeyFn

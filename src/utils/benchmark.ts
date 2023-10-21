@@ -260,29 +260,39 @@ export function benchmark(
  * @param privateKeyFn The function to get the input from at each iteration.
  */
 export function benchmarkGenerator(fn: Function, privateKeyFn: Function) {
-    let input: string;
+    let input = privateKeyFn();
 
-    let total = 0;
-    let avg = 0;
+    // Statistics
+    const initialTime = Date.now();
 
     // Access function result to prevent optimization
     let res = undefined;
 
-    for (let i = 1; i < Infinity; i++) {
-        input = privateKeyFn();
-
-        const start = performance.now();
+    for (let i = 1n; i < Infinity; i++) {
         res = fn(input);
-        const end = performance.now();
 
-        const time = end - start;
-        total += time;
-        avg = total / i;
-        const addressesPerSecond = formatStuffPerSecond(1000 / avg);
+        if (i % BENCHMARK_CONFIG.generatorReportInterval === 0n) {
+            // Formatted high range
+            const formattedHighRange = BENCHMARK_CONFIG.generatorIterations.toLocaleString("en-US");
 
-        logger.info(
-            `Avg: ${formatTime(avg, 2, 2)} | Total: ${formatTime(total, 2, 2)} | APS: ${addressesPerSecond} | Sample: ${res} | Private key: ${BigInt(input).toString(16)}`
-        );
+            // Pad the index with zeros to match the high range length
+            const paddedIndex = i.toLocaleString("en-US").padStart(formattedHighRange.length, " ");
+
+            // Generate the progress part of the report
+            const progress = `${paddedIndex} / ${formattedHighRange}`;
+
+            // Elapsed time
+            const rawElapsedTime = Date.now() - initialTime;
+
+            // Calculate the average addresses per second
+            const aps = formatStuffPerSecond(Math.round(Number(i) / (rawElapsedTime / 1000)));
+
+            // Log the report
+            logger.info(`PRG: ${progress} | APS: ${aps} | Sample: ${res}`);
+
+            // Change the input
+            input = privateKeyFn();
+        }
     }
 }
 
@@ -338,7 +348,7 @@ export function benchmarkRanger(fn: Function) {
     for (let i = 1n; i <= BENCHMARK_CONFIG.rangerIterations; i++) {
         res = fn();
 
-        if (i % BENCHMARK_CONFIG.progressReportInterval === 0n) {
+        if (i % BENCHMARK_CONFIG.rangerReportInterval === 0n) {
             // Formatted high range
             const formattedHighRange = BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US");
 
@@ -354,9 +364,8 @@ export function benchmarkRanger(fn: Function) {
             // Calculate the average private keys per second
             const pkps = formatStuffPerSecond(Math.round(Number(i) / (rawElapsedTime / 1000)));
 
-            logger.info(
-                `PRG: ${progress} | PKPS: ${pkps} | Sample: ${res}`
-            );
+            // Log the report
+            logger.info(`PRG: ${progress} | PKPS: ${pkps} | Sample: ${res}`);
         }
     }
 }
