@@ -7,7 +7,10 @@ const BENCHMARK_CONFIG = {
         100,
         1000
     ],
-    rangerIterations: 1
+    rangerIterations: 5_000_000n,
+    progressReportInterval: 1_000_000n,
+    percentagesPrecision: 2,
+    stuffPerSecondPadding: 12
 };
 
 

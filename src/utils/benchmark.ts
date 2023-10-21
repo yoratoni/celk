@@ -60,11 +60,45 @@ export function generateRandomPrivateKey(): bigint {
  * @returns The formatted string.
  */
 export function formatStuffPerSecond(stuffPerSecond: number): string {
-    if (stuffPerSecond > Math.pow(10, 12)) return `${(Math.round(stuffPerSecond / Math.pow(10, 12))).toLocaleString("en-US")}TK/s`;     // T = tera
-    if (stuffPerSecond > Math.pow(10, 9)) return `${(Math.round(stuffPerSecond / Math.pow(10, 9))).toLocaleString("en-US")}GK/s`;       // G = giga
-    if (stuffPerSecond > Math.pow(10, 6)) return `${(Math.round(stuffPerSecond / Math.pow(10, 6))).toLocaleString("en-US")}MK/s`;       // M = mega
+    const precision = BENCHMARK_CONFIG.percentagesPrecision;
+    const padding = BENCHMARK_CONFIG.stuffPerSecondPadding;
 
-    return `${Math.round(stuffPerSecond).toLocaleString("en-US")} K/s`;
+    // T = tera
+    if (stuffPerSecond >= Math.pow(10, 12)) {
+        return `${(Math.round(stuffPerSecond / Math.pow(10, 12))).toLocaleString(
+            "en-US",
+            { minimumFractionDigits: precision, maximumFractionDigits: precision }
+        )} Tk/s`.padStart(padding, " ");
+    }
+
+    // G = giga
+    if (stuffPerSecond >= Math.pow(10, 9)) {
+        return `${(Math.round(stuffPerSecond / Math.pow(10, 9))).toLocaleString(
+            "en-US",
+            { minimumFractionDigits: precision, maximumFractionDigits: precision }
+        )} Gk/s`.padStart(padding, " ");
+    }
+
+    // M = mega
+    if (stuffPerSecond >= Math.pow(10, 6)) {
+        return `${(stuffPerSecond / Math.pow(10, 6)).toLocaleString(
+            "en-US",
+            { minimumFractionDigits: precision, maximumFractionDigits: precision }
+        )} MK/s`.padStart(padding, " ");
+    }
+
+    // K = kilo
+    if (stuffPerSecond >= Math.pow(10, 3)) {
+        return `${(stuffPerSecond / Math.pow(10, 3)).toLocaleString(
+            "en-US",
+            { minimumFractionDigits: precision, maximumFractionDigits: precision }
+        )} Kk/s`.padStart(padding, " ");
+    }
+
+    return `${Math.round(stuffPerSecond).toLocaleString(
+        "en-US",
+        { minimumFractionDigits: precision, maximumFractionDigits: precision }
+    )} k/s`.padStart(padding, " ");
 }
 
 /**
@@ -91,6 +125,27 @@ export function formatTime(
         minimumFractionDigits: decimalsForMilliseconds,
         maximumFractionDigits: decimalsForMilliseconds
     })}ms`;
+}
+
+/**
+ * Format a timestamp in the format: "xxxx:xx:xx:xx".
+ * @param timestamp the timestamp to format (in ms).
+ * @returns The formatted string.
+ */
+export function formatTimestamp(timestamp: number): string {
+    let seconds = Math.floor((timestamp) / 1000);
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    hours = hours - (days * 24);
+    minutes = minutes - (days * 24 * 60) - (hours * 60);
+    seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
+
+    return `${days.toString().padStart(4, "0")
+    }:${hours.toString().padStart(2, "0")
+    }:${minutes.toString().padStart(2, "0")
+    }:${seconds.toString().padStart(2, "0")}`;
 }
 
 /**
@@ -274,22 +329,34 @@ export function tinyBenchmarkGenerator(fn: Function, privateKeyFn: Function) {
  * @param fn The function to run.
  */
 export function benchmarkRanger(fn: Function) {
-    let total = 0;
+    // Statistics
+    const initialTime = Date.now();
 
     // Access function result to prevent optimization
     let res = undefined;
 
-    for (let i = 1; i <= BENCHMARK_CONFIG.rangerIterations; i++) {
-        const start = performance.now();
+    for (let i = 1n; i <= BENCHMARK_CONFIG.rangerIterations; i++) {
         res = fn();
-        const end = performance.now();
 
-        const time = end - start;
-        total += time;
-        const privateKeysPerSecond = formatStuffPerSecond(1000 / (total / i));
+        if (i % BENCHMARK_CONFIG.progressReportInterval === 0n) {
+            // Formatted high range
+            const formattedHighRange = BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US");
 
-        logger.info(
-            `Total: ${formatTime(total, 2, 2)} | PKPS: ${privateKeysPerSecond} | Sample: ${res}`
-        );
+            // Pad the index with zeros to match the high range length
+            const paddedIndex = i.toLocaleString("en-US").padStart(formattedHighRange.length, " ");
+
+            // Generate the progress part of the report
+            const progress = `${paddedIndex} / ${formattedHighRange}`;
+
+            // Elapsed time
+            const rawElapsedTime = Date.now() - initialTime;
+
+            // Calculate the average private keys per second
+            const pkps = formatStuffPerSecond(Math.round(Number(i) / (rawElapsedTime / 1000)));
+
+            logger.info(
+                `PRG: ${progress} | PKPS: ${pkps} | Sample: ${res}`
+            );
+        }
     }
 }

@@ -1,7 +1,7 @@
 import config from "configs/finder.config";
 import Generator from "lib/classes/generator";
 import Ranger from "lib/classes/ranger";
-import { formatStuffPerSecond, tinyBenchmarkGenerator } from "utils/benchmark";
+import { formatStuffPerSecond, formatTimestamp, tinyBenchmarkGenerator } from "utils/benchmark";
 import logger from "utils/logger";
 import { bigIntToPercentage } from "utils/maths";
 
@@ -75,7 +75,7 @@ export default class Finder {
             address = this.generator.execute(privateKey);
 
             // Report progress
-            if (i % BigInt(config.progressReportInterval) === 0n) {
+            if (i % config.progressReportInterval === 0n) {
                 // Formatted high range
                 const formattedHighRange = config.privateKeyHighRange.toLocaleString("en-US");
 
@@ -88,17 +88,13 @@ export default class Finder {
 
                 // Elapsed time
                 const rawElapsedTime = Date.now() - initialTime;
-                const elapsedTime = new Date(rawElapsedTime);
-                const formattedElapsedTime = `${elapsedTime.getUTCHours().toString().padStart(2, "0")
-                }H ${elapsedTime.getUTCMinutes().toString().padStart(2, "0")
-                }M ${elapsedTime.getUTCSeconds().toString().padStart(2, "0")
-                }S`;
+                const elapsedTime = formatTimestamp(rawElapsedTime);
 
                 // Calculate the average addresses per second
-                const aps = formatStuffPerSecond(Math.round(Number(i) / (rawElapsedTime / 1000))).padStart(12, " ");
+                const aps = formatStuffPerSecond(Math.round(Number(i) / (rawElapsedTime / 1000)));
 
                 // Log the progress
-                logger.info(`PRG: ${progress} (${progressPercentage}%) | APS: ${aps} | TIME: ${formattedElapsedTime} `);
+                logger.info(`PRG: ${progress} | PRP: ${progressPercentage}% | APS: ${aps} | TIME: ${elapsedTime}`);
             }
 
             // Check if the address matches the one we're looking for

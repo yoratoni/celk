@@ -35,14 +35,17 @@ export const bigIntToPercentage = (numerator: bigint, denominator: bigint, preci
     let percentageStr = "";
 
     if (decimalPointPadding >= 0) {
-        // Pad the decimal point with zeros
-        percentageStr = `0.${"".padEnd(decimalPointPadding, "0")}${percentage}`;
+        // Pad the decimal point with zeros (2 spaces at the beginning for "100.00...%")
+        percentageStr = `  0.${"".padEnd(decimalPointPadding, "0")}${percentage}`;
     } else {
-        // Insert the decimal point at the right position
-        percentageStr = strInsert(percentage.toString(), decimalPointPadding * -1, ".");
+        const absOfDecimalPointPadding = Math.abs(decimalPointPadding);
+        const rawPercentageStr = percentage.toString();
 
-        // Add trailing spaces to match "100.00%" length
-        percentageStr = percentageStr.padStart(6, " ");
+        // Insert the decimal point at the right position
+        percentageStr = strInsert(rawPercentageStr, absOfDecimalPointPadding, ".");
+
+        // Add the zeros at the beginning (4 spaces for "100.00...%")
+        percentageStr = percentageStr.padStart(4 + decimalPointPadding + rawPercentageStr.length, " ");
     }
 
     return percentageStr;

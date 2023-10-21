@@ -70,8 +70,8 @@ export default class Ranger {
         for (let i = 0; i < this.highLength; i++) {
             const randInRange = Math.floor(Math.random() * (this.maxHexIndexes[i] - this.minHexIndexes[i] + 1)) + this.minHexIndexes[i];
 
-            console.log(this.maxHexIndexes);
-            console.log(this.minHexIndexes);
+            // console.log(this.maxHexIndexes);
+            // console.log(this.minHexIndexes);
 
             privateKey += this.HEX[randInRange];
         }
@@ -117,7 +117,7 @@ export default class Ranger {
         if (this.currDescending >= this.low) {
             const padded = this.currDescending.toString(16).padStart(this.highLength, "0");
 
-            // Padded with zeroes at the beginning
+            // Padded with zeroes at the end
             let privateKey = (this.ZERO_PAD + padded) as `0x${string}`;
             privateKey = privateKey.padEnd(66, "0") as `0x${string}`;
 

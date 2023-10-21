@@ -16,7 +16,7 @@ const FINDER_CONFIG = {
 
     // Finder
     tinyBenchmarkGeneratorIterations: 64,                          // The number of iterations for the tiny benchmark generator.
-    progressReportInterval: 256,                                   // The progress report interval (in iterations).
+    progressReportInterval: 256n,                                  // The progress report interval (in iterations).
     percentagesPrecision: 2                                        // The percentages precision (in decimal places).
 };
 
