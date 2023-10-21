@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import BENCHMARK_CONFIG from "configs/benchmark.config";
-import FINDER_CONFIG from "configs/finder.config";
 import logger from "utils/logger";
 
 
@@ -142,7 +141,7 @@ export function formatTimestamp(timestamp: number): string {
     minutes = minutes - (days * 24 * 60) - (hours * 60);
     seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
 
-    return `${days.toString().padStart(4, "0")
+    return `${days.toString().padStart(2, "0")
     }:${hours.toString().padStart(2, "0")
     }:${minutes.toString().padStart(2, "0")
     }:${seconds.toString().padStart(2, "0")}`;
@@ -268,7 +267,7 @@ export function benchmarkGenerator(fn: Function, privateKeyFn: Function) {
     // Access function result to prevent optimization
     let res = undefined;
 
-    for (let i = 1n; i < Infinity; i++) {
+    for (let i = 1n; i <= BENCHMARK_CONFIG.generatorIterations; i++) {
         res = fn(input);
 
         if (i % BENCHMARK_CONFIG.generatorReportInterval === 0n) {
@@ -311,7 +310,7 @@ export function tinyBenchmarkGenerator(fn: Function, privateKeyFn: Function) {
     // Access function result to prevent optimization
     let res = undefined;
 
-    for (let i = 1; i < FINDER_CONFIG.tinyBenchmarkGeneratorIterations; i++) {
+    for (let i = 1; i <= BENCHMARK_CONFIG.tinyBenchmarkGeneratorIterations; i++) {
         input = privateKeyFn();
 
         const start = performance.now();
@@ -325,7 +324,7 @@ export function tinyBenchmarkGenerator(fn: Function, privateKeyFn: Function) {
     }
 
     console.log("");
-    logger.info(`>> Tiny benchmarking generator (${FINDER_CONFIG.tinyBenchmarkGeneratorIterations} iterations):`);
+    logger.info(`>> Tiny benchmarking generator (${BENCHMARK_CONFIG.tinyBenchmarkGeneratorIterations} iterations):`);
     logger.info(`   >> Avg: ${formatTime(avg, 2, 2)}`);
     logger.info(`   >> Total: ${formatTime(total, 2, 2)}`);
     logger.info(`   >> APS: ${addressesPerSecond}`);

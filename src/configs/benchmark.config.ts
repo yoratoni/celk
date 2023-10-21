@@ -2,20 +2,19 @@
  * Benchmark configuration.
  */
 const BENCHMARK_CONFIG = {
-    // Cycles for main benchmark
-    cycles: [
-        10,
-        100,
-        1000
-    ],
+    // Cycles for algorithms & encoders benchmarks
+    cycles: [10, 100, 1000],
+
+    // The number of iterations for the tiny benchmark generator used for the finder initialization
+    tinyBenchmarkGeneratorIterations: 64,
 
     // Iterations & report per benchmark
-    generatorIterations: 8_192n,
-    generatorReportInterval: 128n,
-    rangerIterations: 5_000_000n,
-    rangerReportInterval: 1_000_000n,
+    rangerIterations: 1_000_000n,
+    rangerReportInterval: 200_000n,
+    generatorIterations: 1000n,
+    generatorReportInterval: 100n,
 
-    // Display
+    // Reports & display
     percentagesPrecision: 2,
     stuffPerSecondPadding: 12
 };

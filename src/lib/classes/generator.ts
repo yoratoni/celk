@@ -1,7 +1,7 @@
-import BASE58_ENGINE from "lib/algorithms/BASE58";
 import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/algorithms/SHA256";
+import BASE58_ENGINE from "lib/encoders/BASE58";
 import logger from "utils/logger";
 
 
@@ -9,16 +9,16 @@ import logger from "utils/logger";
  * Used to generate Bitcoin addresses (mainnet).
  *
  * Based on the three algorithms & 1 encoder implemented by myself:
- *   - BASE58
  *   - RIPEMD-160
  *   - SECP256K1
  *   - SHA-256
+ *   - BASE58
  */
 export default class Generator {
-    private base58Engine: BASE58_ENGINE;
     private ripemd160Engine: RIPEMD160_ENGINE;
     private secp256k1Engine: SECP256K1_ENGINE;
     private sha256Engine: SHA256_ENGINE;
+    private base58Engine: BASE58_ENGINE;
 
     private secp256k1ExecuteFn: (privateKey: `0x${string}`) => `0x${string}`;
 
@@ -28,10 +28,10 @@ export default class Generator {
      * @param compressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
      */
     constructor(compressedPublicKey = true) {
-        this.base58Engine = new BASE58_ENGINE();
         this.ripemd160Engine = new RIPEMD160_ENGINE();
         this.secp256k1Engine = new SECP256K1_ENGINE();
         this.sha256Engine = new SHA256_ENGINE();
+        this.base58Engine = new BASE58_ENGINE();
 
         this.secp256k1ExecuteFn = compressedPublicKey ?
             this.secp256k1Engine.execute :

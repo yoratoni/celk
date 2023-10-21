@@ -14,8 +14,7 @@ const FINDER_CONFIG = {
     privateKeyLowRange: bigIntPow(2n, 65n),                        // The private key low range (inclusive).
     privateKeyHighRange: bigIntPow(2n, 66n) - 1n,                  // The private key high range (inclusive).
 
-    // Finder
-    tinyBenchmarkGeneratorIterations: 64,                          // The number of iterations for the tiny benchmark generator.
+    // Finder itself
     progressReportInterval: 256n,                                  // The progress report interval (in iterations).
     percentagesPrecision: 2                                        // The percentages precision (in decimal places).
 };
