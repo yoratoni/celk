@@ -119,7 +119,7 @@ export default class Generator {
 
             if (rawPercentage >= 50) logger.error(log);
             else if (rawPercentage >= 8) logger.warn(log);
-            else if (rawPercentage >= 3) logger.debug(log);
+            else if (rawPercentage >= 1) logger.debug(log);
             else logger.info(log);
 
             // Get the longest log length
