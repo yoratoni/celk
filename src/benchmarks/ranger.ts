@@ -14,8 +14,8 @@ const main = () => {
     const iterations = `${BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US")} iterations`;
 
     const ranger = new Ranger(
-        bigIntPow(2n, 4n),
-        bigIntPow(2n, 256n) - 1n
+        bigIntPow(2n, 20n),
+        bigIntPow(2n, 21n) - 1n
     );
 
     console.log("");

@@ -327,7 +327,7 @@ export const benchmarkGenerator = (fn: Function, privateKeyFn: Function): void =
  * Benchmarking function specifically made for the Ranger (Bitcoin private key generator).
  * @param fn The function to run.
  */
-export const benchmarkRanger = (fn: Function): void => {
+export const benchmarkRanger = (fn: () => bigint): void => {
     // Statistics
     const initialTime = Date.now();
     const lengths = {
@@ -340,14 +340,17 @@ export const benchmarkRanger = (fn: Function): void => {
     let nbOfPkpsMeasurements = 0;
 
     // Access function result to prevent optimization
-    let res = undefined;
+    let res: bigint = 0n;
 
     for (let i = 1n; i <= BENCHMARK_CONFIG.rangerIterations; i++) {
         res = fn();
 
         if (i % BENCHMARK_CONFIG.rangerReportInterval === 0n) {
+            // Convert the bigint result to a string
+            const resStr = `0x${res.toString(16).padStart(64, "0")}`;
+
             // Length of the private key (for report formatting)
-            lengths.pk = res.length;
+            lengths.pk = resStr.length;
 
             // Formatted high range
             const formattedHighRange = BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US");
@@ -367,7 +370,7 @@ export const benchmarkRanger = (fn: Function): void => {
             const pkps = formatUnitPerTimeUnit(rawPkps);
 
             // Log the report
-            const log = `PRG: ${progress} | PKPS: ${pkps} | Sample: ${res}`;
+            const log = `PRG: ${progress} | PKPS: ${pkps} | Sample: ${resStr}`;
             lengths.total = log.length;
             logger.info(log);
 

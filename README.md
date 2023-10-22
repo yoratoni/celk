@@ -32,22 +32,30 @@ Benchmark environment:
 | `v1.0.0`    | 396 k/s                    | **Default implementation (benchmark was at every iteration...)**  |
 | `v1.0.1`    | 792 k/s                    | **Better benchmarking precision**                                 |
 | `v1.0.2`    | 850 k/s                    | **Ghost executions + Better benchmark measures**                  |
-| `v1.0.2b`   | 1,18 Kk/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
-
-### Benchmarking of the private keys generator
-| Mode          | Private keys per second (k/s) |
-|---------------|-------------------------------|
-| `FULL_RANDOM` | 396 k/s                       |
-| `ASCENDING`   | 792 k/s                       |
-| `DESCENDING`  | 850 k/s                       |
+| `v1.0.2b`   | 1.18 Kk/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
+| `v1.0.3`    | N/D                        | **Better private key generator (str -> bigint)**                  |
 
 ### Benchmarking of the algorithms / encoders (64 ghost executions)
+This table will be updated with the latest version of the toolbox.
+
 | Algorithm / encoder | Execution time (ms) | Workload                    |
 |---------------------|---------------------|-----------------------------|
 | SECP256K1           | 719µs               | 94.16%                      |
 | SHA-256             | 8µs / 5µs / 5µs     | 1.07% / 0.71% / 0.69%       |
 | RIPEMD-160          | 13µs                | 1.71%                       |
 | BASE58              | 11µs                | 1.44%                       |
+
+### Benchmarking of the private keys generator (1,000,000 iterations)
+From `v1.0.3`, it seems not necessary to benchmark the private key generator anymore,
+because it is not the bottleneck of the toolbox. I would be glad if it becomes one day lol.
+
+| Version     | `FULL_RANDOM` | `ASCENDING` | `DESCENDING` |
+|-------------|---------------|-------------|--------------|
+| `v1.0.0`    | 575.7 Kk/s    | 4.80 Mk/s   | 4.76 Mk/s    |
+| `v1.0.1`    | 590.2 Kk/s    | 4.12 Mk/s   | 4.60 Mk/s    |
+| `v1.0.2`    | 584.4 Kk/s    | 4.75 Mk/s   | 4.65 Mk/s    |
+| `v1.0.2b`   | 592.1 Kk/s    | 4.24 Mk/s   | 4.68 Mk/s    |
+| `v1.0.3`    | 1.21 Mk/s     | 10.66 Mk/s  | 12.71 Mk/s   |
 
 Classes
 -------
