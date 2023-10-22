@@ -11,13 +11,11 @@ Commands
 - `yarn benchmark:ranger`: Benchmarking of the private key generator.
 - `yarn benchmark:generator`: Benchmarking of the Bitcoin address generator.
 
-Configuration
--------------
-I chose to use fix configuration files instead of command line arguments, because it is easier to work with, at least in this case.
-
-- `benchmark.config.ts`: The configuration file for the benchmarking.
-- `finder.config.ts`: The configuration file for the finder.
-- `global.config.ts`: The global configuration file.
+Notes about the benchmarking:
+- What I call the `ghost execution` report is a single showed execution of the generator with multiple previous executions.
+  It allows the JIT compiler to optimize the code, and to show the real performance of the generator.
+- It's the same thing for the other benchmarking, the goal is to run the functions a lot of times to get the real performance.
+  Or the JIT compiler will not really optimize the code, it's even more important when we want to check the workload of the different functions.
 
 Classes
 -------
@@ -25,6 +23,14 @@ The core of the toolbox is composed of the following classes:
 - `Ranger`: A class that generates private keys between a given range, with support for multiple modes.
 - `Generator`: This class wraps the algorithms & encoders to generate Bitcoin addresses from private keys.
 - `Finder`: A class that wraps the `Ranger` & the `Generator` classes to find the Bitcoin addresses that match the given criteria.
+
+Configuration
+-------------
+I chose to use fix configuration files instead of command line arguments, because it is easier to work with, at least in this case.
+
+- `benchmark.config.ts`: The configuration file for the benchmarking.
+- `finder.config.ts`: The configuration file for the finder.
+- `global.config.ts`: The global configuration file.
 
 1000 BTC Bitcoin Challenge
 --------------------------

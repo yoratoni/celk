@@ -1,3 +1,4 @@
+import BENCHMARK_CONFIG from "configs/benchmark.config";
 import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/algorithms/SHA256";
@@ -45,74 +46,65 @@ export default class Generator {
      * @returns The Bitcoin address.
      */
     executeReport = (privateKey: `0x${string}`) => {
-        const VALUES: { [key: string]: string } = {
-            pbl: "",
-            sha: "",
-            rip: "",
-            vrs: "",
-            sc1: "",
-            sc2: "",
-            chk: "",
-            ack: "",
-            adr: ""
+        const VALUES: { [key: string]: string; } = {
+            pbl: "", sha: "", rip: "",
+            vrs: "", sc1: "", sc2: "",
+            chk: "", ack: "", adr: ""
         };
 
         const TABLE = {
-            pbl: 0,     // Public key generation
-            sha: 0,     // SHA-256
-            rip: 0,     // RIPEMD-160
-            vrs: 0,     // Version byte
-            sc1: 0,     // Double SHA-256 checksum
-            sc2: 0,     // Double SHA-256 checksum
-            chk: 0,     // Take the first 4 bytes without the 0x prefix
-            ack: 0,     // Add checksum
-            adr: 0      // Base58 encoding
+            pbl: 0, sha: 0, rip: 0,
+            vrs: 0, sc1: 0, sc2: 0,
+            chk: 0, ack: 0, adr: 0
         };
 
-        // SECP256K1 (compressed / uncompressed)
-        const pblStart = performance.now();
-        VALUES.pbl = this.secp256k1ExecuteFn(privateKey);
-        TABLE.pbl = performance.now() - pblStart;
+        // Run the ghost execution 64 times to to warm up the engine
+        for (let i = 0; i <= BENCHMARK_CONFIG.generatorGhostExecutionIterations; i++) {
+            // SECP256K1 (compressed / uncompressed)
+            const pblStart = performance.now();
+            VALUES.pbl = this.secp256k1ExecuteFn(privateKey);
+            TABLE.pbl = performance.now() - pblStart;
 
-        // SHA-256
-        const shaStart = performance.now();
-        VALUES.sha = this.sha256Engine.execute(VALUES.pbl as `0x${string}`);
-        TABLE.sha = performance.now() - shaStart;
+            // SHA-256
+            const shaStart = performance.now();
+            VALUES.sha = this.sha256Engine.execute(VALUES.pbl as `0x${string}`);
+            TABLE.sha = performance.now() - shaStart;
 
-        // RIPEMD-160
-        const ripStart = performance.now();
-        VALUES.rip = this.ripemd160Engine.execute(VALUES.sha as `0x${string}`);
-        TABLE.rip = performance.now() - ripStart;
+            // RIPEMD-160
+            const ripStart = performance.now();
+            VALUES.rip = this.ripemd160Engine.execute(VALUES.sha as `0x${string}`);
+            TABLE.rip = performance.now() - ripStart;
 
-        // Version byte
-        const vrsStart = performance.now();
-        VALUES.vrs = `0x00${VALUES.rip.substring(2)}` as `0x${string}`;
-        TABLE.vrs = performance.now() - vrsStart;
+            // Version byte
+            const vrsStart = performance.now();
+            VALUES.vrs = `0x00${VALUES.rip.substring(2)}` as `0x${string}`;
+            TABLE.vrs = performance.now() - vrsStart;
 
-        // Double SHA-256 checksum (step 1)
-        const sc1Start = performance.now();
-        VALUES.sc1 = this.sha256Engine.execute(VALUES.vrs as `0x${string}`);
-        TABLE.sc1 = performance.now() - sc1Start;
+            // Double SHA-256 checksum (step 1)
+            const sc1Start = performance.now();
+            VALUES.sc1 = this.sha256Engine.execute(VALUES.vrs as `0x${string}`);
+            TABLE.sc1 = performance.now() - sc1Start;
 
-        // Double SHA-256 checksum (step 2)
-        const sc2Start = performance.now();
-        VALUES.sc2 = this.sha256Engine.execute(VALUES.sc1 as `0x${string}`);
-        TABLE.sc2 = performance.now() - sc2Start;
+            // Double SHA-256 checksum (step 2)
+            const sc2Start = performance.now();
+            VALUES.sc2 = this.sha256Engine.execute(VALUES.sc1 as `0x${string}`);
+            TABLE.sc2 = performance.now() - sc2Start;
 
-        // Take the first 4 bytes without the 0x prefix
-        const chkStart = performance.now();
-        VALUES.chk = VALUES.sc2.substring(2, 10);
-        TABLE.chk = performance.now() - chkStart;
+            // Take the first 4 bytes without the 0x prefix
+            const chkStart = performance.now();
+            VALUES.chk = VALUES.sc2.substring(2, 10);
+            TABLE.chk = performance.now() - chkStart;
 
-        // Add checksum
-        const ackStart = performance.now();
-        VALUES.ack = `${VALUES.vrs}${VALUES.chk}` as `0x${string}`;
-        TABLE.ack = performance.now() - ackStart;
+            // Add checksum
+            const ackStart = performance.now();
+            VALUES.ack = `${VALUES.vrs}${VALUES.chk}` as `0x${string}`;
+            TABLE.ack = performance.now() - ackStart;
 
-        // Base58 encoding
-        const adrStart = performance.now();
-        VALUES.adr = this.base58Engine.execute(VALUES.ack as `0x${string}`);
-        TABLE.adr = performance.now() - adrStart;
+            // Base58 encoding
+            const adrStart = performance.now();
+            VALUES.adr = this.base58Engine.execute(VALUES.ack as `0x${string}`);
+            TABLE.adr = performance.now() - adrStart;
+        }
 
         // Report variables
         const total = Object.values(TABLE).reduce((a, b) => a + b, 0);
