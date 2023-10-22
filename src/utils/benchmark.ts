@@ -220,10 +220,13 @@ export const measureComputeSpeed = (
  * Formatted output of the time it took to run a function (1 iteration).
  * @param fn The function to run.
  * @param inputFn The function to get the input from.
+ * @param padding The padding to use for the iteration number (optional, defaults to 12).
  */
-export const measureComputeSpeedOnceFormatted = (fn: Function, inputFn: Function): void => {
+export const measureComputeSpeedOnceFormatted = (fn: Function, inputFn: Function, padding = 12): void => {
     const res = measureComputeSpeedOnce(fn, inputFn);
-    logger.info(`[1] Avg: ${formatTime(res)} | Total: ${formatTime(res)}`);
+    const iteration = "1".padStart(padding, " ");
+
+    logger.info(`[${iteration}] Avg: ${formatTime(res)} | Total: ${formatTime(res)}`);
 };
 
 /**
@@ -231,16 +234,18 @@ export const measureComputeSpeedOnceFormatted = (fn: Function, inputFn: Function
  * @param fn The function to run.
  * @param iterations The number of iterations to run the function.
  * @param inputFn The function to get the input from at each iteration.
+ * @param padding The padding to use for the iteration number (optional, defaults to 12).
  */
 export const measureComputeSpeedFormatted = (
     fn: Function,
     iterations: number,
-    inputFn: Function
+    inputFn: Function,
+    padding = 12
 ): void => {
     const res = measureComputeSpeed(fn, iterations, inputFn);
 
     logger.info(
-        `[${iterations.toLocaleString("en-US")}] Avg: ${formatTime(res.average)} | Total: ${formatTime(res.total)}`
+        `[${iterations.toLocaleString("en-US").padStart(padding, " ")}] Avg: ${formatTime(res.average)} | Total: ${formatTime(res.total)}`
     );
 };
 
@@ -263,12 +268,14 @@ export const benchmark = (
     if (res === expectedForCorrectness) logger.info(`[OK]: ${inputForCorrectness} -> ${res}`);
     else logger.error(`[KO] ${inputForCorrectness} -> ${res} (expected: ${expectedForCorrectness})`);
 
+    const padding = Math.max(...BENCHMARK_CONFIG.cycles.map((cycle) => cycle.toLocaleString("en-US").length));
+
     // 1 iteration test
-    measureComputeSpeedOnceFormatted(fn, inputFn);
+    measureComputeSpeedOnceFormatted(fn, inputFn, padding);
 
     // Multiple iterations tests
     for (const cycle of BENCHMARK_CONFIG.cycles) {
-        measureComputeSpeedFormatted(fn, cycle, inputFn);
+        measureComputeSpeedFormatted(fn, cycle, inputFn, padding);
     }
 
     console.log("");
