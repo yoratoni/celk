@@ -5,7 +5,6 @@ import BASE58_ENGINE from "lib/encoders/BASE58";
 import {
     benchmark,
     generateRandomHexString,
-    generateRandomPrivateKey,
     generateRandomString
 } from "utils/benchmark";
 import logger from "utils/logger";
@@ -25,7 +24,7 @@ const main = () => {
 
     const randomStrFn = () => generateRandomString(128);
     const randomHexStrFn = () => generateRandomHexString(128);
-    const randomPrivateKeyFn = () => generateRandomPrivateKey();
+    const randomPrivateKeyFn = () => generateRandomHexString(64);
 
     logger.info("BASE58 BINARY-TO-TEXT ENCODER:");
     benchmark(

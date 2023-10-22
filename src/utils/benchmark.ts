@@ -102,13 +102,13 @@ export const formatStuffPerSecond = (stuffPerSecond: number): string => {
  * Format a time in ms, into a responsive string with the en-US locale format.
  * @param time The time in ms.
  * @param decimalsForSeconds The number of decimals to use for seconds (optional, defaults to 2).
- * @param decimalsForMilliseconds The number of decimals to use for milliseconds (optional, defaults to 6).
+ * @param decimalsForMilliseconds The number of decimals to use for milliseconds (optional, defaults to 3).
  * @returns The formatted string.
  */
 export const formatTime = (
     time: number,
     decimalsForSeconds = 2,
-    decimalsForMilliseconds = 6
+    decimalsForMilliseconds = 3
 ): string => {
     if (time > 1000) {
         return `${(time / 1000).toLocaleString("en-US", {
@@ -243,8 +243,8 @@ export const benchmark = (
     // Correctness test
     const res = fn(inputForCorrectness);
 
-    if (res === expectedForCorrectness) logger.info(`[CORRECT]: ${inputForCorrectness} -> ${res}`);
-    else logger.error(`[INCORRECT] ${inputForCorrectness} -> ${res} (expected: ${expectedForCorrectness})`);
+    if (res === expectedForCorrectness) logger.info(`[OK]: ${inputForCorrectness} -> ${res}`);
+    else logger.error(`[KO] ${inputForCorrectness} -> ${res} (expected: ${expectedForCorrectness})`);
 
     // 1 iteration test
     measureComputeSpeedOnceFormatted(fn, inputFn);

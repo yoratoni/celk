@@ -7,7 +7,7 @@ const loggerFormat = format.combine(
     format.timestamp({
         format: GLOBAL_CONFIG.dateFormat
     }),
-    format.printf((info) => `[${info.timestamp}] [${info.level.toUpperCase()}] ${info.message}`),
+    format.printf((info) => `[${info.timestamp}] ${info.message}`),
     format.colorize({
         all: true
     })

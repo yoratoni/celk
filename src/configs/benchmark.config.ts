@@ -11,12 +11,12 @@ const BENCHMARK_CONFIG = {
     // Iterations & report per benchmark
     rangerIterations: 1_000_000n,
     rangerReportInterval: 200_000n,
-    generatorIterations: 1000n,
-    generatorReportInterval: 100n,
+    generatorIterations: 800n,
+    generatorReportInterval: 160n,
 
     // Reports & display
     percentagesPrecision: 2,
-    stuffPerSecondPadding: 12
+    stuffPerSecondPadding: 11
 };
 
 

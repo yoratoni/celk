@@ -2,6 +2,7 @@ import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/algorithms/SHA256";
 import BASE58_ENGINE from "lib/encoders/BASE58";
+import { formatTime } from "utils/benchmark";
 import logger from "utils/logger";
 
 
@@ -38,61 +39,105 @@ export default class Generator {
             this.secp256k1Engine.executeUncompressed;
     }
 
-
     /**
-     * Bitcoin address debugging generation process.
+     * Bitcoin address debugging generation process with a complete report.
      * @param privateKey The private key to generate the address from.
-     * @param compressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
      * @returns The Bitcoin address.
      */
-    executeDebug = (privateKey: `0x${string}`, compressedPublicKey = true): string => {
-        logger.info(`PRV: ${privateKey}`);
+    executeReport = (privateKey: `0x${string}`) => {
+        const VALUES: { [key: string]: string } = {
+            pbl: "",
+            sha: "",
+            rip: "",
+            vrs: "",
+            sc1: "",
+            sc2: "",
+            chk: "",
+            ack: "",
+            adr: ""
+        };
+
+        const TABLE = {
+            pbl: 0,     // Public key generation
+            sha: 0,     // SHA-256
+            rip: 0,     // RIPEMD-160
+            vrs: 0,     // Version byte
+            sc1: 0,     // Double SHA-256 checksum
+            sc2: 0,     // Double SHA-256 checksum
+            chk: 0,     // Take the first 4 bytes without the 0x prefix
+            ack: 0,     // Add checksum
+            adr: 0      // Base58 encoding
+        };
 
         // SECP256K1 (compressed / uncompressed)
-        const publicKey = compressedPublicKey ?
-            this.secp256k1Engine.execute(privateKey) :
-            this.secp256k1Engine.executeUncompressed(privateKey);
-
-        logger.info(`PBL: ${publicKey}`);
+        const pblStart = performance.now();
+        VALUES.pbl = this.secp256k1ExecuteFn(privateKey);
+        TABLE.pbl = performance.now() - pblStart;
 
         // SHA-256
-        const step0 = this.sha256Engine.execute(publicKey);
-
-        logger.info(`SHA: ${step0}`);
+        const shaStart = performance.now();
+        VALUES.sha = this.sha256Engine.execute(VALUES.pbl as `0x${string}`);
+        TABLE.sha = performance.now() - shaStart;
 
         // RIPEMD-160
-        const step1 = this.ripemd160Engine.execute(step0);
-
-        logger.info(`RIP: ${step1}`);
+        const ripStart = performance.now();
+        VALUES.rip = this.ripemd160Engine.execute(VALUES.sha as `0x${string}`);
+        TABLE.rip = performance.now() - ripStart;
 
         // Version byte
-        const step2 = `0x00${step1.substring(2)}` as `0x${string}`;
+        const vrsStart = performance.now();
+        VALUES.vrs = `0x00${VALUES.rip.substring(2)}` as `0x${string}`;
+        TABLE.vrs = performance.now() - vrsStart;
 
-        logger.info(`VRS: ${step2}`);
+        // Double SHA-256 checksum (step 1)
+        const sc1Start = performance.now();
+        VALUES.sc1 = this.sha256Engine.execute(VALUES.vrs as `0x${string}`);
+        TABLE.sc1 = performance.now() - sc1Start;
 
-        // Double SHA-256 checksum
-        const step3 = this.sha256Engine.execute(step2);
-        const step4 = this.sha256Engine.execute(step3);
-
-        logger.info(`SC1: ${step3}`);
-        logger.info(`SC2: ${step4}`);
+        // Double SHA-256 checksum (step 2)
+        const sc2Start = performance.now();
+        VALUES.sc2 = this.sha256Engine.execute(VALUES.sc1 as `0x${string}`);
+        TABLE.sc2 = performance.now() - sc2Start;
 
         // Take the first 4 bytes without the 0x prefix
-        const checksum = step4.substring(2, 10);
-
-        logger.info(`CHK: ${checksum}`);
+        const chkStart = performance.now();
+        VALUES.chk = VALUES.sc2.substring(2, 10);
+        TABLE.chk = performance.now() - chkStart;
 
         // Add checksum
-        const step5 = `${step2}${checksum}` as `0x${string}`;
-
-        logger.info(`+CK: ${step5}`);
+        const ackStart = performance.now();
+        VALUES.ack = `${VALUES.vrs}${VALUES.chk}` as `0x${string}`;
+        TABLE.ack = performance.now() - ackStart;
 
         // Base58 encoding
-        const address = this.base58Engine.execute(step5);
+        const adrStart = performance.now();
+        VALUES.adr = this.base58Engine.execute(VALUES.ack as `0x${string}`);
+        TABLE.adr = performance.now() - adrStart;
 
-        logger.info(`ADR: ${address}`);
+        // Report variables
+        const total = Object.values(TABLE).reduce((a, b) => a + b, 0);
+        let maxLogLength = 0;
 
-        return address;
+        // Report
+        for (const [key, value] of Object.entries(TABLE)) {
+            const rawPercentage = (value / total) * 100;
+            const percentage = rawPercentage.toFixed(2).padStart(6, " ");
+
+            const log = `(${key.toUpperCase()}) TIME: ${formatTime(value)} | WORKLOAD: ${percentage}% | SAMPLE: ${VALUES[key].padStart(VALUES.pbl.length, " ")}`;
+
+            if (rawPercentage >= 50) logger.error(log);
+            else if (rawPercentage >= 8) logger.warn(log);
+            else if (rawPercentage >= 3) logger.debug(log);
+            else logger.info(log);
+
+            // Get the longest log length
+            if (log.length > maxLogLength) maxLogLength = log.length;
+        }
+
+        // Conclusion
+        logger.info("=".repeat(maxLogLength));
+        logger.info(`(...) TIME: ${formatTime(total)} | WORKLOAD: 100.00% | RESULT: ${VALUES.adr.padStart(VALUES.pbl.length, " ")}`);
+        logger.info("=".repeat(maxLogLength));
     };
 
 

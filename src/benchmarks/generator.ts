@@ -1,6 +1,6 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
 import Generator from "lib/classes/generator";
-import { benchmarkGenerator, generateRandomPrivateKey } from "utils/benchmark";
+import { benchmarkGenerator, generateRandomHexString } from "utils/benchmark";
 import logger from "utils/logger";
 
 
@@ -14,10 +14,14 @@ const main = () => {
 
     const generator = new Generator();
 
-    const randomPrivateKeyFn = () => generateRandomPrivateKey();
+    const randomPrivateKeyFn = () => generateRandomHexString(64);
 
     console.log("");
-    logger.info(`GENERATOR (NEW PK PER REPORT - ${iterations}):`);
+    logger.info("Single execution (random private key):");
+    generator.executeReport(generateRandomHexString(64));
+
+    console.log("");
+    logger.info(`Multiple executions (${iterations}, random private key):`);
     benchmarkGenerator(
         generator.execute,
         randomPrivateKeyFn
