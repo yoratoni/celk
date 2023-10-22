@@ -148,12 +148,11 @@ export const formatTimestamp = (timestamp: number): string => {
 /**
  * Measures the time it takes to run a function (1 iteration) in milliseconds.
  * @param fn The function to run.
- * @param inputFn The function to get the input from (optional).
+ * @param inputFn The function to get the input from.
  * @returns The time it took to run the function in milliseconds.
  */
-export const measureComputeSpeedOnce = (fn: Function, inputFn?: Function): number => {
-    let input: unknown = undefined;
-    if (inputFn) input = inputFn();
+export const measureComputeSpeedOnce = (fn: Function, inputFn: Function): number => {
+    const input = inputFn();
 
     // Access function result to prevent optimization
     let res = undefined;
@@ -178,7 +177,7 @@ export const measureComputeSpeedOnce = (fn: Function, inputFn?: Function): numbe
 export const measureComputeSpeed = (
     fn: Function,
     iterations: number,
-    inputFn?: Function
+    inputFn: Function
 ): isComputeSpeedRes => {
     let total = 0;
     let slowest = 0;
@@ -203,9 +202,9 @@ export const measureComputeSpeed = (
 /**
  * Formatted output of the time it took to run a function (1 iteration).
  * @param fn The function to run.
- * @param inputFn The function to get the input from (optional).
+ * @param inputFn The function to get the input from.
  */
-export const measureComputeSpeedOnceFormatted = (fn: Function, inputFn?: Function): void => {
+export const measureComputeSpeedOnceFormatted = (fn: Function, inputFn: Function): void => {
     const res = measureComputeSpeedOnce(fn, inputFn);
     logger.info(`[1] Avg: ${formatTime(res)} | Total: ${formatTime(res)}`);
 };
@@ -214,41 +213,43 @@ export const measureComputeSpeedOnceFormatted = (fn: Function, inputFn?: Functio
  * Formatted output of the time it took to run a function (multiple iterations).
  * @param fn The function to run.
  * @param iterations The number of iterations to run the function.
- * @param inputFn The function to get the input from at each iteration (optional).
+ * @param inputFn The function to get the input from at each iteration.
  */
 export const measureComputeSpeedFormatted = (
     fn: Function,
     iterations: number,
-    inputFn?: Function
+    inputFn: Function
 ): void => {
     const res = measureComputeSpeed(fn, iterations, inputFn);
+
     logger.info(
         `[${iterations.toLocaleString("en-US")}] Avg: ${formatTime(res.average)} | Total: ${formatTime(res.total)}`
     );
 };
 
 /**
- * Logs if the output of a function is correct based on an input function.
- * @param fn The function to run.
- * @param inputFn The function to get the input from.
- * @param expected The expected output.
- */
-export const logIfCorrect = (
-    fn: Function,
-    inputFn: Function,
-    expected: unknown
-): void => {
-    // TODO
-};
-
-/**
  * Main benchmarking function, executing cycles of different iterations.
  * @param fn The function to run.
- * @param inputFn The function to get the input from at each iteration (optional).
+ * @param inputFn The function to get the input from at each iteration.
+ * @param inputForCorrectness The input for the correctness test.
+ * @param expectedForCorrectness The expected output for the correctness test.
  */
-export const benchmark = (fn: Function, inputFn?: Function): void => {
+export const benchmark = (
+    fn: Function,
+    inputFn: Function,
+    inputForCorrectness: unknown,
+    expectedForCorrectness: unknown
+): void => {
+    // Correctness test
+    const res = fn(inputForCorrectness);
+
+    if (res === expectedForCorrectness) logger.info(`[CORRECT]: ${inputForCorrectness} -> ${res}`);
+    else logger.error(`[INCORRECT] ${inputForCorrectness} -> ${res} (expected: ${expectedForCorrectness})`);
+
+    // 1 iteration test
     measureComputeSpeedOnceFormatted(fn, inputFn);
 
+    // Multiple iterations tests
     for (const cycle of BENCHMARK_CONFIG.cycles) {
         measureComputeSpeedFormatted(fn, cycle, inputFn);
     }

@@ -30,25 +30,33 @@ const main = () => {
     logger.info("BASE58 BINARY-TO-TEXT ENCODER:");
     benchmark(
         base58Engine.execute,
-        randomStrFn
+        randomStrFn,
+        "0xABC",
+        "3x"
     );
 
     logger.info("RIPEMD-160 ALGORITHM:");
     benchmark(
         ripemd160Engine.execute,
-        randomHexStrFn
+        randomHexStrFn,
+        "0xABC",
+        "0x82895e91fe5b276b0880dc7db44989c14000c1eb"
     );
 
     logger.info("SECP256K1 ALGORITHM:");
     benchmark(
         secp256k1Engine.execute,
-        randomPrivateKeyFn
+        randomPrivateKeyFn,
+        "0xABC",
+        "0x023ef30130654689a64c864d6dd38760481c55fc525e2c6c7084e2d2d3d4d51be9"
     );
 
     logger.info("SHA-256 ALGORITHM:");
     benchmark(
         sha256Engine.execute,
-        randomHexStrFn
+        randomHexStrFn,
+        "0xABC",
+        "0x087d80f7f182dd44f184aa86ca34488853ebcc04f0c60d5294919a466b463831"
     );
 };
 
