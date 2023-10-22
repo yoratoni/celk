@@ -17,6 +17,38 @@ Notes about the benchmarking:
 - It's the same thing for the other benchmarking, the goal is to run the functions a lot of times to get the real performance.
   Or the JIT compiler will not really optimize the code, it's even more important when we want to check the workload of the different functions.
 
+Performances
+------------
+Benchmark environment:
+- CPU: AMD Ryzen 5 3600x (6 cores / 12 threads) @ 3.8 GHz.
+- GPU: NVIDIA GeForce RTX 3070.
+- RAM: 32 GB DDR4 @ 3200 MHz.
+- OS: Windows 10 64 bits.
+- Node.js: v20.8.1.
+
+### Benchmarking of the Bitcoin addresses generator
+| Version     | Addresses per second (k/s) | Upgrade description                                               |
+|-------------|----------------------------|-------------------------------------------------------------------|
+| `v1.0.0`    | 396 k/s                    | **Default implementation (benchmark was at every iteration...)**  |
+| `v1.0.1`    | 792 k/s                    | **Better benchmarking precision**                                 |
+| `v1.0.2`    | 850 k/s                    | **Ghost executions + Better benchmark measures**                  |
+| `v1.0.2b`   | 1,18 Kk/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
+
+### Benchmarking of the private keys generator
+| Mode          | Private keys per second (k/s) |
+|---------------|-------------------------------|
+| `FULL_RANDOM` | 396 k/s                       |
+| `ASCENDING`   | 792 k/s                       |
+| `DESCENDING`  | 850 k/s                       |
+
+### Benchmarking of the algorithms / encoders (64 ghost executions)
+| Algorithm / encoder | Execution time (ms) | Workload                    |
+|---------------------|---------------------|-----------------------------|
+| SECP256K1           | 719µs               | 94.16%                      |
+| SHA-256             | 8µs / 5µs / 5µs     | 1.07% / 0.71% / 0.69%       |
+| RIPEMD-160          | 13µs                | 1.71%                       |
+| BASE58              | 11µs                | 1.44%                       |
+
 Classes
 -------
 The core of the toolbox is composed of the following classes:
@@ -57,10 +89,6 @@ and the first available public key in the list (wallet still full) is from the p
 - A difference between no public key and an available public key is the computation time, because, to convert the public key
 into a valid Bitcoin address, it is necessary to compute `3 * SHA-256 + RIPEMD-160 + BASE58` too, which takes a bit more time.
 - Now, the thing that always takes most of the computation time is the ECDSA algorithm..
-
-Similarly to the [66 Bit Collective Bitcoin Private Key Cracking Pool](http://www.ttdsales.com/66bit/login.php),
-the workload could be split into ranges from `0000000000` to `FFFFFFFFFF` which corresponds to 1,099,511,627,776 keys.
-After one range is completed, the next one could be started, and the previous one, marked as completed in the database.
 
 Sources & Credits
 -----------------

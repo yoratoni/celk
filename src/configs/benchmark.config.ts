@@ -16,7 +16,8 @@ const BENCHMARK_CONFIG = {
 
     // Reports & display
     percentagesPrecision: 2,                    // Percentages precision
-    stuffPerSecondPadding: 11                   // Stuff per second padding
+    formatTimePadding: 11,                      // Time padding
+    formatUnitPerTimeUnitPadding: 11            // Stuff per second padding
 };
 
 

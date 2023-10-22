@@ -52,50 +52,54 @@ export const generateRandomHexString = (length: number): `0x${string}` => {
 export const generateRandomPrivateKey = (): bigint => BigInt(generateRandomHexString(64));
 
 /**
- * Format a number of generated stuff (addresses or private keys) per second (as xK/s).
- * @param stuffPerSecond The number of stuff generated per second.
- * @returns The formatted string.
+ * Format a number on a unit per time unit basis.
+ *
+ * Note: the time unit can be set to null to only display the unit.
+ * @param nb The number to format.
+ * @param unit The unit to use (optional, defaults to "k" for keys).
+ * @param timeUnit The time unit to use (optional, defaults to "s" for seconds).
  */
-export const formatStuffPerSecond = (stuffPerSecond: number): string => {
+export const formatUnitPerTimeUnit = (nb: number, unit = "k", timeUnit: string | null = "s"): string => {
     const precision = BENCHMARK_CONFIG.percentagesPrecision;
-    const padding = BENCHMARK_CONFIG.stuffPerSecondPadding;
+    const padding = BENCHMARK_CONFIG.formatUnitPerTimeUnitPadding;
+    const strUnit = timeUnit ? `${unit}/${timeUnit}` : unit;
 
     // T = tera
-    if (stuffPerSecond >= Math.pow(10, 12)) {
-        return `${(Math.round(stuffPerSecond / Math.pow(10, 12))).toLocaleString(
+    if (nb >= Math.pow(10, 12)) {
+        return `${(Math.round(nb / Math.pow(10, 12))).toLocaleString(
             "en-US",
             { minimumFractionDigits: precision, maximumFractionDigits: precision }
-        )} Tk/s`.padStart(padding, " ");
+        )} T${strUnit}`.padStart(padding, " ");
     }
 
     // G = giga
-    if (stuffPerSecond >= Math.pow(10, 9)) {
-        return `${(Math.round(stuffPerSecond / Math.pow(10, 9))).toLocaleString(
+    if (nb >= Math.pow(10, 9)) {
+        return `${(Math.round(nb / Math.pow(10, 9))).toLocaleString(
             "en-US",
             { minimumFractionDigits: precision, maximumFractionDigits: precision }
-        )} Gk/s`.padStart(padding, " ");
+        )} G${strUnit}`.padStart(padding, " ");
     }
 
     // M = mega
-    if (stuffPerSecond >= Math.pow(10, 6)) {
-        return `${(stuffPerSecond / Math.pow(10, 6)).toLocaleString(
+    if (nb >= Math.pow(10, 6)) {
+        return `${(nb / Math.pow(10, 6)).toLocaleString(
             "en-US",
             { minimumFractionDigits: precision, maximumFractionDigits: precision }
-        )} MK/s`.padStart(padding, " ");
+        )} M${strUnit}`.padStart(padding, " ");
     }
 
     // K = kilo
-    if (stuffPerSecond >= Math.pow(10, 3)) {
-        return `${(stuffPerSecond / Math.pow(10, 3)).toLocaleString(
+    if (nb >= Math.pow(10, 3)) {
+        return `${(nb / Math.pow(10, 3)).toLocaleString(
             "en-US",
             { minimumFractionDigits: precision, maximumFractionDigits: precision }
-        )} Kk/s`.padStart(padding, " ");
+        )} K${strUnit}`.padStart(padding, " ");
     }
 
-    return `${Math.round(stuffPerSecond).toLocaleString(
+    return `${Math.round(nb).toLocaleString(
         "en-US",
         { minimumFractionDigits: precision, maximumFractionDigits: precision }
-    )} k/s`.padStart(padding, " ");
+    )} ${strUnit}`.padStart(padding, " ");
 };
 
 /**
@@ -103,25 +107,38 @@ export const formatStuffPerSecond = (stuffPerSecond: number): string => {
  * @param time The time in ms.
  * @param decimalsForSeconds The number of decimals to use for seconds (optional, defaults to 2).
  * @param decimalsForMilliseconds The number of decimals to use for milliseconds (optional, defaults to 3).
+ * @param decimalsForMicroseconds The number of decimals to use for microseconds (optional, defaults to 3).
  * @returns The formatted string.
  */
 export const formatTime = (
     time: number,
     decimalsForSeconds = 2,
-    decimalsForMilliseconds = 3
+    decimalsForMilliseconds = 3,
+    decimalsForMicroseconds = 0
 ): string => {
-    if (time > 1000) {
+    const padding = BENCHMARK_CONFIG.formatTimePadding;
+
+    // Seconds
+    if (time >= 1000) {
         return `${(time / 1000).toLocaleString("en-US", {
             minimumFractionDigits: decimalsForSeconds,
             maximumFractionDigits: decimalsForSeconds
-        })}s`;
+        })}s`.padStart(padding, " ");
     }
 
-    // EN US format with 6 decimals
-    return `${time.toLocaleString("en-US", {
-        minimumFractionDigits: decimalsForMilliseconds,
-        maximumFractionDigits: decimalsForMilliseconds
-    })}ms`;
+    // Milliseconds
+    if (time >= 1) {
+        return `${time.toLocaleString("en-US", {
+            minimumFractionDigits: decimalsForMilliseconds,
+            maximumFractionDigits: decimalsForMilliseconds
+        })}ms`.padStart(padding, " ");
+    }
+
+    // Microseconds
+    return `${(time * 1000).toLocaleString("en-US", {
+        minimumFractionDigits: decimalsForMicroseconds,
+        maximumFractionDigits: decimalsForMicroseconds
+    })}μs`.padStart(padding, " ");
 };
 
 /**
@@ -288,7 +305,7 @@ export const benchmarkGenerator = (fn: Function, privateKeyFn: Function): void =
             const rawElapsedTime = Date.now() - initialTime;
 
             // Calculate the average addresses per second
-            const aps = formatStuffPerSecond(Math.round(Number(i) / (rawElapsedTime / 1000)));
+            const aps = formatUnitPerTimeUnit(Math.round(Number(i) / (rawElapsedTime / 1000)));
 
             // Log the report
             logger.info(`PRG: ${progress} | APS: ${aps} | Sample: ${res}`);
@@ -306,6 +323,14 @@ export const benchmarkGenerator = (fn: Function, privateKeyFn: Function): void =
 export const benchmarkRanger = (fn: Function): void => {
     // Statistics
     const initialTime = Date.now();
+    const lengths = {
+        pk: 0,
+        progress: 0,
+        total: 0
+    };
+
+    let totalPkps = 0;
+    let nbOfPkpsMeasurements = 0;
 
     // Access function result to prevent optimization
     let res = undefined;
@@ -314,6 +339,9 @@ export const benchmarkRanger = (fn: Function): void => {
         res = fn();
 
         if (i % BENCHMARK_CONFIG.rangerReportInterval === 0n) {
+            // Length of the private key (for report formatting)
+            lengths.pk = res.length;
+
             // Formatted high range
             const formattedHighRange = BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US");
 
@@ -322,15 +350,32 @@ export const benchmarkRanger = (fn: Function): void => {
 
             // Generate the progress part of the report
             const progress = `${paddedIndex} / ${formattedHighRange}`;
+            lengths.progress = progress.length;
 
             // Elapsed time
             const rawElapsedTime = Date.now() - initialTime;
 
             // Calculate the average private keys per second
-            const pkps = formatStuffPerSecond(Math.round(Number(i) / (rawElapsedTime / 1000)));
+            const rawPkps = Math.round(Number(i) / (rawElapsedTime / 1000));
+            const pkps = formatUnitPerTimeUnit(rawPkps);
 
             // Log the report
-            logger.info(`PRG: ${progress} | PKPS: ${pkps} | Sample: ${res}`);
+            const log = `PRG: ${progress} | PKPS: ${pkps} | Sample: ${res}`;
+            lengths.total = log.length;
+            logger.info(log);
+
+            // PKPS statistics
+            totalPkps += rawPkps;
+            nbOfPkpsMeasurements++;
         }
     }
+
+    // PKPS statistics
+    const avgPkpsFormatted = formatUnitPerTimeUnit(Math.round(totalPkps / nbOfPkpsMeasurements));
+    const totalPkpsFormatted = formatUnitPerTimeUnit(totalPkps, "k", null);
+
+
+    logger.info("=".repeat(lengths.total));
+    logger.info(`AVG: ${avgPkpsFormatted.padStart(lengths.progress, " ")} | ALPK: ${totalPkpsFormatted} | Time: ${formatTimestamp(Date.now() - initialTime).padStart(lengths.pk + 2, " ")}`);
+    logger.info("=".repeat(lengths.total));
 };

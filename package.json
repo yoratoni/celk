@@ -1,8 +1,8 @@
 {
-    "name": "ts-node-boilerplate",
+    "name": "celk",
     "version": "1.0.2",
-    "description": "TS-NODE BOILERPLATE",
-    "repository": "https://github.com/yoratoni/ts-node-boilerplate",
+    "description": "A toolbox to work with Bitcoin addresses & private keys.",
+    "repository": "https://github.com/yoratoni/celk",
     "author": "yoratoni <yoratoni.dev@gmail.com>",
     "license": "MIT",
     "private": true,

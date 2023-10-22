@@ -19,19 +19,19 @@ const main = () => {
     );
 
     console.log("");
-    logger.info(`Full random mode (${iterations} iterations):`);
+    logger.info(`Full random mode (${iterations}):`);
     benchmarkRanger(
         ranger.executeFullRandom
     );
 
     console.log("");
-    logger.info(`Ascending mode (${iterations} iterations):`);
+    logger.info(`Ascending mode (${iterations}):`);
     benchmarkRanger(
         ranger.executeAscending
     );
 
     console.log("");
-    logger.info(`Descending mode (${iterations} iterations):`);
+    logger.info(`Descending mode (${iterations}):`);
     benchmarkRanger(
         ranger.executeDescending
     );

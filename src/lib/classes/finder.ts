@@ -2,7 +2,7 @@ import BENCHMARK_CONFIG from "configs/benchmark.config";
 import config from "configs/finder.config";
 import Generator from "lib/classes/generator";
 import Ranger from "lib/classes/ranger";
-import { formatStuffPerSecond, formatTimestamp } from "utils/benchmark";
+import { formatTimestamp, formatUnitPerTimeUnit } from "utils/benchmark";
 import logger from "utils/logger";
 import { bigIntToPercentage } from "utils/maths";
 
@@ -100,7 +100,7 @@ export default class Finder {
                 const elapsedTime = formatTimestamp(rawElapsedTime);
 
                 // Calculate the average addresses per second
-                const aps = formatStuffPerSecond(Math.round(Number(i) / (rawElapsedTime / 1000)));
+                const aps = formatUnitPerTimeUnit(Math.round(Number(i) / (rawElapsedTime / 1000)));
 
                 // Log the progress
                 logger.info(`PRG: ${progress} | PRP: ${progressPercentage}% | APS: ${aps} | TIME: ${elapsedTime}`);
