@@ -27,15 +27,15 @@ export default class Generator {
 
     /**
      * Construct a new Bitcoin address generator.
-     * @param compressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
+     * @param useCompressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
      */
-    constructor(compressedPublicKey = true) {
+    constructor(useCompressedPublicKey = true) {
         this.ripemd160Engine = new RIPEMD160_ENGINE();
         this.secp256k1Engine = new SECP256K1_ENGINE();
         this.sha256Engine = new SHA256_ENGINE();
         this.base58Engine = new BASE58_ENGINE();
 
-        this.secp256k1ExecuteFn = compressedPublicKey ?
+        this.secp256k1ExecuteFn = useCompressedPublicKey ?
             this.secp256k1Engine.execute :
             this.secp256k1Engine.executeUncompressed;
     }

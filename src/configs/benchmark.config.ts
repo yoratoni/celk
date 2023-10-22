@@ -5,9 +5,6 @@ const BENCHMARK_CONFIG = {
     // Cycles for algorithms & encoders benchmarks
     cycles: [10, 100, 1000],
 
-    // The number of iterations for the tiny benchmark generator used for the finder initialization
-    tinyBenchmarkGeneratorIterations: 64,
-
     // Ranger
     rangerIterations: 1_000_000n,               // Executions
     rangerReportInterval: 200_000n,             // Report interval

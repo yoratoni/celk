@@ -300,44 +300,6 @@ export const benchmarkGenerator = (fn: Function, privateKeyFn: Function): void =
 };
 
 /**
- * Tiny benchmarking function specifically made for the Bitcoin address generator (finder report).
- * @param fn The function to run.
- * @param privateKeyFn The function to get the input from at each iteration.
- */
-export const tinyBenchmarkGenerator = (fn: Function, privateKeyFn: Function): void => {
-    let input = "0x0";
-
-    let total = 0;
-    let avg = 0;
-    let addressesPerSecond = "";
-
-    // Access function result to prevent optimization
-    let res = undefined;
-
-    for (let i = 1; i <= BENCHMARK_CONFIG.tinyBenchmarkGeneratorIterations; i++) {
-        input = privateKeyFn();
-
-        const start = performance.now();
-        res = fn(input);
-        const end = performance.now();
-
-        const time = end - start;
-        total += time;
-        avg = total / i;
-        addressesPerSecond = formatStuffPerSecond(1000 / avg);
-    }
-
-    console.log("");
-    logger.info(`>> Tiny benchmarking generator (${BENCHMARK_CONFIG.tinyBenchmarkGeneratorIterations} iterations):`);
-    logger.info(`   >> Avg: ${formatTime(avg, 2, 2)}`);
-    logger.info(`   >> Total: ${formatTime(total, 2, 2)}`);
-    logger.info(`   >> APS: ${addressesPerSecond}`);
-    logger.info(`   >> LAST_PRV: ${input}`);
-    logger.info(`   >> LAST_ADR: ${res}`);
-    console.log("");
-};
-
-/**
  * Benchmarking function specifically made for the Ranger (Bitcoin private key generator).
  * @param fn The function to run.
  */

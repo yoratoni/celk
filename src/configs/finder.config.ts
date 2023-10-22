@@ -7,7 +7,7 @@ import { bigIntPow } from "utils/maths";
 const FINDER_CONFIG = {
     // Address generation
     addressToFind: "13zb1hQbWVsc2S7ZTZnP2G4undNNpdh5so",           // The address to find.
-    compressedPublicKey: true,                                     // Whether to use the compressed public key or not.
+    useCompressedPublicKey: true,                                  // Whether to use the compressed public key or not.
 
     // Private key generation
     privateKeyGenMode: "FULL_RANDOM",                              // The private key generation mode (FULL_RANDOM, ASCENDING, DESCENDING).
