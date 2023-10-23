@@ -30,24 +30,32 @@ Benchmark environment:
 ### Benchmarking of the Bitcoin addresses generator
 | Version     | Addresses per second (k/s) | Upgrade description                                               |
 |-------------|----------------------------|-------------------------------------------------------------------|
-| `v1.0.0`    | 396 k/s                    | **Default implementation (benchmark was at every iteration...)**  |
-| `v1.0.1`    | 792 k/s                    | **Better benchmarking precision**                                 |
+| `v1.0.0`    | 396 k/s                    | **Basic algorithm implementations**                               |
+| `v1.0.1`    | 792 k/s                    | **Improved benchmarking precision**                               |
 | `v1.0.2`    | 850 k/s                    | **Ghost executions + Better benchmark measures**                  |
 | `v1.0.2b`   | 1.18 Kk/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
 | `v1.0.3`    | N/D                        | **Better private key generator (str -> bigint)**                  |
 
 ### Benchmarking of the algorithms / encoders (64 ghost executions)
-This table will be updated with the latest version of the toolbox.
+This table is updated with the latest version of the toolbox.
 
 | Algorithm / encoder | Execution time (ms) | Workload                    |
 |---------------------|---------------------|-----------------------------|
 | SECP256K1           | 719µs               | 94.16%                      |
-| SHA-256             | 8µs / 5µs / 5µs     | 1.07% / 0.71% / 0.69%       |
 | RIPEMD-160          | 13µs                | 1.71%                       |
 | BASE58              | 11µs                | 1.44%                       |
+| SHA-256             | 8µs / 5µs / 5µs     | 1.07% / 0.71% / 0.69%       |
+
+#### Note about the SHA-256 algorithm:
+The three numbers correspond to the three SHA-256 executions:
+- 1 just before the RIPEMD-160 execution.
+- 2 for the double SHA-256 checksum.
+
+The first one is slower because the input is coming from the SECP256K1 algorithm,
+which makes it big to process for the SHA-256 algorithm.
 
 ### Benchmarking of the private keys generator (1,000,000 iterations)
-From `v1.0.3`, it seems not necessary to benchmark the private key generator anymore,
+From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
 because it is not the bottleneck of the toolbox. I would be glad if it becomes one day lol.
 
 | Version     | `FULL_RANDOM` | `ASCENDING` | `DESCENDING` |
@@ -60,7 +68,8 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 
 ### A list of things that I want to do to improve the performances
 - [x] Use a better private key generator (str -> bigint).
-- [ ] Add support for little & big endian (using TypedArray)
+- [ ] Add support for little & big endian (using TypedArray).
+- [ ] Use a single TypedArray cache for the entire generations.
 - [ ] Convert the output of the Secp256k1 algorithm to an Uint32Array.
 - [ ] Allow SHA-256 to use an Uint32Array as input & output.
 - [ ] Allow RIPEMD-160 to use an Uint32Array as input & output.
