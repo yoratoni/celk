@@ -69,8 +69,8 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 ### A list of things that I want to do to improve the performances
 - [x] Use a better private key generator (str -> bigint).
 - [ ] Add support for little & big endian (using TypedArray).
-- [ ] Use a single TypedArray cache for the entire generations.
-- [ ] Convert the output of the Secp256k1 algorithm to an Uint32Array.
+- [ ] Use a single Buffer & Uint32Array cache for the SECP256K1 output.
+- [ ] Convert the output of the Secp256k1 algorithm to an  Uint32Array.
 - [ ] Allow SHA-256 to use an Uint32Array as input & output.
 - [ ] Allow RIPEMD-160 to use an Uint32Array as input & output.
 - [ ] Add the version byte to the Uint32Array without passing by a string.

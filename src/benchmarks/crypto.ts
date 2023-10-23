@@ -16,18 +16,16 @@ import logger from "utils/logger";
  */
 const main = () => {
     logger.info("Starting benchmarking of the encoders / algorithms.");
-    console.log("");
 
     const ranger = new Ranger(0n, 2n ** 256n);
 
-    const base58Engine = new BASE58_ENGINE();
-    const ripemd160Engine = new RIPEMD160_ENGINE();
     const secp256k1Engine = new SECP256K1_ENGINE();
+    const ripemd160Engine = new RIPEMD160_ENGINE();
     const sha256Engine = new SHA256_ENGINE();
+    const base58Engine = new BASE58_ENGINE();
 
-    const randomStrFn = () => generateRandomString(128);
-    const randomHexStrFn = () => generateRandomHexString(128);
-    const randomPrivateKeyFn = () => ranger.executeFullRandom();
+
+
 
     // logger.info("BASE58 BINARY-TO-TEXT ENCODER:");
     // benchmark(
@@ -45,13 +43,44 @@ const main = () => {
     //     "0x82895e91fe5b276b0880dc7db44989c14000c1eb"
     // );
 
+    console.log("");
     logger.info("SECP256K1 ALGORITHM (Compressed):");
-    benchmark(
-        secp256k1Engine.executeCompressed,
-        randomPrivateKeyFn,
-        256n,
-        BigInt("0x038282263212c609d9ea2a6e3e172de238d8c39cabd5ac1ca10646e23fd5f51508")
-    );
+
+    // Compressed public key is 33 bytes long.
+    const secp256k1Buffer_C = Buffer.alloc(33);
+
+    benchmark(() => secp256k1Engine.executeCompressed(secp256k1Buffer_C, 1n));
+
+    // Check if the compressed public key is valid.
+    if (secp256k1Buffer_C.toString("hex").toUpperCase() ===
+        "02" +
+        "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
+    ) {
+        logger.info(">> Compressed public key check passed.");
+    } else {
+        logger.error(">> Compressed public key check failed.");
+    }
+
+    console.log("");
+    logger.info("SECP256K1 ALGORITHM (Uncompressed):");
+
+    // Uncompressed public key is 65 bytes long.
+    const secp256k1Buffer_U = Buffer.alloc(65);
+
+    benchmark(() => secp256k1Engine.executeUncompressed(secp256k1Buffer_U, 1n));
+
+    // Check if the uncompressed public key is valid.
+    if (secp256k1Buffer_U.toString("hex").toUpperCase() ===
+        "04" +
+        "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798" +
+        "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"
+    ) {
+        logger.info(">> Uncompressed public key check passed.");
+    } else {
+        logger.error(">> Uncompressed public key check failed.");
+    }
+
+    console.log("");
 
     // logger.info("SHA-256 ALGORITHM:");
     // benchmark(

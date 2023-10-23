@@ -354,21 +354,42 @@ export default class SECP256K1_ENGINE {
 
     /**
      * Execute the SECP256K1 algorithm (uncompressed key).
+     * @param cache The buffer cache to fill with the public key (65 bytes).
      * @param privateKey The private key.
-     * @returns The public key as a bigint (65 bytes, 1 byte prefix (04) + 32 bytes X coordinate + Y coordinate).
+     * @param privateKey The private key as a Node.js Buffer.
      */
-    executeUncompressed = (privateKey: bigint): bigint => 4n << BigInt(8 * 64) | this.G.multiply(privateKey).x << BigInt(8 * 32) | this.G.multiply(privateKey).y;
+    executeUncompressed = (cache: Buffer, privateKey: bigint): void => {
+        const point = this.G.multiply(privateKey);
+
+        // X coordinate of the public key (base 16)
+        let x = point.x.toString(16);
+
+        // Y coordinate of the public key (base 16)
+        let y = point.y.toString(16);
+
+        // Fill up the missing zeros
+        while (x.length < 64) x = `0${x}`;
+        while (y.length < 64) y = `0${y}`;
+
+        // Write the public key to the cache
+        cache.write(`04${x}${y}`, "hex");
+    };
 
     /**
      * Execute the SECP256K1 algorithm (compressed key).
-     * @param cache The cache to fill with the public key.
-     * @param privateKey The private key.
+     * @param cache The buffer cache to fill with the public key (33 bytes).
+     * @param privateKey The private key as a Node.js Buffer.
      */
-    executeCompressed = (cache: Uint32Array, privateKey: bigint): void => {
-        const points = this.G.multiply(privateKey);
+    executeCompressed = (cache: Buffer, privateKey: bigint): void => {
+        const point = this.G.multiply(privateKey);
 
-        // Prefixed with 02 or 03 to indicate that it is compressed (2: Even / 3: Odd)
-        const prefix = points.y & 1n ? 0x03 : 0x02;
+        // X coordinate of the public key (base 16)
+        let x = point.x.toString(16);
 
+        // Fill up the missing zeros
+        while (x.length < 64) x = `0${x}`;
+
+        // Write the public key to the cache
+        cache.write(`${point.y % 2n === 0n ? "02" : "03"}${x}`, "hex");
     };
 }

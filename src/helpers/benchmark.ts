@@ -55,17 +55,14 @@ export const generateRandomPrivateKey = (): bigint => BigInt(generateRandomHexSt
 /**
  * Measures the time it takes to run a function (1 iteration) in milliseconds.
  * @param fn The function to run.
- * @param inputFn The function to get the input from.
  * @returns The time it took to run the function in milliseconds.
  */
-export const measureComputeSpeedOnce = (fn: Function, inputFn: Function): number => {
-    const input = inputFn();
-
+export const measureComputeSpeedOnce = (fn: Function): number => {
     // Access function result to prevent optimization
     let res = undefined;
 
     const start = performance.now();
-    res = fn(input);
+    res = fn();
     const end = performance.now();
 
     // Prevent unused variable warning
@@ -78,20 +75,18 @@ export const measureComputeSpeedOnce = (fn: Function, inputFn: Function): number
  * Measures the time it takes to run a function (multiple iterations) in milliseconds.
  * @param fn The function to run.
  * @param iterations The number of iterations to run the function.
- * @param inputFn The function to get the input from at each iteration (optional).
  * @returns The time it took to run the function in milliseconds (average).
  */
 export const measureComputeSpeed = (
     fn: Function,
-    iterations: number,
-    inputFn: Function
+    iterations: number
 ): isComputeSpeedRes => {
     let total = 0;
     let slowest = 0;
     let fastest = Infinity;
 
     for (let i = 0; i < iterations; i++) {
-        const tmpSpd = measureComputeSpeedOnce(fn, inputFn) as number;
+        const tmpSpd = measureComputeSpeedOnce(fn) as number;
         total += tmpSpd;
 
         if (tmpSpd > slowest) slowest = tmpSpd;
@@ -110,16 +105,14 @@ export const measureComputeSpeed = (
  * Formatted output of the time it took to run a function (multiple iterations).
  * @param fn The function to run.
  * @param iterations The number of iterations to run the function.
- * @param inputFn The function to get the input from at each iteration.
  * @param padding The padding to use for the iteration number (optional, defaults to 12).
  */
 export const measureComputeSpeedFormatted = (
     fn: Function,
     iterations: number,
-    inputFn: Function,
     padding = 12
 ): void => {
-    const res = measureComputeSpeed(fn, iterations, inputFn);
+    const res = measureComputeSpeed(fn, iterations);
 
     logger.info(
         `[${iterations.toLocaleString("en-US").padStart(padding, " ")}] AVG: ${formatTime(res.average)} | TOTAL: ${formatTime(res.total)}`
@@ -129,14 +122,12 @@ export const measureComputeSpeedFormatted = (
 /**
  * Main benchmarking function, executing cycles of different iterations.
  * @param fn The function to run.
- * @param inputFn The function to get the input from at each iteration.
  * @param inputForCorrectness The input for the correctness test.
  * @param expectedForCorrectness The expected output for the correctness test.
  * @param useSandboxCycles Whether to use the sandbox cycles or the normal cycles.
  */
 export const benchmark = (
     fn: Function,
-    inputFn: Function,
     inputForCorrectness?: unknown,
     expectedForCorrectness?: unknown,
     useSandboxCycles = false
@@ -153,10 +144,8 @@ export const benchmark = (
     const padding = Math.max(...cycles.map((cycle) => cycle.toLocaleString("en-US").length));
 
     for (const cycle of cycles) {
-        measureComputeSpeedFormatted(fn, cycle, inputFn, padding);
+        measureComputeSpeedFormatted(fn, cycle, padding);
     }
-
-    console.log("");
 };
 
 /**
