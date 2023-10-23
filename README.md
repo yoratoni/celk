@@ -58,6 +58,16 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 | `v1.0.2b`   | 592.1 Kk/s    | 4.24 Mk/s   | 4.68 Mk/s    |
 | `v1.0.3`    | 1.21 Mk/s     | 10.66 Mk/s  | 12.71 Mk/s   |
 
+### A list of things that I want to do to improve the performances
+- [x] Use a better private key generator (str -> bigint).
+- [ ] Add support for little & big endian (using TypedArray)
+- [ ] Convert the output of the Secp256k1 algorithm to an Uint32Array.
+- [ ] Allow SHA-256 to use an Uint32Array as input & output.
+- [ ] Allow RIPEMD-160 to use an Uint32Array as input & output.
+- [ ] Add the version byte to the Uint32Array without passing by a string.
+- [ ] Calculate the checksum without passing by a string (double SHA-256 checksum).
+- [ ] Allow BASE58 to use an Uint32Array as input.
+
 Classes
 -------
 The core of the toolbox is composed of the following classes:

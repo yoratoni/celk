@@ -1,18 +1,18 @@
 // A library for data conversion.
 
 /**
- * Converts a string into an Uint8Array.
- * @param input The string to convert.
- * @returns The Uint8Array.
- */
-export const stringToUint8Array = (input: string): Uint8Array => Uint8Array.from(Buffer.from(input));
-
-/**
  * Converts an hexadecimal string into an Uint8Array.
  * @param input The hexadecimal string to convert.
  * @returns The Uint8Array.
  */
 export const hexToUint8Array = (input: `0x${string}`): Uint8Array => Uint8Array.from(Buffer.from(input.substring(2), "hex"));
+
+/**
+ * Converts an hexadecimal string into an Uint32Array.
+ * @param input The hexadecimal string to convert.
+ * @returns The Uint32Array.
+ */
+export const hexToUint32Array = (input: `0x${string}`): Uint32Array => Uint32Array.from(Buffer.from(input.substring(2), "hex"));
 
 /**
  * Converts an Uint8Array to an hexadecimal string.
@@ -22,11 +22,11 @@ export const hexToUint8Array = (input: `0x${string}`): Uint8Array => Uint8Array.
 export const uint8ArrayToHex = (input: Uint8Array): `0x${string}` => `0x${Buffer.from(input).toString("hex")}`;
 
 /**
- * Converts an Uint8Array into a bigint.
- * @param input The Uint8Array to convert.
- * @returns The bigint.
+ * Converts an Uint32Array to an hexadecimal string.
+ * @param input The Uint32Array to convert.
+ * @returns The hexadecimal string.
  */
-export const uint8ArrayToBigint = (input: Uint8Array): bigint => BigInt(`0x${Buffer.from(input).toString("hex")}`);
+export const uint32ArrayToHex = (input: Uint32Array): `0x${string}` => `0x${Buffer.from(input).toString("hex")}`;
 
 /**
  * Converts an Uint8Array to an array of big-endian words.
