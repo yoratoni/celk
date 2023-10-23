@@ -7,10 +7,10 @@ Commands
 - `yarn find`: Executes the finder class with the configuration.
 
 ### Benchmarking
-- `yarn benchmark:crypto`: Benchmarking of the encoders / algorithms.
-- `yarn benchmark:ranger`: Benchmarking of the private key generator.
-- `yarn benchmark:generator`: Benchmarking of the Bitcoin address generator.
-- `yarn benchmark:sandbox`: To test some implementations.
+- `yarn benchmark:crypto`: Each encoder / algorithm.
+- `yarn benchmark:ranger`: Private key generator.
+- `yarn benchmark:generator`: Bitcoin address generator.
+- `yarn benchmark:sandbox`: To compare different techniques while implementing new stuff.
 
 Notes about the benchmarking:
 - What I call the "ghost execution report" is a single showed execution of the generator with multiple previous executions.
