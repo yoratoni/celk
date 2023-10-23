@@ -67,6 +67,7 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 - [ ] Add the version byte to the Uint32Array without passing by a string.
 - [ ] Calculate the checksum without passing by a string (double SHA-256 checksum).
 - [ ] Allow BASE58 to use an Uint32Array as input.
+- [ ] Use a pre-allocated TypedArray and keep it in memory for the entire execution (reduces memory allocation time).
 
 Classes
 -------
