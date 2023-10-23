@@ -122,24 +122,9 @@ export const measureComputeSpeedFormatted = (
 /**
  * Main benchmarking function, executing cycles of different iterations.
  * @param fn The function to run.
- * @param inputForCorrectness The input for the correctness test.
- * @param expectedForCorrectness The expected output for the correctness test.
  * @param useSandboxCycles Whether to use the sandbox cycles or the normal cycles.
  */
-export const benchmark = (
-    fn: Function,
-    inputForCorrectness?: unknown,
-    expectedForCorrectness?: unknown,
-    useSandboxCycles = false
-): void => {
-    // Correctness test
-    if (inputForCorrectness && expectedForCorrectness) {
-        const res = fn(inputForCorrectness);
-
-        if (res === expectedForCorrectness) logger.info(`[OK]: ${inputForCorrectness} -> ${res}`);
-        else logger.error(`[KO] ${inputForCorrectness} -> ${res} (expected: ${expectedForCorrectness})`);
-    }
-
+export const benchmark = (fn: Function, useSandboxCycles = false): void => {
     const cycles = useSandboxCycles ? BENCHMARK_CONFIG.sandboxCycles : BENCHMARK_CONFIG.cycles;
     const padding = Math.max(...cycles.map((cycle) => cycle.toLocaleString("en-US").length));
 

@@ -99,11 +99,11 @@ export default class SHA256_ENGINE {
 
     /**
      * SHA-256 internal hash computation.
-     * @param m The message to hash (Uint32Array).
+     * @param m The message to hash (Buffer).
      * @param l The length of the message.
      * @returns The hash of the message.
      */
-    private sha256 = (m: Uint32Array, l: number): number[] => {
+    private sha256 = (m: Buffer, l: number): number[] => {
         const HASH = [
             0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
             0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
@@ -185,18 +185,11 @@ export default class SHA256_ENGINE {
 
     /**
      * Execute the SHA-256 algorithm.
-     * @param num The bigint to hash.
-     * @returns The bigint hash of the bigint.
+     * @param cache The Buffer cache to use (input & output).
      */
-    execute = (num: bigint): bigint => {
-        // const uint8Array = hexToUint8Array(hex);
-        // const bigEndianWords = uint8ArrayToBigEndianWords(uint8Array);
+    execute = (cache: Buffer): void => {
 
-        // const hash = this.sha256(bigEndianWords, uint8Array.length * 8);
+        const hash = this.sha256(cache, cache.length * 2);
 
-        // const rawOutput = bigEndianWordsToUint8Array(hash);
-        // return uint8ArrayToHex(rawOutput);
-
-        return 0n;
     };
 }

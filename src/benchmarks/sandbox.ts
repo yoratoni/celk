@@ -36,16 +36,12 @@ const main = () => {
     console.log("Benchmarking testFn_0().");
     benchmark(
         () => testFn_0(406406891762530007676983468101857752779095154063922479276071118116148301075720n),
-        undefined,
-        undefined,
         true
     );
 
     console.log("Benchmarking testFn_1().");
     benchmark(
         () => testFn_1("0x82895e91fe5b276b0880dc7db44989c14000c1eb"),
-        undefined,
-        undefined,
         true
     );
 };

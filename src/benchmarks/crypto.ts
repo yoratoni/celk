@@ -43,6 +43,8 @@ const main = () => {
     //     "0x82895e91fe5b276b0880dc7db44989c14000c1eb"
     // );
 
+
+
     console.log("");
     logger.info("SECP256K1 ALGORITHM (Compressed):");
 
@@ -51,15 +53,12 @@ const main = () => {
 
     benchmark(() => secp256k1Engine.executeCompressed(secp256k1Buffer_C, 1n));
 
-    // Check if the compressed public key is valid.
     if (secp256k1Buffer_C.toString("hex").toUpperCase() ===
-        "02" +
-        "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
-    ) {
-        logger.info(">> Compressed public key check passed.");
-    } else {
-        logger.error(">> Compressed public key check failed.");
-    }
+        "0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
+    ) logger.info(">> Compressed public key check passed.");
+    else logger.error(">> Compressed public key check failed.");
+
+
 
     console.log("");
     logger.info("SECP256K1 ALGORITHM (Uncompressed):");
@@ -69,25 +68,24 @@ const main = () => {
 
     benchmark(() => secp256k1Engine.executeUncompressed(secp256k1Buffer_U, 1n));
 
-    // Check if the uncompressed public key is valid.
     if (secp256k1Buffer_U.toString("hex").toUpperCase() ===
-        "04" +
-        "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798" +
-        "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"
-    ) {
-        logger.info(">> Uncompressed public key check passed.");
-    } else {
-        logger.error(">> Uncompressed public key check failed.");
-    }
+        "0479BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"
+    ) logger.info(">> Uncompressed public key check passed.");
+    else logger.error(">> Uncompressed public key check failed.");
 
-    console.log("");
 
+
+    // console.log("");
     // logger.info("SHA-256 ALGORITHM:");
+
+    // // Input from SECP256K1 algorithm is converted from a buffer to an Uint32Array.
+    // // That will be used for the rest of the steps.
+    // // Input is 33 / 65 bytes long
+    // // Output is 32 bytes long
+    // const sha256Buffer = Buffer.alloc(32);
+
     // benchmark(
-    //     sha256Engine.execute,
-    //     randomHexStrFn,
-    //     "0xABC",
-    //     "0x087d80f7f182dd44f184aa86ca34488853ebcc04f0c60d5294919a466b463831"
+    //     () => sha256Engine.execute()
     // );
 };
 
