@@ -1,9 +1,8 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
 import config from "configs/finder.config";
-import { bigIntToPercentage } from "helpers/maths";
 import Generator from "lib/classes/generator";
 import Ranger from "lib/classes/ranger";
-import { bigintToPrivateKey, formatTimestamp, formatUnitPerTimeUnit } from "utils/formats";
+import { bigIntToPercentage , bigintToPrivateKey, formatTimestamp, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
 
 

@@ -1,13 +1,13 @@
+import {
+    benchmark,
+    generateRandomHexString,
+    generateRandomString
+} from "helpers/benchmark";
 import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/algorithms/SHA256";
 import Ranger from "lib/classes/ranger";
 import BASE58_ENGINE from "lib/encoders/BASE58";
-import {
-    benchmark,
-    generateRandomHexString,
-    generateRandomString
-} from "utils/benchmark";
 import logger from "utils/logger";
 
 

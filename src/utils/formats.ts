@@ -1,3 +1,5 @@
+import { bigIntToTenPow } from "helpers/maths";
+
 /**
  * Converts a bigint to a prefixed private key string (64 characters).
  * @param bigint The bigint to convert.
@@ -122,4 +124,35 @@ export const formatTimestamp = (timestamp: number): string => {
     }:${hours.toString().padStart(2, "0")
     }:${minutes.toString().padStart(2, "0")
     }:${seconds.toString().padStart(2, "0")}`;
+};
+
+/**
+ * Generates a formatted percentage from bigints (including decimal point).
+ * @param numerator The numerator.
+ * @param denominator The denominator.
+ * @param precision The precision (optional, defaults to 2).
+ * @returns The formatted percentage.
+ */
+export const bigIntToPercentage = (numerator: bigint, denominator: bigint, precision = 2): string => {
+    const percentage = Number((numerator * bigIntToTenPow(denominator, precision)) / denominator);
+    const decimalPointPadding = denominator.toString().length - percentage.toString().length - 1;
+
+    // Format it depending on decimal point position
+    let percentageStr = "";
+
+    if (decimalPointPadding >= 0) {
+        // Pad the decimal point with zeros (2 spaces at the beginning for "100.00...%")
+        percentageStr = `  0.${"".padEnd(decimalPointPadding, "0")}${percentage}`;
+    } else {
+        const absOfDecimalPointPadding = Math.abs(decimalPointPadding);
+        const rawPercentageStr = percentage.toString();
+
+        // Insert the decimal point at the right position
+        percentageStr = strInsert(rawPercentageStr, absOfDecimalPointPadding, ".");
+
+        // Add the zeros at the beginning (4 spaces for "100.00...%")
+        percentageStr = percentageStr.padStart(4 + decimalPointPadding + rawPercentageStr.length, " ");
+    }
+
+    return percentageStr;
 };

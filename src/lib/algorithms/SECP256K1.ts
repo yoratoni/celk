@@ -361,21 +361,14 @@ export default class SECP256K1_ENGINE {
 
     /**
      * Execute the SECP256K1 algorithm (compressed key).
+     * @param cache The cache to fill with the public key.
      * @param privateKey The private key.
-     * @returns The public key as a bigint (33 bytes, 1 byte prefix (02 or 03) + 32 bytes X coordinate).
      */
-    executeCompressed = (privateKey: bigint): bigint => {
-        const publicKey = this.G.multiply(privateKey);
+    executeCompressed = (cache: Uint32Array, privateKey: bigint): void => {
+        const points = this.G.multiply(privateKey);
 
-        const testBuffer = Buffer.alloc(64);
-        testBuffer.writeBigInt64BE(publicKey.x);
-        testBuffer.writeBigInt64BE(publicKey.y, 32);
+        // Prefixed with 02 or 03 to indicate that it is compressed (2: Even / 3: Odd)
+        const prefix = points.y & 1n ? 0x03 : 0x02;
 
-        console.log(testBuffer.toString("hex"));
-
-        console.log(publicKey.x, publicKey.y);
-        console.log(publicKey.x.toString(16), publicKey.y.toString(16));
-
-        return (publicKey.y & 1n) === 0n ? 2n << BigInt(8 * 32) | publicKey.x : 3n << BigInt(8 * 32) | publicKey.x;
     };
 }
