@@ -1,4 +1,4 @@
-import { hexToUint8Array } from "utils/conversions";
+import { hexToUint8Array } from "helpers/conversions";
 
 
 /**

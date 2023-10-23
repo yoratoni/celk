@@ -355,40 +355,27 @@ export default class SECP256K1_ENGINE {
     /**
      * Execute the SECP256K1 algorithm (uncompressed key).
      * @param privateKey The private key.
-     * @returns The public key (65 bytes, 1 byte prefix (04) + 32 bytes X coordinate + 32 bytes Y coordinate).
+     * @returns The public key as a bigint (65 bytes, 1 byte prefix (04) + 32 bytes X coordinate + Y coordinate).
      */
-    executeUncompressed = (privateKey: `0x${string}`): `0x${string}` => {
-        const point = this.G.multiply(BigInt(privateKey));
-
-        // X & Y coordinates of the public key (base 16)
-        let x = point.x.toString(16);
-        let y = point.y.toString(16);
-
-        // Fill up the missing zeros
-        while (x.length < 64) x = `0${x}`;
-        while (y.length < 64) y = `0${y}`;
-
-        // Prefixed with 04 to indicate that it is uncompressed
-        return `0x04${x}${y}`;
-    };
+    executeUncompressed = (privateKey: bigint): bigint => 4n << BigInt(8 * 64) | this.G.multiply(privateKey).x << BigInt(8 * 32) | this.G.multiply(privateKey).y;
 
     /**
      * Execute the SECP256K1 algorithm (compressed key).
      * @param privateKey The private key.
-     * @returns The public key (33 bytes, 1 byte prefix + 32 bytes X coordinate).
+     * @returns The public key as a bigint (33 bytes, 1 byte prefix (02 or 03) + 32 bytes X coordinate).
      */
-    execute = (privateKey: `0x${string}`): `0x${string}` => {
-        const point = this.G.multiply(BigInt(privateKey));
+    executeCompressed = (privateKey: bigint): bigint => {
+        const publicKey = this.G.multiply(privateKey);
 
-        // X coordinate of the public key (base 16)
-        let x = point.x.toString(16);
+        const testBuffer = Buffer.alloc(64);
+        testBuffer.writeBigInt64BE(publicKey.x);
+        testBuffer.writeBigInt64BE(publicKey.y, 32);
 
-        // Fill up the missing zeros
-        while (x.length < 64) x = `0${x}`;
+        console.log(testBuffer.toString("hex"));
 
-        // Prefixed with 02 or 03 to indicate that it is compressed (02: Even / 03: Odd)
-        const prefix = point.y % 2n === 0n ? "02" : "03";
+        console.log(publicKey.x, publicKey.y);
+        console.log(publicKey.x.toString(16), publicKey.y.toString(16));
 
-        return `0x${prefix}${x}`;
+        return (publicKey.y & 1n) === 0n ? 2n << BigInt(8 * 32) | publicKey.x : 3n << BigInt(8 * 32) | publicKey.x;
     };
 }

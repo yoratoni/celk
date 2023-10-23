@@ -3,7 +3,7 @@ import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/algorithms/SHA256";
 import BASE58_ENGINE from "lib/encoders/BASE58";
-import { formatTime } from "utils/benchmark";
+import { formatTime } from "utils/formats";
 import logger from "utils/logger";
 
 
@@ -22,7 +22,7 @@ export default class Generator {
     private sha256Engine: SHA256_ENGINE;
     private base58Engine: BASE58_ENGINE;
 
-    private secp256k1ExecuteFn: (privateKey: `0x${string}`) => `0x${string}`;
+    private secp256k1ExecuteFn: (privateKey: bigint) => bigint;
 
 
     /**
@@ -36,7 +36,7 @@ export default class Generator {
         this.base58Engine = new BASE58_ENGINE();
 
         this.secp256k1ExecuteFn = useCompressedPublicKey ?
-            this.secp256k1Engine.execute :
+            this.secp256k1Engine.executeCompressed :
             this.secp256k1Engine.executeUncompressed;
     }
 
@@ -45,7 +45,7 @@ export default class Generator {
      * @param privateKey The private key to generate the address from.
      * @returns The Bitcoin address.
      */
-    executeReport = (privateKey: `0x${string}`) => {
+    executeReport = (privateKey: bigint) => {
         const VALUES: { [key: string]: string; } = {
             pbl: "", sha: "", rip: "",
             vrs: "", sc1: "", sc2: "",
@@ -138,7 +138,7 @@ export default class Generator {
      * @param privateKey The private key to generate the address from.
      * @returns The Bitcoin address.
      */
-    execute = (privateKey: `0x${string}`): string => {
+    execute = (privateKey: bigint): string => {
         const publicKey = this.secp256k1ExecuteFn(privateKey);
         const p1 = `0x00${this.ripemd160Engine.execute(this.sha256Engine.execute(publicKey)).substring(2)}` as `0x${string}`;
         const checksum = this.sha256Engine.execute(this.sha256Engine.execute(p1)).substring(2, 10);

@@ -3,7 +3,7 @@ import {
     hexToUint8Array,
     uint8ArrayToBigEndianWords,
     uint8ArrayToHex
-} from "utils/conversions";
+} from "helpers/conversions";
 
 
 /**
@@ -27,6 +27,9 @@ export default class SHA256_ENGINE {
         0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
         0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
     ];
+
+    /** Reusable W array. */
+    private W: number[] = new Array(64);
 
 
     /**
@@ -96,17 +99,16 @@ export default class SHA256_ENGINE {
 
     /**
      * SHA-256 internal hash computation.
-     * @param m The message to hash (big-endian words array).
+     * @param m The message to hash (Uint32Array).
      * @param l The length of the message.
      * @returns The hash of the message.
      */
-    private sha256 = (m: number[], l: number): number[] => {
+    private sha256 = (m: Uint32Array, l: number): number[] => {
         const HASH = [
             0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
             0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
         ];
 
-        const W = new Array(64);
         let a, b, c, d, e, f, g, h;
         let i, j, t1, t2;
 
@@ -126,17 +128,17 @@ export default class SHA256_ENGINE {
 
             for (j = 0; j < 64; j++) {
                 if (j < 16) {
-                    W[j] = m[j + i];
+                    this.W[j] = m[j + i];
                 } else {
-                    W[j] = this.safeAdd(
+                    this.W[j] = this.safeAdd(
                         this.safeAdd(
                             this.safeAdd(
-                                this.gamma1(W[j - 2]),
-                                W[j - 7]
+                                this.gamma1(this.W[j - 2]),
+                                this.W[j - 7]
                             ),
-                            this.gamma0(W[j - 15])
+                            this.gamma0(this.W[j - 15])
                         ),
-                        W[j - 16]
+                        this.W[j - 16]
                     );
                 }
 
@@ -151,7 +153,7 @@ export default class SHA256_ENGINE {
                         ),
                         this.K[j]
                     ),
-                    W[j]
+                    this.W[j]
                 );
 
                 t2 = this.safeAdd(this.sigma0(a), this.majority(a, b, c));
@@ -183,16 +185,18 @@ export default class SHA256_ENGINE {
 
     /**
      * Execute the SHA-256 algorithm.
-     * @param hex The hexadecimal string to hash.
-     * @returns The hexadecimal hash of the hexadecimal string.
+     * @param num The bigint to hash.
+     * @returns The bigint hash of the bigint.
      */
-    execute = (hex: `0x${string}`): `0x${string}` => {
-        const uint8Array = hexToUint8Array(hex);
-        const bigEndianWords = uint8ArrayToBigEndianWords(uint8Array);
+    execute = (num: bigint): bigint => {
+        // const uint8Array = hexToUint8Array(hex);
+        // const bigEndianWords = uint8ArrayToBigEndianWords(uint8Array);
 
-        const hash = this.sha256(bigEndianWords, uint8Array.length * 8);
+        // const hash = this.sha256(bigEndianWords, uint8Array.length * 8);
 
-        const rawOutput = bigEndianWordsToUint8Array(hash);
-        return uint8ArrayToHex(rawOutput);
+        // const rawOutput = bigEndianWordsToUint8Array(hash);
+        // return uint8ArrayToHex(rawOutput);
+
+        return 0n;
     };
 }

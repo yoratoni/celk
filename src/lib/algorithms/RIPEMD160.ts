@@ -3,7 +3,7 @@ import {
     littleEndianWordsToUint8Array,
     uint8ArrayToHex,
     uint8ArrayToLittleEndianWords
-} from "utils/conversions";
+} from "helpers/conversions";
 
 
 /**

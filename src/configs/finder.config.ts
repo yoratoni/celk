@@ -1,4 +1,4 @@
-import { bigIntPow } from "utils/maths";
+import { bigIntPow } from "helpers/maths";
 
 
 /**
@@ -16,7 +16,6 @@ const FINDER_CONFIG = {
 
     // Finder itself
     progressReportInterval: 256n,                                  // The progress report interval (in iterations).
-    percentagesPrecision: 2                                        // The percentages precision (in decimal places).
 };
 
 

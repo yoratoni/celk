@@ -1,8 +1,8 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
+import { benchmarkRanger } from "helpers/benchmark";
+import { bigIntPow } from "helpers/maths";
 import Ranger from "lib/classes/ranger";
-import { benchmarkRanger } from "utils/benchmark";
 import logger from "utils/logger";
-import { bigIntPow } from "utils/maths";
 
 
 /**

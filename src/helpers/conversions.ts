@@ -1,6 +1,5 @@
 // A library for data conversion.
 
-
 /**
  * Converts a string into an Uint8Array.
  * @param input The string to convert.
@@ -21,6 +20,13 @@ export const hexToUint8Array = (input: `0x${string}`): Uint8Array => Uint8Array.
  * @returns The hexadecimal string.
  */
 export const uint8ArrayToHex = (input: Uint8Array): `0x${string}` => `0x${Buffer.from(input).toString("hex")}`;
+
+/**
+ * Converts an Uint8Array into a bigint.
+ * @param input The Uint8Array to convert.
+ * @returns The bigint.
+ */
+export const uint8ArrayToBigint = (input: Uint8Array): bigint => BigInt(`0x${Buffer.from(input).toString("hex")}`);
 
 /**
  * Converts an Uint8Array to an array of big-endian words.

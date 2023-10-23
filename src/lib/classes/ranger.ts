@@ -1,6 +1,5 @@
 import { randomFillSync } from "crypto";
 
-import RANGER_CONFIG from "configs/ranger.config";
 import logger from "utils/logger";
 
 
@@ -15,7 +14,7 @@ export default class Ranger {
     private currDescending: bigint;
 
     // Full random buffer
-    private tmpBuffer: Buffer = Buffer.alloc(RANGER_CONFIG.fullRandomBufferCacheSize);
+    private tmpBuffer: Buffer = Buffer.alloc(4096);  // Best performance with 4096
     private tmpBufferIndex: number = 0;
 
 
@@ -41,7 +40,7 @@ export default class Ranger {
      * @returns The private key.
      */
     executeFullRandom = (): bigint => {
-        if (this.tmpBufferIndex >= RANGER_CONFIG.fullRandomBufferCacheSize - 1) {
+        if (this.tmpBufferIndex >= 4096 - 1) {
             randomFillSync(this.tmpBuffer);
             this.tmpBufferIndex = 0;
         }

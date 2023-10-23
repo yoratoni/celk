@@ -1,11 +1,22 @@
 // A library for maths.
 
 
-import { strInsert } from "utils/others";
+import { strInsert } from "utils/formats";
 
 
 /**
+ * Get the length of a bigint.
+ * @param input The bigint to get the length of.
+ * @param radix The radix to use (optional, defaults to 10).
+ * @returns The length of the bigint.
+ */
+export const bigIntLength = (input: bigint, radix?: number): number => input.toString(radix).length;
+
+/**
  * Equivalent to `Math.pow` for bigints.
+ * @param base The base.
+ * @param exponent The exponent.
+ * @returns The result of the power.
  */
 export const bigIntPow = (base: bigint, exponent: bigint): bigint => base ** exponent;
 

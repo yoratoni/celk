@@ -10,6 +10,7 @@ Commands
 - `yarn benchmark:crypto`: Benchmarking of the encoders / algorithms.
 - `yarn benchmark:ranger`: Benchmarking of the private key generator.
 - `yarn benchmark:generator`: Benchmarking of the Bitcoin address generator.
+- `yarn benchmark:sandbox`: To test some implementations.
 
 Notes about the benchmarking:
 - What I call the `ghost execution` report is a single showed execution of the generator with multiple previous executions.
@@ -100,6 +101,7 @@ into a valid Bitcoin address, it is necessary to compute `3 * SHA-256 + RIPEMD-1
 
 Sources & Credits
 -----------------
+- [A scheme about public keys to BTC addresses](https://en.bitcoin.it/w/images/en/9/9b/PubKeyToAddr.png).
 - [Bitcoin address generation procedure.](https://www.crypto-lyon.fr/how-to-get-an-address-from-a-private-key-on-bitcoin.html)
 - [More detailed procedure to generate addresses.](https://www.oreilly.com/library/view/mastering-bitcoin-2nd/9781491954379/ch04.html)
 - [Technical background of v1 Bitcoin addresses.](https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses)

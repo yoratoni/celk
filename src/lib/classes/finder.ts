@@ -1,10 +1,10 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
 import config from "configs/finder.config";
+import { bigIntToPercentage } from "helpers/maths";
 import Generator from "lib/classes/generator";
 import Ranger from "lib/classes/ranger";
-import { formatTimestamp, formatUnitPerTimeUnit } from "utils/benchmark";
+import { bigintToPrivateKey, formatTimestamp, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
-import { bigIntToPercentage } from "utils/maths";
 
 
 /**
@@ -19,7 +19,7 @@ export default class Finder {
     private generator: Generator;
     private ranger: Ranger;
 
-    private rangerExecuteFn: () => `0x${string}`;
+    private rangerExecuteFn: () => bigint;
 
 
     /**
@@ -76,7 +76,7 @@ export default class Finder {
 
         // Internal variables
         let address: string;
-        let privateKey: `0x${string}` = "0x0";
+        let privateKey = 0n;
         let found = false;
 
         for (let i = 1n; i <= config.privateKeyHighRange; i++) {
@@ -93,7 +93,7 @@ export default class Finder {
 
                 // Generate the progress part of the report
                 const progress = `${paddedIndex}`;
-                const progressPercentage = bigIntToPercentage(i, config.privateKeyHighRange, config.percentagesPrecision);
+                const progressPercentage = bigIntToPercentage(i, config.privateKeyHighRange, 2);
 
                 // Elapsed time
                 const rawElapsedTime = Date.now() - initialTime;
@@ -120,7 +120,7 @@ export default class Finder {
             logger.error(`Couldn't find the private key of the address '${config.addressToFind}' within the given range!`);
         } else {
             logger.warn(`Found the private key of the address '${config.addressToFind}'!`);
-            logger.warn(`>> Private key: ${privateKey}`);
+            logger.warn(`>> Private key: ${bigintToPrivateKey(privateKey)}`);
         }
 
         console.log("");
