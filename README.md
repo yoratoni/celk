@@ -34,10 +34,15 @@ Benchmark environment:
 | `v1.0.1`    | 792 k/s                    | **Improved benchmarking precision**                               |
 | `v1.0.2`    | 850 k/s                    | **Ghost executions + Better benchmark measures**                  |
 | `v1.0.2b`   | 1.18 Kk/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
-| `v1.0.3`    | N/D                        | **Better private key generator (str -> bigint)**                  |
+| `v1.0.3`    | 1.19 Kk/s                  | **Better private key generator (str -> bigint)**                  |
+| `v1.0.4`    | 1.24 Kk/s                  | **Using a single buffer**                                         |
 
 #### About the single buffer:
-The cache itself is an 154 Bytes Buffer, which is enough to store all the steps of the generator.
+The cache itself is an 154 Bytes buffer, which is enough to store all the steps of the generator.
+
+The goal of the single buffer update is not to directly improve the performance of the generator,
+as the bottleneck is still the ECDSA algorithm, but to at least, not make it the bottleneck later,
+when the ECDSA algorithm will be improved.
 
 Here's a table that show the reserved spaces (in Bytes):
 | Step           | ID     | Start | End   | Length  |
@@ -55,10 +60,10 @@ This table is updated with the latest version of the toolbox.
 
 | Algorithm / encoder | Execution time (ms) | Workload              |
 |---------------------|---------------------|-----------------------|
-| SECP256K1           | 719µs               | 94.16%                |
-| RIPEMD-160          | 13µs                | 1.71%                 |
-| BASE58              | 11µs                | 1.44%                 |
-| SHA-256             | 8µs / 5µs / 5µs     | 1.07% / 0.71% / 0.69% |
+| SECP256K1           | 714µs               | 96.85%                |
+| RIPEMD-160          | 6µs                 | 0.83%                 |
+| BASE58              | 6µs                 | 0.83%                 |
+| SHA-256             | 4µs / 3µs / 3µs     | 0.57% / 0.35% / 0.35% |
 
 #### Note about the SHA-256 algorithm:
 The three numbers correspond to the three SHA-256 executions:

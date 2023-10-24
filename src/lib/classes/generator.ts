@@ -157,15 +157,31 @@ export default class Generator {
     };
 
 
-    // /**
-    //  * Generate a Bitcoin address from a private key.
-    //  * @param privateKey The private key to generate the address from.
-    //  * @returns The Bitcoin address.
-    //  */
-    // execute = (privateKey: bigint): string => {
-    //     const publicKey = this.secp256k1ExecuteFn(privateKey);
-    //     const p1 = `0x00${this.ripemd160Engine.execute(this.sha256Engine.execute(publicKey)).substring(2)}` as `0x${string}`;
-    //     const checksum = this.sha256Engine.execute(this.sha256Engine.execute(p1)).substring(2, 10);
-    //     return this.base58Engine.execute(`${p1}${checksum}` as `0x${string}`);
-    // };
+    /**
+     * Generate a Bitcoin address from a private key.
+     * @param privateKey The private key to generate the address from.
+     * @returns The Bitcoin address.
+     */
+    execute = (privateKey: bigint): string => {
+        // SECP256K1
+        this.secp256k1ExecuteFn(this.cache, privateKey);
+
+        // SHA-256
+        this.sha256Engine.execute(this.cache, [0, this.pkB], 65);
+
+        // RIPEMD-160
+        this.ripemd160Engine.execute(this.cache, [65, 97], 98);
+
+        // Double SHA-256 checksum (step 1)
+        this.sha256Engine.execute(this.cache, [97, 118], 122);
+
+        // Double SHA-256 checksum (step 2 -> overwrites step 1)
+        this.sha256Engine.execute(this.cache, [122, 154], 122);
+
+        // Take the first 4 bytes of the double SHA-256 checksum
+        this.cache.writeUInt32BE(this.cache.readUInt32BE(122), 118);
+
+        // Base58 encoding
+        return this.base58Engine.execute(this.cache, [97, 122]);
+    };
 }

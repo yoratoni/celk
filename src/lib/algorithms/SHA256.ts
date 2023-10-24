@@ -97,7 +97,7 @@ export default class SHA256_ENGINE {
 
     /**
      * SHA-256 internal hash computation.
-     * @param cache The Buffer cache to write to.
+     * @param cache The buffer cache to write to.
      * @param subarray The subarray to use as an input.
      * @param writeToOffset The offset to write to (optional, defaults to 0).
      */

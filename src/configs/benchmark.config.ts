@@ -14,7 +14,7 @@ const BENCHMARK_CONFIG = {
     rangerReportInterval: 200_000n,             // Report interval
 
     // Generator
-    generatorGhostExecutionIterations: 1024,    // Ghost executions to warm up the engine
+    generatorGhostExecutionIterations: 512,     // Ghost executions to warm up the engine
     generatorIterations: 800n,                  // Real executions
     generatorReportInterval: 160n,              // Report interval
 };

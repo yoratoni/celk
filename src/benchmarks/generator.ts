@@ -17,18 +17,18 @@ const main = () => {
     const ranger = new Ranger(0n, 2n ** 256n - 1n);
     const generator = new Generator(true);
 
-    // const randomPrivateKeyFn = () => ranger.executeFullRandom();
+    const randomPrivateKeyFn = () => ranger.executeFullRandom();
 
     console.log("");
     logger.info(`Ghost execution (${ghostIterations}, random private key):`);
     generator.executeReport(ranger.executeFullRandom());
 
-    // console.log("");
-    // logger.info(`Multiple executions (${iterations}, random private key):`);
-    // benchmarkGenerator(
-    //     generator.execute,
-    //     randomPrivateKeyFn
-    // );
+    console.log("");
+    logger.info(`Multiple executions (${iterations}, random private key):`);
+    benchmarkGenerator(
+        generator.execute,
+        randomPrivateKeyFn
+    );
 };
 
 

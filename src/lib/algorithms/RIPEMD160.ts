@@ -127,7 +127,7 @@ export default class RIPEMD160_ENGINE {
 
     /**
      * RIPEMD-160 internal hash computation.
-     * @param cache The Buffer cache to write to.
+     * @param cache The buffer cache to write to.
      * @param subarray The subarray to use as an input.
      * @param writeToOffset The offset to write to (optional, defaults to 0).
      */
@@ -204,7 +204,7 @@ export default class RIPEMD160_ENGINE {
 
     /**
      * Execute the RIPEMD-160 algorithm.
-     * @param cache The Buffer cache to use (input & output).
+     * @param cache The buffer cache to use (input & output).
      * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end] (optional).
      * @param writeToOffset The offset to write to (optional, defaults to 0).
      */

@@ -354,9 +354,9 @@ export default class SECP256K1_ENGINE {
 
     /**
      * Execute the SECP256K1 algorithm (uncompressed key - 65 bytes).
-     * @param cache The Buffer cache to use (input & output).
+     * @param cache The buffer cache to use (input & output).
      * @param privateKey The private key.
-     * @param privateKey The private key as a Node.js Buffer.
+     * @param privateKey The private key as a buffer.
      */
     executeUncompressed = (cache: Buffer, privateKey: bigint): void => {
         const point = this.G.multiply(privateKey);
@@ -377,8 +377,8 @@ export default class SECP256K1_ENGINE {
 
     /**
      * Execute the SECP256K1 algorithm (compressed key - 33 bytes).
-     * @param cache The Buffer cache to use (input & output).
-     * @param privateKey The private key as a Node.js Buffer.
+     * @param cache The buffer cache to use (input & output).
+     * @param privateKey The private key as a buffer.
      */
     executeCompressed = (cache: Buffer, privateKey: bigint): void => {
         const point = this.G.multiply(privateKey);

@@ -1,6 +1,6 @@
 {
     "name": "celk",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "A toolbox to work with Bitcoin addresses & private keys.",
     "repository": "https://github.com/yoratoni/celk",
     "author": "yoratoni <yoratoni.dev@gmail.com>",
