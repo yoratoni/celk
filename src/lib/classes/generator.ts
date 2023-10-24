@@ -1,4 +1,5 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
+import { bigEndianWordsToBuffer } from "helpers/conversions";
 import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/algorithms/SHA256";
@@ -26,7 +27,7 @@ export default class Generator {
     private secp256k1ExecuteFn: (cache: Buffer, privateKey: bigint) => void;
 
     /**
-     * Reusable buffer used as a cache for all operations (1024 bytes).
+     * Reusable buffer used as a cache for all operations (186 bytes).
      *
      * Spaces are reserved as follows (end index exclusive):
      * - `000::065` -> SECP256K1 public key (33/65 bytes).
@@ -35,13 +36,13 @@ export default class Generator {
      * - `098::118` -> RIPEMD-160 output (20 bytes).
      * - `118::122` -> Checksum (4 bytes).
      * - `122::154` -> Double SHA-256 checksum (step 1 -> 32 bytes).
-     * - `154::186` -> Double SHA-256 checksum (step 2 -> 32 bytes).
+     * - `122::154` -> Double SHA-256 checksum (step 2 -> 32 bytes -> overwrites step 1).
      *
      * With:
-     * - `097::118` being the final RIPEMD-160 hash before BASE58 (20 bytes).
+     * - `097::118` being the final RIPEMD-160 hash before double SHA-256 checksum (21 bytes).
      * - `097::122` being the final Bitcoin hash before BASE58 (25 bytes).
      */
-    private cache: Buffer;
+    private cache = Buffer.alloc(154).fill(0);
 
     /** Number of bytes for the public key */
     private pkB: number;
@@ -61,9 +62,6 @@ export default class Generator {
             this.secp256k1Engine.executeCompressed :
             this.secp256k1Engine.executeUncompressed;
 
-        // Initialize the cache with 186 bytes of zeros
-        this.cache = Buffer.alloc(186).fill(0);
-
         // Initialize the public key bytes (33 for compressed, 65 for uncompressed)
         this.pkB = useCompressedPublicKey ? 33 : 65;
     }
@@ -76,14 +74,14 @@ export default class Generator {
     executeReport = (privateKey: bigint) => {
         const VALUES: { [key: string]: string; } = {
             pbl: "", sha: "", rip: "",
-            sc1: "", sc2: "", chk: "TODO",
-            ack: "TODO", adr: "TODO"
+            sc1: "", sc2: "",
+            chk: "", adr: "TODO"
         };
 
         const TABLE = {
             pbl: 0, sha: 0, rip: 0,
-            sc1: 0, sc2: 0, chk: 0,
-            ack: 0, adr: 0
+            sc1: 0, sc2: 0,
+            chk: 0, adr: 0
         };
 
         // Run the ghost execution n times to to warm up the engine
@@ -112,21 +110,17 @@ export default class Generator {
             TABLE.sc1 = performance.now() - sc1Start;
             VALUES.sc1 = this.cache.subarray(122, 154).toString("hex");
 
-            // Double SHA-256 checksum (step 2)
+            // Double SHA-256 checksum (step 2 -> overwrites step 1)
             const sc2Start = performance.now();
-            this.sha256Engine.execute(this.cache, [122, 154], 154);
+            this.sha256Engine.execute(this.cache, [122, 154], 122);
             TABLE.sc2 = performance.now() - sc2Start;
-            VALUES.sc2 = this.cache.subarray(154, 186).toString("hex");
+            VALUES.sc2 = this.cache.subarray(122, 154).toString("hex");
 
-            // // Take the first 4 bytes without the 0x prefix
-            // const chkStart = performance.now();
-            // // TODO
-            // TABLE.chk = performance.now() - chkStart;
-
-            // // Add checksum
-            // const ackStart = performance.now();
-            // // TODO;
-            // TABLE.ack = performance.now() - ackStart;
+            // Take the first 4 bytes of the double SHA-256 checksum
+            const chkStart = performance.now();
+            this.cache.writeUInt32BE(this.cache.readUInt32BE(122), 118);
+            TABLE.chk = performance.now() - chkStart;
+            VALUES.chk = this.cache.subarray(118, 122).toString("hex");
 
             // // Base58 encoding
             // const adrStart = performance.now();

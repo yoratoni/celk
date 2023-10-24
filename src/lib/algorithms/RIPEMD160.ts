@@ -41,8 +41,8 @@ export default class RIPEMD160_ENGINE {
         8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
     ];
 
-    /** Reusable input array (up to 8 bytes for SHA-256 input). */
-    private inputArray: number[] = new Array(8);
+    /** Reusable input array. */
+    private inputArray: number[] = [];
 
     /**
      * Construct a new RIPEMD-160 engine.
@@ -197,6 +197,7 @@ export default class RIPEMD160_ENGINE {
      */
     private bufferToLittleEndianWords = (buffer: Buffer): void => {
         for (let i = 0; i < buffer.length * 8; i += 8) {
+            // Write the byte to the word
             this.inputArray[i >> 5] |= (buffer[i / 8] & 0xFF) << (i % 32);
         }
     };
@@ -208,6 +209,9 @@ export default class RIPEMD160_ENGINE {
      * @param writeToOffset The offset to write to (optional, defaults to 0).
      */
     execute = (cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void => {
+        // Empty the input array by keeping the reference
+        this.inputArray.length = 0;
+
         const subarray = cache.subarray(bytesToTakeFromCache?.[0] || 0, bytesToTakeFromCache?.[1]);
         this.bufferToLittleEndianWords(subarray);
         this.ripemd160(cache, subarray, writeToOffset);

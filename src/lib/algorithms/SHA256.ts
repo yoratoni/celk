@@ -23,8 +23,8 @@ export default class SHA256_ENGINE {
         0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
     ];
 
-    /** Reusable input array (up to 16 bytes for uncompressed public keys). */
-    private inputArray: number[] = new Array(16);
+    /** Reusable input array. */
+    private inputArray: number[] = [];
 
     /** Reusable W array. */
     private W: number[] = new Array(64);
@@ -191,10 +191,9 @@ export default class SHA256_ENGINE {
      */
     private bufferToBigEndianWords = (buffer: Buffer): void => {
         for (let i = 0; i < buffer.length * 8; i += 8) {
+            // Write the byte to the word
             this.inputArray[i >> 5] |= (buffer[i / 8] & 0xFF) << (24 - i % 32);
         }
-
-        console.log(this.inputArray);
     };
 
     /**
@@ -204,6 +203,9 @@ export default class SHA256_ENGINE {
      * @param writeToOffset The offset to write to (optional, defaults to 0).
      */
     execute = (cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void => {
+        // Empty the input array by keeping the reference
+        this.inputArray.length = 0;
+
         const subarray = cache.subarray(bytesToTakeFromCache?.[0] || 0, bytesToTakeFromCache?.[1]);
         this.bufferToBigEndianWords(subarray);
         this.sha256(cache, subarray, writeToOffset);

@@ -36,6 +36,20 @@ Benchmark environment:
 | `v1.0.2b`   | 1.18 Kk/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
 | `v1.0.3`    | N/D                        | **Better private key generator (str -> bigint)**                  |
 
+#### About the single buffer:
+The cache itself is an 154 Bytes Buffer, which is enough to store all the steps of the generator.
+
+Here's a table that show the reserved spaces (in Bytes):
+| Space          | Start | End   | Length  | Description                                                |
+|----------------|-------|-------|---------|------------------------------------------------------------|
+| `SECP256K1`    | `000` | `065` | `65`    | Public key                                                 |
+| `SHA-256`      | `065` | `097` | `32`    | Step 1 hash                                                |
+| `VERSION BYTE` | `097` | `098` | `01`    | Stored before, to be at the right place for the next steps |
+| `RIPEMD-160`   | `098` | `118` | `20`    | Step 2 hash                                                |
+| `CHECKSUM`     | `118` | `122` | `04`    | Stored before, to be at the right place for BASE58         |
+| `DSC - STEP 1` | `122` | `154` | `32`    | Double SHA-256 Checksum (step 1)                           |
+| `DSC - STEP 2` | `122` | `154` | `32`    | Double SHA-256 Checksum (overwriting step 1)               |
+
 ### Benchmarking of the algorithms / encoders (512 ghost executions)
 This table is updated with the latest version of the toolbox.
 
@@ -53,17 +67,6 @@ The three numbers correspond to the three SHA-256 executions:
 
 The first one is slower because the input is coming from the SECP256K1 algorithm,
 which makes it big to process for the SHA-256 algorithm.
-
-### A list of things that I want to do to improve the performances
-- [x] Use a better private key generator (str -> bigint).
-- [x] Use a single Buffer for the entire execution of the generator.
-
-#### About the single buffer:
-The goal is to initialize it once from the public key.
-As the private key & secp256k1 are big integers, we're using strings only once to write into the Buffer cache.
-
-Maybe I'll find a way to write big integers directly into the Buffer cache, I tried some techniques but it was
-much slower than using strings (I think it's called `bit twiddling`, I'll try that again one day)..
 
 ### Benchmarking of the private keys generator (1,000,000 iterations)
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
