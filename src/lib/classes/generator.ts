@@ -1,5 +1,4 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
-import { bigEndianWordsToBuffer } from "helpers/conversions";
 import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/algorithms/SHA256";
@@ -74,14 +73,14 @@ export default class Generator {
     executeReport = (privateKey: bigint) => {
         const VALUES: { [key: string]: string; } = {
             pbl: "", sha: "", rip: "",
-            sc1: "", sc2: "",
-            chk: "", adr: "TODO"
+            sc1: "", sc2: "", chk: "",
+            rad: "", adr: ""
         };
 
         const TABLE = {
             pbl: 0, sha: 0, rip: 0,
-            sc1: 0, sc2: 0,
-            chk: 0, adr: 0
+            sc1: 0, sc2: 0, chk: 0,
+            rad: 0
         };
 
         // Run the ghost execution n times to to warm up the engine
@@ -122,10 +121,11 @@ export default class Generator {
             TABLE.chk = performance.now() - chkStart;
             VALUES.chk = this.cache.subarray(118, 122).toString("hex");
 
-            // // Base58 encoding
-            // const adrStart = performance.now();
-            // // TODO
-            // TABLE.adr = performance.now() - adrStart;
+            // Base58 encoding
+            const adrStart = performance.now();
+            VALUES.adr = this.base58Engine.execute(this.cache, [97, 122]);
+            TABLE.rad = performance.now() - adrStart;
+            VALUES.rad = this.cache.subarray(97, 122).toString("hex");
         }
 
         // Report variables
@@ -154,8 +154,6 @@ export default class Generator {
         logger.info("=".repeat(maxLogLength));
 
         console.log("");
-
-        console.log(this.cache.toString("hex"));
     };
 
 

@@ -1,6 +1,3 @@
-import { hexToUint8Array } from "helpers/conversions";
-
-
 /**
  * A TypeScript implementation of the binary-to-text encoder, BASE58.
  *
@@ -20,15 +17,12 @@ export default class BASE58_ENGINE {
 
     /**
      * Execute the BASE58 encoder.
-     * @param hex The hexadecimal string to hash.
-     * @returns The BASE58 encoded version of hexadecimal string.
+     * @param cache The cache to use as input.
+     * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end].
+     * @returns The BASE58 encoded version of the bytes.
      */
-    execute = (hex: `0x${string}`): string => {
-        if (hex.length === 0) {
-            return "";
-        }
-
-        const bytes = hexToUint8Array(hex);
+    execute = (cache: Buffer, bytesToTakeFromCache: [number, number]): string => {
+        const bytes = cache.subarray(...bytesToTakeFromCache);
         const digits = [0];
 
         for (let i = 0; i < bytes.length; i++) {

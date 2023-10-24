@@ -23,17 +23,3 @@ export const littleEndianWordsToBuffer = (input: Buffer, littleEndianWords: numb
         input[writeToOffset + i / 8] = (littleEndianWords[i >> 5] >>> (i % 32)) & 0xFF;
     }
 };
-
-/**
- * Converts an hexadecimal string into an Uint8Array.
- * @param input The hexadecimal string to convert.
- * @returns The Uint8Array.
- */
-export const hexToUint8Array = (input: `0x${string}`): Uint8Array => Uint8Array.from(Buffer.from(input.substring(2), "hex"));
-
-/**
- * Converts an Uint8Array to an hexadecimal string.
- * @param input The Uint8Array to convert.
- * @returns The hexadecimal string.
- */
-export const uint8ArrayToHex = (input: Uint8Array): `0x${string}` => `0x${Buffer.from(input).toString("hex")}`;
