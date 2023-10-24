@@ -6,7 +6,7 @@ const BENCHMARK_CONFIG = {
     sandboxCycles: [1000, 10_000, 100_000, 1_000_000],
 
     // Cycles for algorithms & encoders benchmarks
-    // cycles: [8, 64, 256, 1024],
+    // cycles: [8, 512, 4096, 65_536],
     cycles: [1],
 
     // Ranger
@@ -14,7 +14,7 @@ const BENCHMARK_CONFIG = {
     rangerReportInterval: 200_000n,             // Report interval
 
     // Generator
-    generatorGhostExecutionIterations: 64,      // Ghost executions to warm up the engine
+    generatorGhostExecutionIterations: 0,       // Ghost executions to warm up the engine
     generatorIterations: 800n,                  // Real executions
     generatorReportInterval: 160n,              // Report interval
 };

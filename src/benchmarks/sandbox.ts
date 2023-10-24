@@ -1,8 +1,6 @@
 /* eslint-disable arrow-body-style */
 
 import { benchmark } from "helpers/benchmark";
-import { hexToUint8Array, uint8ArrayToBigEndianWords } from "helpers/conversions";
-import { bigIntLength } from "helpers/maths";
 
 
 /**
@@ -15,14 +13,14 @@ const buffer = Buffer.alloc(4096);
  * **[FN 0]** Test function to benchmark.
  */
 const testFn_0 = (arg0: bigint) => {
-    return new Uint32Array(buffer.buffer, 0);
+
 };
 
 /**
  * **[FN 1]** Test function to benchmark.
  */
 const testFn_1 = (arg0: `0x${string}`) => {
-    return uint8ArrayToBigEndianWords(hexToUint8Array(arg0));
+
 };
 
 

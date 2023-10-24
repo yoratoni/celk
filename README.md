@@ -36,15 +36,15 @@ Benchmark environment:
 | `v1.0.2b`   | 1.18 Kk/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
 | `v1.0.3`    | N/D                        | **Better private key generator (str -> bigint)**                  |
 
-### Benchmarking of the algorithms / encoders (64 ghost executions)
+### Benchmarking of the algorithms / encoders (512 ghost executions)
 This table is updated with the latest version of the toolbox.
 
-| Algorithm / encoder | Execution time (ms) | Workload                    |
-|---------------------|---------------------|-----------------------------|
-| SECP256K1           | 719µs               | 94.16%                      |
-| RIPEMD-160          | 13µs                | 1.71%                       |
-| BASE58              | 11µs                | 1.44%                       |
-| SHA-256             | 8µs / 5µs / 5µs     | 1.07% / 0.71% / 0.69%       |
+| Algorithm / encoder | Execution time (ms) | Workload              |
+|---------------------|---------------------|-----------------------|
+| SECP256K1           | 719µs               | 94.16%                |
+| RIPEMD-160          | 13µs                | 1.71%                 |
+| BASE58              | 11µs                | 1.44%                 |
+| SHA-256             | 8µs / 5µs / 5µs     | 1.07% / 0.71% / 0.69% |
 
 #### Note about the SHA-256 algorithm:
 The three numbers correspond to the three SHA-256 executions:
@@ -53,6 +53,17 @@ The three numbers correspond to the three SHA-256 executions:
 
 The first one is slower because the input is coming from the SECP256K1 algorithm,
 which makes it big to process for the SHA-256 algorithm.
+
+### A list of things that I want to do to improve the performances
+- [x] Use a better private key generator (str -> bigint).
+- [x] Use a single Buffer for the entire execution of the generator.
+
+#### About the single buffer:
+The goal is to initialize it once from the public key.
+As the private key & secp256k1 are big integers, we're using strings only once to write into the Buffer cache.
+
+Maybe I'll find a way to write big integers directly into the Buffer cache, I tried some techniques but it was
+much slower than using strings (I think it's called `bit twiddling`, I'll try that again one day)..
 
 ### Benchmarking of the private keys generator (1,000,000 iterations)
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
@@ -65,16 +76,6 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 | `v1.0.2`    | 584.4 Kk/s    | 4.75 Mk/s   | 4.65 Mk/s    |
 | `v1.0.2b`   | 592.1 Kk/s    | 4.24 Mk/s   | 4.68 Mk/s    |
 | `v1.0.3`    | 1.21 Mk/s     | 10.66 Mk/s  | 12.71 Mk/s   |
-
-### A list of things that I want to do to improve the performances
-- [x] Use a better private key generator (str -> bigint).
-- [x] Use a single Buffer for the entire execution of the generator.
-- [ ] Allow SHA-256 to use an Buffer as input & output.
-- [ ] Allow RIPEMD-160 to use an Buffer as input & output.
-- [ ] Add the version byte to the Buffer without passing by a string.
-- [ ] Calculate the checksum without passing by a string (double SHA-256 checksum).
-- [ ] Allow BASE58 to use an Buffer as input.
-- [ ] Use a pre-allocated TypedArray and keep it in memory for the entire execution (reduces memory allocation time).
 
 Classes
 -------

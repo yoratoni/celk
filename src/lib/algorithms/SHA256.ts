@@ -1,9 +1,4 @@
-import {
-    bigEndianWordsToUint8Array,
-    hexToUint8Array,
-    uint8ArrayToBigEndianWords,
-    uint8ArrayToHex
-} from "helpers/conversions";
+import { bigEndianWordsToBuffer } from "helpers/conversions";
 
 
 /**
@@ -28,6 +23,9 @@ export default class SHA256_ENGINE {
         0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
     ];
 
+    /** Reusable input array (up to 16 bytes for uncompressed public keys). */
+    private inputArray: number[] = new Array(16);
+
     /** Reusable W array. */
     private W: number[] = new Array(64);
 
@@ -35,7 +33,7 @@ export default class SHA256_ENGINE {
     /**
      * Construct a new SHA-256 engine.
      */
-    constructor() {}
+    constructor() { }
 
 
     /**
@@ -99,24 +97,26 @@ export default class SHA256_ENGINE {
 
     /**
      * SHA-256 internal hash computation.
-     * @param m The message to hash (Buffer).
-     * @param l The length of the message.
-     * @returns The hash of the message.
+     * @param cache The Buffer cache to write to.
+     * @param subarray The subarray to use as an input.
+     * @param writeToOffset The offset to write to (optional, defaults to 0).
      */
-    private sha256 = (m: Buffer, l: number): number[] => {
+    private sha256 = (cache: Buffer, subarray: Buffer, writeToOffset?: number): void => {
         const HASH = [
             0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
             0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
         ];
 
+        const l = subarray.length * 8;
+
         let a, b, c, d, e, f, g, h;
         let i, j, t1, t2;
 
         // Append padding (Big Endian)
-        m[l >> 5] |= 0x80 << (24 - l % 32);
-        m[(((l + 64) >>> 9) << 4) + 15] = l;
+        this.inputArray[l >> 5] |= 0x80 << (24 - l % 32);
+        this.inputArray[(((l + 64) >>> 9) << 4) + 15] = l;
 
-        for (i = 0; i < m.length; i += 16) {
+        for (i = 0; i < this.inputArray.length; i += 16) {
             a = HASH[0];
             b = HASH[1];
             c = HASH[2];
@@ -128,7 +128,7 @@ export default class SHA256_ENGINE {
 
             for (j = 0; j < 64; j++) {
                 if (j < 16) {
-                    this.W[j] = m[j + i];
+                    this.W[j] = this.inputArray[j + i];
                 } else {
                     this.W[j] = this.safeAdd(
                         this.safeAdd(
@@ -180,16 +180,32 @@ export default class SHA256_ENGINE {
             HASH[7] = this.safeAdd(h, HASH[7]);
         }
 
-        return HASH;
+        // Write to cache at offset
+        bigEndianWordsToBuffer(cache, HASH, writeToOffset);
+    };
+
+    /**
+     * Converts an input buffer to an array of big-endian words
+     * using the predefined input array as an output.
+     * @param buffer The input buffer.
+     */
+    private bufferToBigEndianWords = (buffer: Buffer): void => {
+        for (let i = 0; i < buffer.length * 8; i += 8) {
+            this.inputArray[i >> 5] |= (buffer[i / 8] & 0xFF) << (24 - i % 32);
+        }
+
+        console.log(this.inputArray);
     };
 
     /**
      * Execute the SHA-256 algorithm.
-     * @param cache The Buffer cache to use (input & output).
+     * @param cache The cache to use (input & output).
+     * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end] (optional).
+     * @param writeToOffset The offset to write to (optional, defaults to 0).
      */
-    execute = (cache: Buffer): void => {
-
-        const hash = this.sha256(cache, cache.length * 2);
-
+    execute = (cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void => {
+        const subarray = cache.subarray(bytesToTakeFromCache?.[0] || 0, bytesToTakeFromCache?.[1]);
+        this.bufferToBigEndianWords(subarray);
+        this.sha256(cache, subarray, writeToOffset);
     };
 }

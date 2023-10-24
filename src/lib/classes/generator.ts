@@ -22,7 +22,29 @@ export default class Generator {
     private sha256Engine: SHA256_ENGINE;
     private base58Engine: BASE58_ENGINE;
 
-    private secp256k1ExecuteFn: (privateKey: bigint) => bigint;
+    /** Main SECP256K1 function */
+    private secp256k1ExecuteFn: (cache: Buffer, privateKey: bigint) => void;
+
+    /**
+     * Reusable buffer used as a cache for all operations (1024 bytes).
+     *
+     * Spaces are reserved as follows (end index exclusive):
+     * - `000::065` -> SECP256K1 public key (33/65 bytes).
+     * - `065::097` -> SHA-256 output (32 bytes).
+     * - `097::098` -> 0x00 -> Version byte (1 byte).
+     * - `098::118` -> RIPEMD-160 output (20 bytes).
+     * - `118::122` -> Checksum (4 bytes).
+     * - `122::154` -> Double SHA-256 checksum (step 1 -> 32 bytes).
+     * - `154::186` -> Double SHA-256 checksum (step 2 -> 32 bytes).
+     *
+     * With:
+     * - `097::118` being the final RIPEMD-160 hash before BASE58 (20 bytes).
+     * - `097::122` being the final Bitcoin hash before BASE58 (25 bytes).
+     */
+    private cache: Buffer;
+
+    /** Number of bytes for the public key */
+    private pkB: number;
 
 
     /**
@@ -38,6 +60,12 @@ export default class Generator {
         this.secp256k1ExecuteFn = useCompressedPublicKey ?
             this.secp256k1Engine.executeCompressed :
             this.secp256k1Engine.executeUncompressed;
+
+        // Initialize the cache with 186 bytes of zeros
+        this.cache = Buffer.alloc(186).fill(0);
+
+        // Initialize the public key bytes (33 for compressed, 65 for uncompressed)
+        this.pkB = useCompressedPublicKey ? 33 : 65;
     }
 
     /**
@@ -48,62 +76,62 @@ export default class Generator {
     executeReport = (privateKey: bigint) => {
         const VALUES: { [key: string]: string; } = {
             pbl: "", sha: "", rip: "",
-            vrs: "", sc1: "", sc2: "",
-            chk: "", ack: "", adr: ""
+            sc1: "", sc2: "", chk: "TODO",
+            ack: "TODO", adr: "TODO"
         };
 
         const TABLE = {
             pbl: 0, sha: 0, rip: 0,
-            vrs: 0, sc1: 0, sc2: 0,
-            chk: 0, ack: 0, adr: 0
+            sc1: 0, sc2: 0, chk: 0,
+            ack: 0, adr: 0
         };
 
-        // Run the ghost execution 64 times to to warm up the engine
+        // Run the ghost execution n times to to warm up the engine
         for (let i = 0; i <= BENCHMARK_CONFIG.generatorGhostExecutionIterations; i++) {
-            // SECP256K1 (compressed / uncompressed)
+            // SECP256K1
             const pblStart = performance.now();
-            VALUES.pbl = this.secp256k1ExecuteFn(privateKey);
+            this.secp256k1ExecuteFn(this.cache, privateKey);
             TABLE.pbl = performance.now() - pblStart;
+            VALUES.pbl = this.cache.subarray(0, this.pkB).toString("hex");
 
             // SHA-256
             const shaStart = performance.now();
-            VALUES.sha = this.sha256Engine.execute(VALUES.pbl as `0x${string}`);
+            this.sha256Engine.execute(this.cache, [0, this.pkB], 65);
             TABLE.sha = performance.now() - shaStart;
+            VALUES.sha = this.cache.subarray(65, 97).toString("hex");
 
             // RIPEMD-160
             const ripStart = performance.now();
-            VALUES.rip = this.ripemd160Engine.execute(VALUES.sha as `0x${string}`);
+            this.ripemd160Engine.execute(this.cache, [65, 97], 98);
             TABLE.rip = performance.now() - ripStart;
-
-            // Version byte
-            const vrsStart = performance.now();
-            VALUES.vrs = `0x00${VALUES.rip.substring(2)}` as `0x${string}`;
-            TABLE.vrs = performance.now() - vrsStart;
+            VALUES.rip = this.cache.subarray(98, 118).toString("hex");
 
             // Double SHA-256 checksum (step 1)
             const sc1Start = performance.now();
-            VALUES.sc1 = this.sha256Engine.execute(VALUES.vrs as `0x${string}`);
+            this.sha256Engine.execute(this.cache, [97, 118], 122);
             TABLE.sc1 = performance.now() - sc1Start;
+            VALUES.sc1 = this.cache.subarray(122, 154).toString("hex");
 
             // Double SHA-256 checksum (step 2)
             const sc2Start = performance.now();
-            VALUES.sc2 = this.sha256Engine.execute(VALUES.sc1 as `0x${string}`);
+            this.sha256Engine.execute(this.cache, [122, 154], 154);
             TABLE.sc2 = performance.now() - sc2Start;
+            VALUES.sc2 = this.cache.subarray(154, 186).toString("hex");
 
-            // Take the first 4 bytes without the 0x prefix
-            const chkStart = performance.now();
-            VALUES.chk = VALUES.sc2.substring(2, 10);
-            TABLE.chk = performance.now() - chkStart;
+            // // Take the first 4 bytes without the 0x prefix
+            // const chkStart = performance.now();
+            // // TODO
+            // TABLE.chk = performance.now() - chkStart;
 
-            // Add checksum
-            const ackStart = performance.now();
-            VALUES.ack = `${VALUES.vrs}${VALUES.chk}` as `0x${string}`;
-            TABLE.ack = performance.now() - ackStart;
+            // // Add checksum
+            // const ackStart = performance.now();
+            // // TODO;
+            // TABLE.ack = performance.now() - ackStart;
 
-            // Base58 encoding
-            const adrStart = performance.now();
-            VALUES.adr = this.base58Engine.execute(VALUES.ack as `0x${string}`);
-            TABLE.adr = performance.now() - adrStart;
+            // // Base58 encoding
+            // const adrStart = performance.now();
+            // // TODO
+            // TABLE.adr = performance.now() - adrStart;
         }
 
         // Report variables
@@ -130,18 +158,22 @@ export default class Generator {
         logger.info("=".repeat(maxLogLength));
         logger.info(`(...) TIME: ${formatTime(total)} | WORKLOAD: 100.00% | RESULT: ${VALUES.adr.padStart(VALUES.pbl.length, " ")}`);
         logger.info("=".repeat(maxLogLength));
+
+        console.log("");
+
+        console.log(this.cache.toString("hex"));
     };
 
 
-    /**
-     * Generate a Bitcoin address from a private key.
-     * @param privateKey The private key to generate the address from.
-     * @returns The Bitcoin address.
-     */
-    execute = (privateKey: bigint): string => {
-        const publicKey = this.secp256k1ExecuteFn(privateKey);
-        const p1 = `0x00${this.ripemd160Engine.execute(this.sha256Engine.execute(publicKey)).substring(2)}` as `0x${string}`;
-        const checksum = this.sha256Engine.execute(this.sha256Engine.execute(p1)).substring(2, 10);
-        return this.base58Engine.execute(`${p1}${checksum}` as `0x${string}`);
-    };
+    // /**
+    //  * Generate a Bitcoin address from a private key.
+    //  * @param privateKey The private key to generate the address from.
+    //  * @returns The Bitcoin address.
+    //  */
+    // execute = (privateKey: bigint): string => {
+    //     const publicKey = this.secp256k1ExecuteFn(privateKey);
+    //     const p1 = `0x00${this.ripemd160Engine.execute(this.sha256Engine.execute(publicKey)).substring(2)}` as `0x${string}`;
+    //     const checksum = this.sha256Engine.execute(this.sha256Engine.execute(p1)).substring(2, 10);
+    //     return this.base58Engine.execute(`${p1}${checksum}` as `0x${string}`);
+    // };
 }

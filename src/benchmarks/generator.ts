@@ -15,20 +15,20 @@ const main = () => {
     const iterations = `${BENCHMARK_CONFIG.generatorIterations.toLocaleString("en-US")} iterations`;
 
     const ranger = new Ranger(0n, 2n ** 256n - 1n);
-    const generator = new Generator();
+    const generator = new Generator(false);
 
     const randomPrivateKeyFn = () => ranger.executeFullRandom();
 
     console.log("");
     logger.info(`Ghost execution (${ghostIterations}, random private key):`);
-    generator.executeReport(ranger.executeFullRandom());
+    generator.executeReport(1n);
 
-    console.log("");
-    logger.info(`Multiple executions (${iterations}, random private key):`);
-    benchmarkGenerator(
-        generator.execute,
-        randomPrivateKeyFn
-    );
+    // console.log("");
+    // logger.info(`Multiple executions (${iterations}, random private key):`);
+    // benchmarkGenerator(
+    //     generator.execute,
+    //     randomPrivateKeyFn
+    // );
 };
 
 
