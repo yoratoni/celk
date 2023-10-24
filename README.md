@@ -40,15 +40,15 @@ Benchmark environment:
 The cache itself is an 154 Bytes Buffer, which is enough to store all the steps of the generator.
 
 Here's a table that show the reserved spaces (in Bytes):
-| Step           | ID     | Start | End   | Length  | Description                                                |
-|----------------|--------|-------|-------|---------|------------------------------------------------------------|
-| `SECP256K1`    | `PBL`  | `000` | `065` | `65`    | Public key                                                 |
-| `SHA-256`      | `SHA`  | `065` | `097` | `32`    | Step 1 hash                                                |
-| `VERSION BYTE` | `---`  | `097` | `098` | `01`    | Stored before, to be at the right place for the next steps |
-| `RIPEMD-160`   | `RIP`  | `098` | `118` | `20`    | Step 2 hash                                                |
-| `CHECKSUM`     | `CHK`  | `118` | `122` | `04`    | Stored before, to be at the right place for BASE58         |
-| `SHA-256 CHK`  | `SC1`  | `122` | `154` | `32`    | Double SHA-256 Checksum (step 1)                           |
-| `SHA-256 CHK`  | `SC2`  | `122` | `154` | `32`    | Double SHA-256 Checksum (overwriting step 1)               |
+| Step           | ID     | Start | End   | Length  |
+|----------------|--------|-------|-------|---------|
+| `SECP256K1`    | `PBL`  | `000` | `065` | `65`    |
+| `SHA-256`      | `SHA`  | `065` | `097` | `32`    |
+| `VERSION BYTE` | `---`  | `097` | `098` | `01`    |
+| `RIPEMD-160`   | `RIP`  | `098` | `118` | `20`    |
+| `CHECKSUM`     | `CHK`  | `118` | `122` | `04`    |
+| `SHA-256 CHK`  | `SC1`  | `122` | `154` | `32`    |
+| `SHA-256 CHK`  | `SC2`  | `122` | `154` | `32`    |
 
 ### Benchmarking of the algorithms / encoders (512 ghost executions)
 This table is updated with the latest version of the toolbox.

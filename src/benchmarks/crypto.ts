@@ -2,7 +2,6 @@ import { benchmark } from "helpers/benchmark";
 import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/algorithms/SHA256";
-import Ranger from "lib/classes/ranger";
 import BASE58_ENGINE from "lib/encoders/BASE58";
 import logger from "utils/logger";
 
@@ -13,8 +12,6 @@ import logger from "utils/logger";
 const main = () => {
     logger.info("Starting benchmarking of the encoders / algorithms.");
 
-    const ranger = new Ranger(0n, 2n ** 256n);
-
     // Engines
     const secp256k1Engine = new SECP256K1_ENGINE();
     const ripemd160Engine = new RIPEMD160_ENGINE();
@@ -22,16 +19,17 @@ const main = () => {
     const base58Engine = new BASE58_ENGINE();
 
     // Test values
-    const secp256k1_input = 1n;
-    const secp256k1_compressedOutput = "0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798";
-    const secp256k1_uncompressedOutput = "0479BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8";
-    const sha256_output = "50929B74C1A04954B78B4B6035E97A5E078A5A0F28EC96D547BFEE9ACE803AC0";
-    const ripemd160_output = "91B24BF9F5288532960AC687ABB035127B1D28A5";
-
+    const secp256k1_input = 452312848583266388373324160190187140051835877600158453279131187530910662655n;
+    const secp256k1_compressedOutput = "03513BA6E632B03D116D8BD9B96B1E64D39BA15A3CD56E371A2852D1B1331280D3";
+    const secp256k1_uncompressedOutput = "04513BA6E632B03D116D8BD9B96B1E64D39BA15A3CD56E371A2852D1B1331280D3547D6E528F9CDACE903849DF2E9D7AAF5DAE533949F6DF47327E3DD1EF6679E3";
+    const sha256_output = "776FED35A3E1CF19DC0FDED97AF8BE0898B061559F994C75D7CE8129A3462E92";
+    const ripemd160_output = "621BCDEADDACC0C8EF640D0B44C5C45CC0DCA1F0";
+    const rawAddress = "00621BCDEADDACC0C8EF640D0B44C5C45CC0DCA1F083731B27";
+    const address = "19wkXgUJjR82ZSdn9gufFNRM2f2A3aAMuQ";
 
 
     console.log("");
-    logger.info("SECP256K1 ALGORITHM (Compressed):");
+    logger.info("SECP256K1 ALGORITHM (Compressed, largest private key on 62 bytes):");
 
     // Compressed public key is 33 bytes long.
     const secp256k1Buffer_C = Buffer.alloc(33);
@@ -45,9 +43,8 @@ const main = () => {
     benchmark(() => secp256k1Engine.executeCompressed(secp256k1Buffer_C, secp256k1_input));
 
 
-
     console.log("");
-    logger.info("SECP256K1 ALGORITHM (Uncompressed):");
+    logger.info("SECP256K1 ALGORITHM (Uncompressed, largest private key on 62 bytes):");
 
     // Uncompressed public key is 65 bytes long.
     const secp256k1Buffer_U = Buffer.alloc(65);
@@ -59,7 +56,6 @@ const main = () => {
     else logger.error(">> Uncompressed public key check failed.");
 
     benchmark(() => secp256k1Engine.executeUncompressed(secp256k1Buffer_U, secp256k1_input));
-
 
 
     console.log("");
@@ -83,7 +79,6 @@ const main = () => {
     benchmark(() => sha256Engine.execute(sha256Buffer));
 
 
-
     console.log("");
     logger.info("RIPEMD-160 ALGORITHM:");
 
@@ -104,15 +99,23 @@ const main = () => {
     benchmark(() => ripemd160Engine.execute(ripemd160Buffer));
 
 
+    console.log("");
+    logger.info("BASE58 ENCODER:");
 
+    // Input from raw address.
+    // Input is always 25 bytes long
+    const base58Buffer = Buffer.alloc(25);
 
-    // logger.info("BASE58 BINARY-TO-TEXT ENCODER:");
-    // benchmark(
-    //     base58Engine.execute,
-    //     randomStrFn,
-    //     "0xABC",
-    //     "3x"
-    // );
+    // Raw address into base58Buffer
+    base58Buffer.write(rawAddress, "hex");
+
+    // Executes once for checking the output
+    const addr = base58Engine.execute(base58Buffer, [0, 25]);
+
+    if (addr === address) logger.info(">> RIPEMD-160 check passed.");
+    else logger.error(">> RIPEMD-160 check failed.");
+
+    benchmark(() => base58Engine.execute(base58Buffer, [0, 25]));
 };
 
 
