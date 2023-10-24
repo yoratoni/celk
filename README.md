@@ -1,5 +1,5 @@
 # Celk
-A toolbox to work with Bitcoin addresses & private keys.
+A toolbox to work with Bitcoin addresses & private keys, entirely written in TypeScript..
 
 Commands
 --------
