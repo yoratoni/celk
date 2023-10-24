@@ -44,7 +44,7 @@ The goal of the single buffer update is not to directly improve the performance 
 as the bottleneck is still the ECDSA algorithm, but to at least, not make it the bottleneck later,
 when the ECDSA algorithm will be improved.
 
-Here's a table that show the reserved spaces (in bytes):
+Here's a table that shows the reserved spaces (in bytes):
 | Step           | ID     | Start index | End index   | Length |
 |----------------|--------|-------------|-------------|--------|
 | `SECP256K1`    | `PBL`  | `000`       | `065`       | `65`   |
@@ -72,6 +72,15 @@ The three numbers correspond to the three SHA-256 executions:
 
 The first one is slower because the input is coming from the SECP256K1 algorithm,
 which makes it big to process for the SHA-256 algorithm.
+
+### Work on the secp256k1 algorithm
+The secp256k1 algorithm is the bottleneck of the toolbox for now, I'm gonna work on it to improve its performance.
+
+Here's a table that shows the execution time of the secp256k1 algorithm, with different implementations:
+| Description                                                                                      | Execution time |
+|--------------------------------------------------------------------------------------------------|----------------|
+| Implementation by [Paul Miller](https://github.com/paulmillr/noble-secp256k1/blob/main/index.ts) | 714µs          |
+| My implementation: `v1.0.0`                                                                      | -----          |
 
 ### Benchmarking of the private keys generator (1,000,000 iterations)
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
