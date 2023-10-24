@@ -38,22 +38,22 @@ Benchmark environment:
 | `v1.0.4`    | 1.24 Kk/s                  | **Using a single buffer**                                         |
 
 #### About the single buffer:
-The cache itself is an 154 Bytes buffer, which is enough to store all the steps of the generator.
+The cache itself is a 154 bytes buffer, which is enough to store all the steps of the generator.
 
 The goal of the single buffer update is not to directly improve the performance of the generator,
 as the bottleneck is still the ECDSA algorithm, but to at least, not make it the bottleneck later,
 when the ECDSA algorithm will be improved.
 
-Here's a table that show the reserved spaces (in Bytes):
-| Step           | ID     | Start | End   | Length  |
-|----------------|--------|-------|-------|---------|
-| `SECP256K1`    | `PBL`  | `000` | `065` | `65`    |
-| `SHA-256`      | `SHA`  | `065` | `097` | `32`    |
-| `VERSION BYTE` | `---`  | `097` | `098` | `01`    |
-| `RIPEMD-160`   | `RIP`  | `098` | `118` | `20`    |
-| `CHECKSUM`     | `CHK`  | `118` | `122` | `04`    |
-| `SHA-256 CHK`  | `SC1`  | `122` | `154` | `32`    |
-| `SHA-256 CHK`  | `SC2`  | `122` | `154` | `32`    |
+Here's a table that show the reserved spaces (in bytes):
+| Step           | ID     | Start index | End index   | Length |
+|----------------|--------|-------------|-------------|--------|
+| `SECP256K1`    | `PBL`  | `000`       | `065`       | `65`   |
+| `SHA-256`      | `SHA`  | `065`       | `097`       | `32`   |
+| `VERSION BYTE` | `---`  | `097`       | `098`       | `01`   |
+| `RIPEMD-160`   | `RIP`  | `098`       | `118`       | `20`   |
+| `CHECKSUM`     | `CHK`  | `118`       | `122`       | `04`   |
+| `SHA-256 CHK`  | `SC1`  | `122`       | `154`       | `32`   |
+| `SHA-256 CHK`  | `SC2`  | `122`       | `154`       | `32`   |
 
 ### Benchmarking of the algorithms / encoders (512 ghost executions)
 This table is updated with the latest version of the toolbox.
