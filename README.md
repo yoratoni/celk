@@ -40,7 +40,7 @@ Benchmark environment:
 #### About the single buffer:
 The cache itself is a 154 bytes buffer, which is enough to store all the steps of the generator.
 
-The goal of the single buffer update is not to directly improve the performance of the generator,
+The goal of the single buffer update is not to directly improve the performance of the generator (for now),
 as the bottleneck is still the ECDSA algorithm, but to at least, not make it the bottleneck later,
 when the ECDSA algorithm will be improved.
 
