@@ -1,5 +1,3 @@
-import { bigIntToTenPow } from "helpers/maths";
-
 /**
  * Converts a bigint to a prefixed private key string (64 characters).
  * @param bigint The bigint to convert.
@@ -67,51 +65,53 @@ export const formatUnitPerTimeUnit = (nb: number, unit = "k", timeUnit: string |
 };
 
 /**
- * Format a time in ms, into a responsive string with the en-US locale format.
- * @param time The time in ms.
- * @param decimalsForSeconds The number of decimals to use for seconds (optional, defaults to 2).
- * @param decimalsForMilliseconds The number of decimals to use for milliseconds (optional, defaults to 3).
- * @param decimalsForMicroseconds The number of decimals to use for microseconds (optional, defaults to 3).
+ * Format a high-resolution time, into a responsive string with the en-US locale format.
+ * @param hrtime The hrtime in nanoseconds.
  * @returns The formatted string.
  */
-export const formatTime = (
-    time: number,
-    decimalsForSeconds = 2,
-    decimalsForMilliseconds = 3,
-    decimalsForMicroseconds = 0
+export const formatHRTime = (
+    hrtime: bigint
 ): string => {
-    const padding = 11;
+    const padding = 10;
 
     // Seconds
-    if (time >= 1000) {
-        return `${(time / 1000).toLocaleString("en-US", {
-            minimumFractionDigits: decimalsForSeconds,
-            maximumFractionDigits: decimalsForSeconds
+    if (hrtime >= 1_000_000_000_000n) {
+        return `${(Number(hrtime) / 1_000_000_000).toLocaleString("en-US", {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
         })}s`.padStart(padding, " ");
     }
 
     // Milliseconds
-    if (time >= 1) {
-        return `${time.toLocaleString("en-US", {
-            minimumFractionDigits: decimalsForMilliseconds,
-            maximumFractionDigits: decimalsForMilliseconds
+    if (hrtime >= 1_000_000n) {
+        return `${(Number(hrtime) / 1_000_000).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         })}ms`.padStart(padding, " ");
     }
 
     // Microseconds
-    return `${(time * 1000).toLocaleString("en-US", {
-        minimumFractionDigits: decimalsForMicroseconds,
-        maximumFractionDigits: decimalsForMicroseconds
-    })}μs`.padStart(padding, " ");
+    if (hrtime >= 1000n) {
+        return `${(Number(hrtime) / 1000).toLocaleString("en-US", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        })}µs`.padStart(padding, " ");
+    }
+
+    // Nanoseconds
+    return `${hrtime.toLocaleString("en-US", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    })}ns`.padStart(padding, " ");
 };
 
 /**
- * Format a timestamp in the format: "xxxx:xx:xx:xx".
- * @param timestamp the timestamp to format (in ms).
+ * Format a duration in the format: "xxxx:xx:xx:xx".
+ * @param duration the duration to format (in ms).
  * @returns The formatted string.
  */
-export const formatTimestamp = (timestamp: number): string => {
-    let seconds = Math.floor((timestamp) / 1000);
+export const formatDuration = (duration: number): string => {
+    let seconds = Math.floor((duration) / 1000);
     let minutes = Math.floor(seconds / 60);
     let hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
@@ -124,35 +124,4 @@ export const formatTimestamp = (timestamp: number): string => {
     }:${hours.toString().padStart(2, "0")
     }:${minutes.toString().padStart(2, "0")
     }:${seconds.toString().padStart(2, "0")}`;
-};
-
-/**
- * Generates a formatted percentage from bigints (including decimal point).
- * @param numerator The numerator.
- * @param denominator The denominator.
- * @param precision The precision (optional, defaults to 2).
- * @returns The formatted percentage.
- */
-export const bigIntToPercentage = (numerator: bigint, denominator: bigint, precision = 2): string => {
-    const percentage = Number((numerator * bigIntToTenPow(denominator, precision)) / denominator);
-    const decimalPointPadding = denominator.toString().length - percentage.toString().length - 1;
-
-    // Format it depending on decimal point position
-    let percentageStr = "";
-
-    if (decimalPointPadding >= 0) {
-        // Pad the decimal point with zeros (2 spaces at the beginning for "100.00...%")
-        percentageStr = `  0.${"".padEnd(decimalPointPadding, "0")}${percentage}`;
-    } else {
-        const absOfDecimalPointPadding = Math.abs(decimalPointPadding);
-        const rawPercentageStr = percentage.toString();
-
-        // Insert the decimal point at the right position
-        percentageStr = strInsert(rawPercentageStr, absOfDecimalPointPadding, ".");
-
-        // Add the zeros at the beginning (4 spaces for "100.00...%")
-        percentageStr = percentageStr.padStart(4 + decimalPointPadding + rawPercentageStr.length, " ");
-    }
-
-    return percentageStr;
 };

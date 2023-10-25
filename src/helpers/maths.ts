@@ -1,5 +1,9 @@
 // A library for maths.
 
+import { strInsert } from "utils/formats";
+import logger from "utils/logger";
+
+
 /**
  * Get the length of a bigint.
  * @param input The bigint to get the length of.
@@ -23,6 +27,52 @@ export const bigIntPow = (base: bigint, exponent: bigint): bigint => base ** exp
  * @returns The power of 10.
  */
 export const bigIntToTenPow = (input: bigint, incr = 0): bigint => {
-    const len = input.toString().length - 1;
+    const len = input.toString().length;
     return 10n ** BigInt(len + incr);
+};
+
+/**
+ * Bigint division with decimal point at a specific precision (truncates the result).
+ * @param numerator The numerator.
+ * @param denominator The denominator.
+ * @param precision The precision (optional, defaults to 2).
+ * @returns The result of the division with decimal point.
+ */
+export const bigIntDiv = (numerator: bigint, denominator: bigint, precision = 2): number => {
+    if (precision > 15) {
+        logger.warn("Precision cannot be greater than 15. Using 15 instead.");
+        precision = 15;
+    }
+
+    // Get the percentage with no decimal point
+    const percentageWithNoDP = Number((numerator * bigIntToTenPow(denominator, precision)) / denominator);
+    const percentageWithNoDPStr = percentageWithNoDP.toString();
+
+    // Get the position of the decimal point
+    const pos = (bigIntLength(denominator) - percentageWithNoDPStr.length + precision);
+
+    let percentageStr = "";
+
+    // Notes:
+    // - If pos < 0, result is >= 1
+    // - If pos >= 0, result is < 1
+
+    if (pos < 0) {
+        // Insert the decimal point at the right position
+        percentageStr = strInsert(percentageWithNoDPStr, Math.abs(pos), ".");
+
+        // Trim the amount of decimals to the precision after the decimal point
+        percentageStr = percentageStr.substring(0, percentageStr.indexOf(".") + precision + 1);
+    } else {
+        // Prevents to have "0." as a result when precision is 0
+        if (precision === 0) {
+            percentageStr = "0";
+        } else {
+            // Pad the decimal point with zeros
+            // And trim the result to the precision
+            percentageStr = `0.${"".padEnd(pos, "0")}${percentageWithNoDP.toString().substring(0, precision)}`;
+        }
+    }
+
+    return parseFloat(percentageStr);
 };

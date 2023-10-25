@@ -1,8 +1,9 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
 import config from "configs/finder.config";
+import { bigIntDiv } from "helpers/maths";
 import Generator from "lib/classes/generator";
 import Ranger from "lib/classes/ranger";
-import { bigIntToPercentage , bigintToPrivateKey, formatTimestamp, formatUnitPerTimeUnit } from "utils/formats";
+import { bigintToPrivateKey, formatDuration, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
 
 
@@ -92,17 +93,21 @@ export default class Finder {
 
                 // Generate the progress part of the report
                 const progress = `${paddedIndex}`;
-                const progressPercentage = bigIntToPercentage(i, config.privateKeyHighRange, 2);
+                const progressPercentage = bigIntDiv(i, config.privateKeyHighRange, 15) * 100;
+                const paddedProgressPercentage = progressPercentage.toLocaleString("en-US", {
+                    minimumFractionDigits: 15,
+                    maximumFractionDigits: 15
+                }).padStart(19, " ");
 
                 // Elapsed time
                 const rawElapsedTime = Date.now() - initialTime;
-                const elapsedTime = formatTimestamp(rawElapsedTime);
+                const elapsedTime = formatDuration(rawElapsedTime);
 
                 // Calculate the average addresses per second
                 const aps = formatUnitPerTimeUnit(Math.round(Number(i) / (rawElapsedTime / 1000)));
 
                 // Log the progress
-                logger.info(`PRG: ${progress} | PRP: ${progressPercentage}% | APS: ${aps} | TIME: ${elapsedTime}`);
+                logger.info(`PRG: ${progress} | PRP: ${paddedProgressPercentage}% | APS: ${aps} | TIME: ${elapsedTime}`);
             }
 
             // Check if the address matches the one we're looking for

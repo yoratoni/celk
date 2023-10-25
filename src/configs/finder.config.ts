@@ -15,7 +15,7 @@ const FINDER_CONFIG = {
     privateKeyHighRange: bigIntPow(2n, 66n) - 1n,                  // The private key high range (inclusive).
 
     // Finder itself
-    progressReportInterval: 256n,                                  // The progress report interval (in iterations).
+    progressReportInterval: 55_000n,                                  // The progress report interval (in iterations).
 };
 
 

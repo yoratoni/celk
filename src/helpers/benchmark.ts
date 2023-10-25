@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import BENCHMARK_CONFIG from "configs/benchmark.config";
-import { bigintToPrivateKey, formatTime, formatTimestamp, formatUnitPerTimeUnit } from "utils/formats";
+import { bigintToPrivateKey, formatDuration, formatHRTime, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
 
 
@@ -8,10 +8,10 @@ import logger from "utils/logger";
  * The type of the result of the measureComputeSpeed function.
  */
 type isComputeSpeedRes = {
-    total: number;
-    average: number;
-    slowest: number;
-    fastest: number;
+    total: bigint;
+    average: bigint;
+    slowest: bigint;
+    fastest: bigint;
 };
 
 /**
@@ -53,40 +53,40 @@ export const generateRandomHexString = (length: number): `0x${string}` => {
 export const generateRandomPrivateKey = (): bigint => BigInt(generateRandomHexString(64));
 
 /**
- * Measures the time it takes to run a function (1 iteration) in milliseconds.
+ * Measures the time it takes to run a function (1 iteration) in nanoseconds.
  * @param fn The function to run.
- * @returns The time it took to run the function in milliseconds.
+ * @returns The time it took to run the function in nanoseconds.
  */
-export const measureComputeSpeedOnce = (fn: Function): number => {
+export const measureComputeSpeedOnce = (fn: Function): bigint => {
     // Access function result to prevent optimization
     let res = undefined;
 
-    const start = performance.now();
+    const start = process.hrtime.bigint();
     res = fn();
-    const end = performance.now();
+    const end = process.hrtime.bigint();
 
     // Prevent unused variable warning
-    if (res === "EMPTY_FIELD") return 0;
+    if (res === "EMPTY_FIELD") return 0n;
 
     return end - start;
 };
 
 /**
- * Measures the time it takes to run a function (multiple iterations) in milliseconds.
+ * Measures the time it takes to run a function (multiple iterations) in nanoseconds.
  * @param fn The function to run.
  * @param iterations The number of iterations to run the function.
- * @returns The time it took to run the function in milliseconds (average).
+ * @returns The time it took to run the function in nanoseconds (average).
  */
 export const measureComputeSpeed = (
     fn: Function,
     iterations: number
 ): isComputeSpeedRes => {
-    let total = 0;
-    let slowest = 0;
-    let fastest = Infinity;
+    let total = 0n;
+    let slowest = 0n;
+    let fastest = 10n ** 64n;
 
     for (let i = 0; i < iterations; i++) {
-        const tmpSpd = measureComputeSpeedOnce(fn) as number;
+        const tmpSpd = measureComputeSpeedOnce(fn) as bigint;
         total += tmpSpd;
 
         if (tmpSpd > slowest) slowest = tmpSpd;
@@ -95,7 +95,7 @@ export const measureComputeSpeed = (
 
     return {
         total,
-        average: total / iterations,
+        average: total / BigInt(iterations),
         slowest,
         fastest
     };
@@ -115,7 +115,7 @@ export const measureComputeSpeedFormatted = (
     const res = measureComputeSpeed(fn, iterations);
 
     logger.info(
-        `[${iterations.toLocaleString("en-US").padStart(padding, " ")}] AVG: ${formatTime(res.average)} | TOTAL: ${formatTime(res.total)}`
+        `[${iterations.toLocaleString("en-US").padStart(padding, " ")}] AVG: ${formatHRTime(res.average)} | TOTAL: ${formatHRTime(res.total)}`
     );
 };
 
@@ -237,6 +237,6 @@ export const benchmarkRanger = (fn: () => bigint): void => {
     const totalPkpsFormatted = formatUnitPerTimeUnit(totalPkps, "k", null);
 
     logger.info("=".repeat(lengths.total));
-    logger.info(`AVG: ${avgPkpsFormatted.padStart(lengths.progress, " ")} | ALPK: ${totalPkpsFormatted} | Time: ${formatTimestamp(Date.now() - initialTime).padStart(lengths.pk + 2, " ")}`);
+    logger.info(`AVG: ${avgPkpsFormatted.padStart(lengths.progress, " ")} | ALPK: ${totalPkpsFormatted} | Time: ${formatDuration(Date.now() - initialTime).padStart(lengths.pk + 2, " ")}`);
     logger.info("=".repeat(lengths.total));
 };

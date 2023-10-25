@@ -1,9 +1,10 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
+import { bigIntDiv } from "helpers/maths";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
 import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
-import { formatTime } from "utils/formats";
+import { formatHRTime } from "utils/formats";
 import logger from "utils/logger";
 
 
@@ -77,71 +78,71 @@ export default class Generator {
             rad: "", adr: ""
         };
 
-        const TABLE = {
-            pbl: 0, sha: 0, rip: 0,
-            sc1: 0, sc2: 0, chk: 0,
-            rad: 0
+        const TIMES = {
+            pbl: 0n, sha: 0n, rip: 0n,
+            sc1: 0n, sc2: 0n, chk: 0n,
+            rad: 0n
         };
 
         // Run the ghost execution n times to to warm up the engine
         for (let i = 0; i <= BENCHMARK_CONFIG.generatorGhostExecutionIterations; i++) {
             // SECP256K1
-            const pblStart = performance.now();
+            const pblStart = process.hrtime.bigint();
             this.secp256k1ExecuteFn(this.cache, privateKey);
-            TABLE.pbl = performance.now() - pblStart;
+            TIMES.pbl = process.hrtime.bigint() - pblStart;
             VALUES.pbl = this.cache.subarray(0, this.pkB).toString("hex");
 
             // SHA-256
-            const shaStart = performance.now();
+            const shaStart = process.hrtime.bigint();
             this.sha256Engine.execute(this.cache, [0, this.pkB], 65);
-            TABLE.sha = performance.now() - shaStart;
+            TIMES.sha = process.hrtime.bigint() - shaStart;
             VALUES.sha = this.cache.subarray(65, 97).toString("hex");
 
             // RIPEMD-160
-            const ripStart = performance.now();
+            const ripStart = process.hrtime.bigint();
             this.ripemd160Engine.execute(this.cache, [65, 97], 98);
-            TABLE.rip = performance.now() - ripStart;
+            TIMES.rip = process.hrtime.bigint() - ripStart;
             VALUES.rip = this.cache.subarray(98, 118).toString("hex");
 
             // Double SHA-256 checksum (step 1)
-            const sc1Start = performance.now();
+            const sc1Start = process.hrtime.bigint();
             this.sha256Engine.execute(this.cache, [97, 118], 122);
-            TABLE.sc1 = performance.now() - sc1Start;
+            TIMES.sc1 = process.hrtime.bigint() - sc1Start;
             VALUES.sc1 = this.cache.subarray(122, 154).toString("hex");
 
             // Double SHA-256 checksum (step 2 -> overwrites step 1)
-            const sc2Start = performance.now();
+            const sc2Start = process.hrtime.bigint();
             this.sha256Engine.execute(this.cache, [122, 154], 122);
-            TABLE.sc2 = performance.now() - sc2Start;
+            TIMES.sc2 = process.hrtime.bigint() - sc2Start;
             VALUES.sc2 = this.cache.subarray(122, 154).toString("hex");
 
             // Take the first 4 bytes of the double SHA-256 checksum
-            const chkStart = performance.now();
+            const chkStart = process.hrtime.bigint();
             this.cache.writeUInt32BE(this.cache.readUInt32BE(122), 118);
-            TABLE.chk = performance.now() - chkStart;
+            TIMES.chk = process.hrtime.bigint() - chkStart;
             VALUES.chk = this.cache.subarray(118, 122).toString("hex");
 
             // Base58 encoding
-            const adrStart = performance.now();
+            const adrStart = process.hrtime.bigint();
             VALUES.adr = this.base58Engine.execute(this.cache, [97, 122]);
-            TABLE.rad = performance.now() - adrStart;
+            TIMES.rad = process.hrtime.bigint() - adrStart;
             VALUES.rad = this.cache.subarray(97, 122).toString("hex");
         }
 
         // Report variables
-        const total = Object.values(TABLE).reduce((a, b) => a + b, 0);
+        const totalTime = Object.values(TIMES).reduce((a, b) => a + b);
         let maxLogLength = 0;
 
         // Report
-        for (const [key, value] of Object.entries(TABLE)) {
-            const rawPercentage = (value / total) * 100;
-            const percentage = rawPercentage.toFixed(2).padStart(6, " ");
+        for (const [key, value] of Object.entries(TIMES)) {
+            const percentage = bigIntDiv(value, totalTime, 6) * 100;
+            const paddedPercentage = percentage.toFixed(2).padStart(6, " ");
 
-            const log = `(${key.toUpperCase()}) TIME: ${formatTime(value)} | WORKLOAD: ${percentage}% | SAMPLE: ${VALUES[key].padStart(VALUES.pbl.length, " ")}`;
+            const log = `(${key.toUpperCase()}) TIME: ${formatHRTime(value)} | WORKLOAD: ${paddedPercentage}% | SAMPLE: ${`0x${VALUES[key]}`.padStart(VALUES.pbl.length + 2, " ")}`;
 
-            if (rawPercentage >= 50) logger.error(log);
-            else if (rawPercentage >= 8) logger.warn(log);
-            else if (rawPercentage >= 1) logger.debug(log);
+            if (percentage >= 50) logger.error(log);
+            else if (percentage >= 8) logger.warn(log);
+            else if (percentage >= 1) logger.debug(log);
             else logger.info(log);
 
             // Get the longest log length
@@ -150,7 +151,7 @@ export default class Generator {
 
         // Conclusion
         logger.info("=".repeat(maxLogLength));
-        logger.info(`(...) TIME: ${formatTime(total)} | WORKLOAD: 100.00% | RESULT: ${VALUES.adr.padStart(VALUES.pbl.length, " ")}`);
+        logger.info(`(...) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: ${VALUES.adr.padStart(VALUES.pbl.length + 2, " ")}`);
         logger.info("=".repeat(maxLogLength));
 
         console.log("");

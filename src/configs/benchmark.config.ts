@@ -15,8 +15,8 @@ const BENCHMARK_CONFIG = {
 
     // Generator
     generatorGhostExecutionIterations: 512,     // Ghost executions to warm up the engine
-    generatorIterations: 800n,                  // Real executions
-    generatorReportInterval: 160n,              // Report interval
+    generatorIterations: 20_000n,               // Real executions
+    generatorReportInterval: 2000n,             // Report interval
 };
 
 
