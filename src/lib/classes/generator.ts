@@ -1,8 +1,8 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
-import RIPEMD160_ENGINE from "lib/algorithms/RIPEMD160";
-import SECP256K1_ENGINE from "lib/algorithms/SECP256K1";
-import SHA256_ENGINE from "lib/algorithms/SHA256";
-import BASE58_ENGINE from "lib/encoders/BASE58";
+import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
+import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
+import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
+import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
 import { formatTime } from "utils/formats";
 import logger from "utils/logger";
 
