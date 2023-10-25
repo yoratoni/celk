@@ -56,8 +56,7 @@ const FINDER_CONFIG = {
 };
 ```
 - If the public key is known, you can specify it in the `publicKeyToFind` field, it will overwrite the `addressToFind` field.
-  In the other case, the finder will try to find the address by applying all normal steps to the private key (except after the coming
-  update, where the address will be reversed to its RIPEMD-160 hash, to gain a bit of k/s).
+  In the other case, the finder will try to find the address by applying all normal steps to the private key.
   The private key can start with `0x`, it is supported.
 - The `useCompressedPublicKey` field is used to specify if the public key should be compressed or not, it is generally compressed.
 - The `privateKeyGenMode` can be set to `FULL_RANDOM`, `ASCENDING` or `DESCENDING`. Ascending & descending will start from the beginning
