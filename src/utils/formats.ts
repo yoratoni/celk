@@ -23,7 +23,7 @@ export const strInsert = (str: string, index: number, value: string): string => 
  * @param timeUnit The time unit to use (optional, defaults to "s" for seconds).
  */
 export const formatUnitPerTimeUnit = (nb: number, unit = "k", timeUnit: string | null = "s"): string => {
-    const padding = 11;
+    const padding = 10;
     const strUnit = timeUnit ? `${unit}/${timeUnit}` : unit;
 
     // T = tera

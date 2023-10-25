@@ -211,7 +211,7 @@ export const benchmarkRanger = (fn: () => bigint): void => {
             const paddedIndex = i.toLocaleString("en-US").padStart(formattedHighRange.length, " ");
 
             // Generate the progress part of the report
-            const progress = `${paddedIndex} / ${formattedHighRange}`;
+            const progress = `${paddedIndex}`;
             lengths.progress = progress.length;
 
             // Elapsed time
