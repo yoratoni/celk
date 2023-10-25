@@ -63,7 +63,7 @@ const FINDER_CONFIG = {
 / end of the private key range, and full random will generate.. a random number in the range.
 - If you do not know the private key range, just let them like this, these are the default values for the `secp256k1` algorithm.
 - The report interval is the number of iterations to skip before showing the report, if you produces 55 Kk/s, and set it at `55_000n`,
-it will show the report every second.
+  it will show the report every second.
 
 Performances
 ------------
