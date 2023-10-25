@@ -34,13 +34,13 @@ const main = () => {
     // Compressed public key is 33 bytes long.
     const secp256k1Buffer_C = Buffer.alloc(33);
 
+    benchmark(() => secp256k1Engine.executeCompressed(secp256k1Buffer_C, secp256k1_input));
+
     // Executes once for checking the output
     secp256k1Engine.executeCompressed(secp256k1Buffer_C, secp256k1_input);
 
     if (secp256k1Buffer_C.toString("hex").toUpperCase() === secp256k1_compressedOutput) logger.info(">> Compressed public key check passed.");
     else logger.error(">> Compressed public key check failed.");
-
-    benchmark(() => secp256k1Engine.executeCompressed(secp256k1Buffer_C, secp256k1_input));
 
 
     console.log("");
@@ -49,13 +49,13 @@ const main = () => {
     // Uncompressed public key is 65 bytes long.
     const secp256k1Buffer_U = Buffer.alloc(65);
 
+    benchmark(() => secp256k1Engine.executeUncompressed(secp256k1Buffer_U, secp256k1_input));
+
     // Executes once for checking the output
     secp256k1Engine.executeUncompressed(secp256k1Buffer_U, secp256k1_input);
 
     if (secp256k1Buffer_U.toString("hex").toUpperCase() === secp256k1_uncompressedOutput) logger.info(">> Uncompressed public key check passed.");
     else logger.error(">> Uncompressed public key check failed.");
-
-    benchmark(() => secp256k1Engine.executeUncompressed(secp256k1Buffer_U, secp256k1_input));
 
 
     console.log("");
@@ -69,14 +69,14 @@ const main = () => {
     // Secp256k1 uncompressed output into sha256Buffer
     sha256Buffer.write(secp256k1_uncompressedOutput, "hex");
 
+    benchmark(() => sha256Engine.execute(sha256Buffer));
+
     // Executes once for checking the output
     sha256Engine.execute(sha256Buffer);
 
     // Subarray is used to get the first 32 bytes of the output (256 bits)
     if (sha256Buffer.subarray(0, 32).toString("hex").toUpperCase() === sha256_output) logger.info(">> SHA-256 check passed.");
     else logger.error(">> SHA-256 check failed.");
-
-    benchmark(() => sha256Engine.execute(sha256Buffer));
 
 
     console.log("");
@@ -89,14 +89,14 @@ const main = () => {
     // SHA-256 output into ripemd160Buffer
     ripemd160Buffer.write(sha256_output, "hex");
 
+    benchmark(() => ripemd160Engine.execute(ripemd160Buffer));
+
     // Executes once for checking the output
     ripemd160Engine.execute(ripemd160Buffer);
 
     // Subarray is used to get the first 20 bytes of the output (160 bits)
     if (ripemd160Buffer.subarray(0, 20).toString("hex").toUpperCase() === ripemd160_output) logger.info(">> RIPEMD-160 check passed.");
     else logger.error(">> RIPEMD-160 check failed.");
-
-    benchmark(() => ripemd160Engine.execute(ripemd160Buffer));
 
 
     console.log("");
@@ -109,13 +109,13 @@ const main = () => {
     // Raw address into base58Buffer
     base58Buffer.write(rawAddress, "hex");
 
+    benchmark(() => base58Engine.encode(base58Buffer, [0, 25]));
+
     // Encode once for checking the output
     const addr = base58Engine.encode(base58Buffer, [0, 25]);
 
     if (addr === address) logger.info(">> RIPEMD-160 check passed.");
     else logger.error(">> RIPEMD-160 check failed.");
-
-    benchmark(() => base58Engine.encode(base58Buffer, [0, 25]));
 };
 
 

@@ -10,6 +10,7 @@ import logger from "utils/logger";
 type isComputeSpeedRes = {
     total: bigint;
     average: bigint;
+    speed: bigint;
     slowest: bigint;
     fastest: bigint;
 };
@@ -75,7 +76,7 @@ export const measureComputeSpeedOnce = (fn: Function): bigint => {
  * Measures the time it takes to run a function (multiple iterations) in nanoseconds.
  * @param fn The function to run.
  * @param iterations The number of iterations to run the function.
- * @returns The time it took to run the function in nanoseconds (average).
+ * @returns Time statistics about the function.
  */
 export const measureComputeSpeed = (
     fn: Function,
@@ -96,6 +97,7 @@ export const measureComputeSpeed = (
     return {
         total,
         average: total / BigInt(iterations),
+        speed: 1_000_000_000n / (total / BigInt(iterations)),
         slowest,
         fastest
     };
@@ -115,7 +117,7 @@ export const measureComputeSpeedFormatted = (
     const res = measureComputeSpeed(fn, iterations);
 
     logger.info(
-        `[${iterations.toLocaleString("en-US").padStart(padding, " ")}] AVG: ${formatHRTime(res.average)} | TOTAL: ${formatHRTime(res.total)}`
+        `[${iterations.toLocaleString("en-US").padStart(padding, " ")}] AVG: ${formatHRTime(res.average)} | TOTAL: ${formatHRTime(res.total)} | SLOWEST: ${formatHRTime(res.slowest)} | FASTEST: ${formatHRTime(res.fastest)} | SPEED: ${res.speed.toLocaleString("en-US")} op/s`
     );
 };
 
