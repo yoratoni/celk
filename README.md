@@ -138,7 +138,8 @@ into a valid Bitcoin address, it is necessary to compute `3 * SHA-256 + RIPEMD-1
 Sources & Credits
 -----------------
 - [A scheme about public keys to BTC addresses](https://en.bitcoin.it/w/images/en/9/9b/PubKeyToAddr.png).
-- [Bitcoin address generation procedure.](https://www.crypto-lyon.fr/how-to-get-an-address-from-a-private-key-on-bitcoin.html)
-- [More detailed procedure to generate addresses.](https://www.oreilly.com/library/view/mastering-bitcoin-2nd/9781491954379/ch04.html)
-- [Technical background of v1 Bitcoin addresses.](https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses)
-- [Bitcoin address testing tool from uncompressed private keys.](https://gobittest.appspot.com/Address).
+- [Bitcoin address generation procedure](https://www.crypto-lyon.fr/how-to-get-an-address-from-a-private-key-on-bitcoin.html).
+- [More detailed procedure to generate addresses](https://www.oreilly.com/library/view/mastering-bitcoin-2nd/9781491954379/ch04.html).
+- [Technical background of v1 Bitcoin addresses](https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses).
+- [Bitcoin address testing tool from uncompressed private keys](https://gobittest.appspot.com/Address).
+- [This post about ECC by Andrea Corbellini](https://andrea.corbellini.name/2015/05/17/elliptic-curve-cryptography-a-gentle-introduction/?ref=hackernoon.com).
