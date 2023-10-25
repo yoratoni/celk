@@ -15,6 +15,52 @@ export default class BASE58_ENGINE {
     constructor() { }
 
     /**
+     * Execute the BASE58 decoder.
+     * @param input The BASE58 encoded string to decode.
+     * @returns The decoded bytes.
+     */
+    decode = (input: string): Buffer => {
+        if (input.length === 0) {
+            return Buffer.alloc(0);
+        }
+
+        const bytes = [0];
+
+        for (let i = 0; i < input.length; i++) {
+            const c = input[i];
+            const digit = this.ALPHABET.indexOf(c);
+
+            if (digit < 0) {
+                throw new Error(`[BASE58] Invalid character found: ${c}`);
+            }
+
+            for (let j = 0; j < bytes.length; j++) {
+                bytes[j] *= this.BASE;
+            }
+
+            bytes[0] += digit;
+            let carry = 0;
+
+            for (let k = 0; k < bytes.length; k++) {
+                bytes[k] += carry;
+                carry = bytes[k] >> 8;
+                bytes[k] &= 0xff;
+            }
+
+            while (carry) {
+                bytes.push(carry & 0xff);
+                carry >>= 8;
+            }
+        }
+
+        for (let i = 0; input[i] === "1" && i < input.length - 1; i++) {
+            bytes.push(0);
+        }
+
+        return Buffer.from(bytes.reverse());
+    };
+
+    /**
      * Execute the BASE58 encoder.
      * @param cache The cache to use as input.
      * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end].

@@ -71,6 +71,9 @@ const main = () => {
 
     benchmark(() => sha256Engine.execute(sha256Buffer));
 
+    // Secp256k1 uncompressed output into sha256Buffer
+    sha256Buffer.write(secp256k1_uncompressedOutput, "hex");
+
     // Executes once for checking the output
     sha256Engine.execute(sha256Buffer);
 
@@ -90,6 +93,9 @@ const main = () => {
     ripemd160Buffer.write(sha256_output, "hex");
 
     benchmark(() => ripemd160Engine.execute(ripemd160Buffer));
+
+    // SHA-256 output into ripemd160Buffer
+    ripemd160Buffer.write(sha256_output, "hex");
 
     // Executes once for checking the output
     ripemd160Engine.execute(ripemd160Buffer);
@@ -114,8 +120,8 @@ const main = () => {
     // Encode once for checking the output
     const addr = base58Engine.encode(base58Buffer, [0, 25]);
 
-    if (addr === address) logger.info(">> RIPEMD-160 check passed.");
-    else logger.error(">> RIPEMD-160 check failed.");
+    if (addr === address) logger.info(">> BASE58 check passed.");
+    else logger.error(">> BASE58 check failed.");
 };
 
 

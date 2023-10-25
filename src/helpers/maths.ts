@@ -1,5 +1,3 @@
-// A library for maths.
-
 import { strInsert } from "utils/formats";
 import logger from "utils/logger";
 

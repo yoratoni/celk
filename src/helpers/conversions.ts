@@ -1,5 +1,3 @@
-// A library for data conversion.
-
 /**
  * Writes an array of big-endian words into a buffer.
  * @param input The buffer.

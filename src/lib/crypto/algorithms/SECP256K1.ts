@@ -114,7 +114,7 @@ const splitScalarEndo = (k: bigint): {
     if (k1neg) k1 = n - k1;
     if (k2neg) k2 = n - k2;
 
-    if (k1 > POW_2_128 || k2 > POW_2_128) throw new Error("splitScalarEndo: Endomorphism failed");
+    if (k1 > POW_2_128 || k2 > POW_2_128) throw new Error("[SECP256K1] splitScalarEndo: Endomorphism failed");
 
     return { k1neg, k1, k2neg, k2 };
 };
