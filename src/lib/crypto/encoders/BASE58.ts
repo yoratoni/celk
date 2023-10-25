@@ -12,8 +12,7 @@ export default class BASE58_ENGINE {
     /**
      * Construct a new BASE58 engine.
      */
-    constructor() {}
-
+    constructor() { }
 
     /**
      * Execute the BASE58 encoder.
@@ -21,7 +20,7 @@ export default class BASE58_ENGINE {
      * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end].
      * @returns The BASE58 encoded version of the bytes.
      */
-    execute = (cache: Buffer, bytesToTakeFromCache: [number, number]): string => {
+    encode = (cache: Buffer, bytesToTakeFromCache: [number, number]): string => {
         const bytes = cache.subarray(...bytesToTakeFromCache);
         const digits = [0];
 

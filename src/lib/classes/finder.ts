@@ -1,5 +1,5 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
-import config from "configs/finder.config";
+import FINDER_CONFIG from "configs/finder.config";
 import { bigIntDiv } from "helpers/maths";
 import Generator from "lib/classes/generator";
 import Ranger from "lib/classes/ranger";
@@ -20,16 +20,18 @@ export default class Finder {
     private ranger: Ranger;
 
     private rangerExecuteFn: () => bigint;
+    private publicKeyOnly: boolean;
+    private findField: string;
 
 
     /**
      * Construct a new Bitcoin address finder (based on FINDER_CONFIG).
      */
     constructor() {
-        this.generator = new Generator(config.useCompressedPublicKey);
-        this.ranger = new Ranger(config.privateKeyLowRange, config.privateKeyHighRange);
+        this.generator = new Generator(FINDER_CONFIG.useCompressedPublicKey);
+        this.ranger = new Ranger(FINDER_CONFIG.privateKeyLowRange, FINDER_CONFIG.privateKeyHighRange);
 
-        switch (config.privateKeyGenMode) {
+        switch (FINDER_CONFIG.privateKeyGenMode) {
             case "FULL_RANDOM":
                 this.rangerExecuteFn = this.ranger.executeFullRandom;
                 break;
@@ -42,23 +44,34 @@ export default class Finder {
             default:
                 this.rangerExecuteFn = this.ranger.executeAscending;
         }
+
+        if (typeof FINDER_CONFIG.publicKeyToFind === "string" && (FINDER_CONFIG.publicKeyToFind as string).length > 0) {
+            this.publicKeyOnly = true;
+            const publicKey = FINDER_CONFIG.publicKeyToFind as string;
+
+            if (publicKey.startsWith("0x")) this.findField = publicKey.substring(2);
+            else this.findField = publicKey;
+        } else {
+            this.publicKeyOnly = false;
+            this.findField = FINDER_CONFIG.addressToFind as string;
+        }
     }
 
     private initialReport = (): void => {
         logger.info("Starting the Bitcoin address finder.");
-        logger.info(`>> Private key generation mode: '${config.privateKeyGenMode}'`);
-        logger.info(`>> Progress report interval: ${config.progressReportInterval.toLocaleString("en-US")} iterations`);
-        logger.info(`>> Use compressed public key: ${config.useCompressedPublicKey}`);
+        logger.info(`>> Private key generation mode: '${FINDER_CONFIG.privateKeyGenMode}'`);
+        logger.info(`>> Progress report interval: ${FINDER_CONFIG.progressReportInterval.toLocaleString("en-US")} iterations`);
+        logger.info(`>> Use compressed public key: ${FINDER_CONFIG.useCompressedPublicKey}`);
 
         console.log("");
-        logger.info(`Finding the private key of the address '${config.addressToFind}' within the range:`);
-        logger.info(`>> Low: ${config.privateKeyLowRange.toLocaleString("en-US")}`);
-        logger.info(`>> High: ${config.privateKeyHighRange.toLocaleString("en-US")}`);
+        logger.info(`Finding the private key of '${this.findField}' within the range:`);
+        logger.info(`>> Low: ${FINDER_CONFIG.privateKeyLowRange.toLocaleString("en-US")}`);
+        logger.info(`>> High: ${FINDER_CONFIG.privateKeyHighRange.toLocaleString("en-US")}`);
 
         console.log("");
         const ghostIterations = `${BENCHMARK_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
         logger.info(`Ghost execution (${ghostIterations}):`);
-        this.generator.executeReport(this.ranger.executeFullRandom());
+        this.generator.executeReport(this.ranger.executeFullRandom(), this.publicKeyOnly);
 
         console.log("");
         logger.info("Beginning the search...");
@@ -75,25 +88,25 @@ export default class Finder {
         const initialTime = Date.now();
 
         // Internal variables
-        let address: string;
+        let field: string;
         let privateKey = 0n;
         let found = false;
 
-        for (let i = 1n; i <= config.privateKeyHighRange; i++) {
+        for (let i = 1n; i <= FINDER_CONFIG.privateKeyHighRange; i++) {
             privateKey = this.rangerExecuteFn();
-            address = this.generator.execute(privateKey);
+            field = this.generator.execute(privateKey, this.publicKeyOnly);
 
             // Report progress
-            if (i % config.progressReportInterval === 0n) {
+            if (i % FINDER_CONFIG.progressReportInterval === 0n) {
                 // Formatted high range
-                const formattedHighRange = config.privateKeyHighRange.toLocaleString("en-US");
+                const formattedHighRange = FINDER_CONFIG.privateKeyHighRange.toLocaleString("en-US");
 
                 // Pad the index with zeros to match the high range length
                 const paddedIndex = i.toLocaleString("en-US").padStart(formattedHighRange.length, " ");
 
                 // Generate the progress part of the report
                 const progress = `${paddedIndex}`;
-                const rawProgress = bigIntDiv(i, config.privateKeyHighRange, 15).result;
+                const rawProgress = bigIntDiv(i, FINDER_CONFIG.privateKeyHighRange, 15).result;
                 const paddedProgressPercentage = rawProgress.toLocaleString("en-US", {
                     minimumFractionDigits: 15,
                     maximumFractionDigits: 15
@@ -110,8 +123,8 @@ export default class Finder {
                 logger.info(`PRG: ${progress} | PRP: ${paddedProgressPercentage}% | APS: ${aps} | TIME: ${elapsedTime}`);
             }
 
-            // Check if the address matches the one we're looking for
-            if (address === config.addressToFind) {
+            // Check if the field matches the one we're looking for
+            if (field === this.findField) {
                 found = true;
                 break;
             };
@@ -121,9 +134,9 @@ export default class Finder {
 
         // Report the result
         if (!found) {
-            logger.error(`Couldn't find the private key of the address '${config.addressToFind}' within the given range!`);
+            logger.error(`Couldn't find the private key of '${this.findField}' within the given range!`);
         } else {
-            logger.warn(`Found the private key of the address '${config.addressToFind}'!`);
+            logger.warn(`Found the private key of '${this.findField}'!`);
             logger.warn(`>> Private key: ${bigintToPrivateKey(privateKey)}`);
         }
 

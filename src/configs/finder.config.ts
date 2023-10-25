@@ -1,21 +1,31 @@
-import { bigIntPow } from "helpers/maths";
+import Configs from "types/configs";
 
 
 /**
  * Bitcoin private key finder configuration.
  */
-const FINDER_CONFIG = {
-    // Address generation
-    addressToFind: "13zb1hQbWVsc2S7ZTZnP2G4undNNpdh5so",           // The address to find.
-    useCompressedPublicKey: true,                                  // Whether to use the compressed public key or not.
+const FINDER_CONFIG: Configs.IsFinderConfig = {
+    // The public key to find the private key for if available.
+    publicKeyToFind: null,
 
-    // Private key generation
-    privateKeyGenMode: "FULL_RANDOM",                              // The private key generation mode (FULL_RANDOM, ASCENDING, DESCENDING).
-    privateKeyLowRange: bigIntPow(2n, 65n),                        // The private key low range (inclusive).
-    privateKeyHighRange: bigIntPow(2n, 66n) - 1n,                  // The private key high range (inclusive).
+    // The address to find the private key for (if publicKeyToFind is null).
+    addressToFind: "13zb1hQbWVsc2S7ZTZnP2G4undNNpdh5so",
 
-    // Finder itself
-    progressReportInterval: 55_000n,                                  // The progress report interval (in iterations).
+    // Use compressed public key (true) or uncompressed (false).
+    // BTC addresses generally uses compressed keys.
+    useCompressedPublicKey: true,
+
+    // The private key generation mode (FULL_RANDOM, ASCENDING, DESCENDING).
+    privateKeyGenMode: "FULL_RANDOM",
+
+    // The private key low range (inclusive).
+    privateKeyLowRange: 1n,
+
+    // The private key high range (inclusive).
+    privateKeyHighRange: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn,
+
+    // The progress report interval (in number of iterations).
+    progressReportInterval: 1024n,
 };
 
 

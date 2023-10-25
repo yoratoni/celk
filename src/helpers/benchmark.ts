@@ -137,8 +137,9 @@ export const benchmark = (fn: Function, useSandboxCycles = false): void => {
  * Benchmarking function specifically made for the Bitcoin address generator.
  * @param fn The function to run.
  * @param privateKeyFn The function to get the input from at each iteration.
+ * @param publicKeyOnly Whether to only generate the public key or not (optional, defaults to false).
  */
-export const benchmarkGenerator = (fn: Function, privateKeyFn: Function): void => {
+export const benchmarkGenerator = (fn: Function, privateKeyFn: Function, publicKeyOnly = false): void => {
     let input = privateKeyFn();
 
     // Statistics
@@ -148,7 +149,7 @@ export const benchmarkGenerator = (fn: Function, privateKeyFn: Function): void =
     let res = undefined;
 
     for (let i = 1n; i <= BENCHMARK_CONFIG.generatorIterations; i++) {
-        res = fn(input);
+        res = fn(input, publicKeyOnly);
 
         if (i % BENCHMARK_CONFIG.generatorReportInterval === 0n) {
             // Formatted high range
@@ -167,7 +168,7 @@ export const benchmarkGenerator = (fn: Function, privateKeyFn: Function): void =
             const aps = formatUnitPerTimeUnit(Math.round(Number(i) / (rawElapsedTime / 1000)));
 
             // Log the report
-            logger.info(`PRG: ${progress} | APS: ${aps} | Sample: ${res}`);
+            logger.info(`PRG: ${progress} | APS: ${aps} | Sample: ${publicKeyOnly ? "0x" : ""}${res}`);
 
             // Change the input
             input = privateKeyFn();

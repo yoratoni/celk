@@ -109,13 +109,13 @@ const main = () => {
     // Raw address into base58Buffer
     base58Buffer.write(rawAddress, "hex");
 
-    // Executes once for checking the output
-    const addr = base58Engine.execute(base58Buffer, [0, 25]);
+    // Encode once for checking the output
+    const addr = base58Engine.encode(base58Buffer, [0, 25]);
 
     if (addr === address) logger.info(">> RIPEMD-160 check passed.");
     else logger.error(">> RIPEMD-160 check failed.");
 
-    benchmark(() => base58Engine.execute(base58Buffer, [0, 25]));
+    benchmark(() => base58Engine.encode(base58Buffer, [0, 25]));
 };
 
 

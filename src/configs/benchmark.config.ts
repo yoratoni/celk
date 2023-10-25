@@ -1,7 +1,10 @@
+import Configs from "types/configs";
+
+
 /**
  * Benchmark configuration.
  */
-const BENCHMARK_CONFIG = {
+const BENCHMARK_CONFIG: Configs.IsBenchmarkConfig = {
     // Cycles for the sandbox
     sandboxCycles: [1000, 10_000, 100_000, 1_000_000],
 
@@ -15,8 +18,8 @@ const BENCHMARK_CONFIG = {
 
     // Generator
     generatorGhostExecutionIterations: 512,     // Ghost executions to warm up the engine
-    generatorIterations: 20_000n,               // Real executions
-    generatorReportInterval: 2000n,             // Report interval
+    generatorIterations: 1024n,                 // Real executions
+    generatorReportInterval: 128n,              // Report interval
 };
 
 

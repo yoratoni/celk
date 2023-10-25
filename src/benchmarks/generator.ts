@@ -20,11 +20,21 @@ const main = () => {
     const randomPrivateKeyFn = () => ranger.executeFullRandom();
 
     console.log("");
-    logger.info(`Ghost execution (${ghostIterations}, random private key):`);
+    logger.info(`Ghost execution (${ghostIterations}, random private key, public key only):`);
+    generator.executeReport(ranger.executeFullRandom(), true);
+
+    logger.info(`Ghost execution (${ghostIterations}, random private key, address):`);
     generator.executeReport(ranger.executeFullRandom());
 
+    logger.info(`Multiple executions (${iterations}, random private key, public key only):`);
+    benchmarkGenerator(
+        generator.execute,
+        randomPrivateKeyFn,
+        true
+    );
+
     console.log("");
-    logger.info(`Multiple executions (${iterations}, random private key):`);
+    logger.info(`Multiple executions (${iterations}, random private key, address):`);
     benchmarkGenerator(
         generator.execute,
         randomPrivateKeyFn
