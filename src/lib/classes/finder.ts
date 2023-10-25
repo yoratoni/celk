@@ -46,7 +46,7 @@ export default class Finder {
 
     private initialReport = (): void => {
         logger.info("Starting the Bitcoin address finder.");
-        logger.info(`>> Private key generation mode: ${config.privateKeyGenMode}`);
+        logger.info(`>> Private key generation mode: '${config.privateKeyGenMode}'`);
         logger.info(`>> Progress report interval: ${config.progressReportInterval.toLocaleString("en-US")} iterations`);
         logger.info(`>> Use compressed public key: ${config.useCompressedPublicKey}`);
 
@@ -93,8 +93,8 @@ export default class Finder {
 
                 // Generate the progress part of the report
                 const progress = `${paddedIndex}`;
-                const progressPercentage = bigIntDiv(i, config.privateKeyHighRange, 15) * 100;
-                const paddedProgressPercentage = progressPercentage.toLocaleString("en-US", {
+                const rawProgress = bigIntDiv(i, config.privateKeyHighRange, 15).result;
+                const paddedProgressPercentage = rawProgress.toLocaleString("en-US", {
                     minimumFractionDigits: 15,
                     maximumFractionDigits: 15
                 }).padStart(19, " ");

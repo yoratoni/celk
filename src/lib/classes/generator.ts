@@ -135,7 +135,7 @@ export default class Generator {
 
         // Report
         for (const [key, value] of Object.entries(TIMES)) {
-            const percentage = bigIntDiv(value, totalTime, 6) * 100;
+            const percentage = bigIntDiv(value, totalTime, 6).result * 100;
             const paddedPercentage = percentage.toFixed(2).padStart(6, " ");
 
             const log = `(${key.toUpperCase()}) TIME: ${formatHRTime(value)} | WORKLOAD: ${paddedPercentage}% | SAMPLE: ${`0x${VALUES[key]}`.padStart(VALUES.pbl.length + 2, " ")}`;

@@ -36,16 +36,19 @@ export const bigIntToTenPow = (input: bigint, incr = 0): bigint => {
  * @param numerator The numerator.
  * @param denominator The denominator.
  * @param precision The precision (optional, defaults to 2).
- * @returns The result of the division with decimal point.
+ * @returns An object with the result as a float (limited in precision) and as a string (unlimited precision).
  */
-export const bigIntDiv = (numerator: bigint, denominator: bigint, precision = 2): number => {
+export const bigIntDiv = (numerator: bigint, denominator: bigint, precision = 2): {
+    result: number;
+    str: string
+} => {
     if (precision > 15) {
         logger.warn("Precision cannot be greater than 15. Using 15 instead.");
         precision = 15;
     }
 
     // Get the percentage with no decimal point
-    const percentageWithNoDP = Number((numerator * bigIntToTenPow(denominator, precision)) / denominator);
+    const percentageWithNoDP = (numerator * bigIntToTenPow(denominator, precision)) / denominator;
     const percentageWithNoDPStr = percentageWithNoDP.toString();
 
     // Get the position of the decimal point
@@ -69,10 +72,12 @@ export const bigIntDiv = (numerator: bigint, denominator: bigint, precision = 2)
             percentageStr = "0";
         } else {
             // Pad the decimal point with zeros
-            // And trim the result to the precision
-            percentageStr = `0.${"".padEnd(pos, "0")}${percentageWithNoDP.toString().substring(0, precision)}`;
+            percentageStr = `0.${"".padEnd(pos, "0")}${percentageWithNoDP.toString()}`;
         }
     }
 
-    return parseFloat(percentageStr);
+    return {
+        result: Number(percentageStr),
+        str: percentageStr
+    };
 };
