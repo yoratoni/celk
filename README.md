@@ -135,7 +135,7 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 
 Future updates
 --------------
-### 02: Work on the secp256k1 algorithm
+### Work on the secp256k1 algorithm
 The secp256k1 algorithm is the bottleneck of the toolbox for now, I'm gonna work on it to improve its performance.
 
 Here's a table that shows the execution time of the secp256k1 algorithm, with different implementations:
