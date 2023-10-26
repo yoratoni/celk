@@ -135,6 +135,15 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 
 Future updates
 --------------
+### From TS to AssemblyScript
+Multiple things will be written in AssemblyScript, to improve the performance of the toolbox.
+
+Including:
+- The Ranger (private key generator).
+- The Generator (and all its algorithms / encoders).
+
+The goal is to put the main loop inside of the AssemblyScript code, and return results at every report interval.
+
 ### Work on the secp256k1 algorithm
 The secp256k1 algorithm is the bottleneck of the toolbox for now, I'm gonna work on it to improve its performance.
 

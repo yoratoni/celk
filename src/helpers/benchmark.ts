@@ -110,7 +110,7 @@ export const measureComputeSpeedFormatted = (
 
     const log = `PRG: ${iterations.toLocaleString("en-US").padStart(padding, " ")
     } | AVG: ${formatHRTime(res.average)} | TOTAL: ${formatHRTime(res.total)
-    } | SPEED: ${formatUnitPerTimeUnit(res.speed, "OP")
+    } | SPEED: ${formatUnitPerTimeUnit(res.speed, "I")
     }`;
 
     logger.info(log);
