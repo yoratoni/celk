@@ -20,12 +20,13 @@ export default class Finder {
     private generator: Generator;
     private ranger: Ranger;
 
-    private rangerExecuteFn: () => bigint;
     private generatorInfo: {
         inputType: "PUBLIC_KEY" | "RIPEMD-160";
         untouchedInput: string;
         input: Buffer;
     };
+
+    private rangerExecuteFn: () => bigint;
 
 
     /**

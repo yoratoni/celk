@@ -70,9 +70,9 @@ export default class Generator {
      * Bitcoin address debugging generation process with a complete report.
      *
      * Available modes:
-     * - `PUBLIC_KEY`: Only generate the public key.
-     * - `RIPEMD-160`: Generate the RIPEMD-160 hash of the public key.
-     * - `ADDRESS`: Generate the Bitcoin address.
+     * - `PUBLIC_KEY`: Only generate the public key (buffer).
+     * - `RIPEMD-160`: Generate the RIPEMD-160 hash of the public key (buffer).
+     * - `ADDRESS`: Generate the Bitcoin address (string).
      *
      * @param privateKey The private key to generate the address from.
      * @param mode The mode to use for the report.
@@ -167,12 +167,17 @@ export default class Generator {
                 logger.info(`(ADR) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: ${VALUES.adr.padStart(VALUES.pbl.length + 2, " ")}`);
                 break;
         }
-        logger.info("=".repeat(maxLogLength));
         console.log("");
     };
 
     /**
-     * Generate a Bitcoin address from a private key .
+     * Generate a Bitcoin address from a private key.
+     *
+     * Available modes:
+     * - `PUBLIC_KEY`: Only generate the public key (buffer).
+     * - `RIPEMD-160`: Generate the RIPEMD-160 hash of the public key (buffer).
+     * - `ADDRESS`: Generate the Bitcoin address (string).
+     *
      * @param privateKey The private key to generate the address from.
      * @param mode The mode to use for the report.
      * @returns The Bitcoin address.

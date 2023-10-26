@@ -10,9 +10,7 @@ import logger from "utils/logger";
 type isComputeSpeedRes = {
     total: bigint;
     average: bigint;
-    speed: bigint;
-    slowest: bigint;
-    fastest: bigint;
+    speed: number;
 };
 
 /**
@@ -83,23 +81,16 @@ export const measureComputeSpeed = (
     iterations: number
 ): isComputeSpeedRes => {
     let total = 0n;
-    let slowest = 0n;
-    let fastest = 10n ** 64n;
 
     for (let i = 0; i < iterations; i++) {
         const tmpSpd = measureComputeSpeedOnce(fn) as bigint;
         total += tmpSpd;
-
-        if (tmpSpd > slowest) slowest = tmpSpd;
-        if (tmpSpd < fastest) fastest = tmpSpd;
     }
 
     return {
         total,
         average: total / BigInt(iterations),
-        speed: 1_000_000_000n / (total / BigInt(iterations)),
-        slowest,
-        fastest
+        speed: Number(1_000_000_000n / (total / BigInt(iterations)))
     };
 };
 
@@ -108,31 +99,43 @@ export const measureComputeSpeed = (
  * @param fn The function to run.
  * @param iterations The number of iterations to run the function.
  * @param padding The padding to use for the iteration number (optional, defaults to 12).
+ * @returns The length of the log message.
  */
 export const measureComputeSpeedFormatted = (
     fn: Function,
     iterations: number,
     padding = 12
-): void => {
+): number => {
     const res = measureComputeSpeed(fn, iterations);
 
-    logger.info(
-        `[${iterations.toLocaleString("en-US").padStart(padding, " ")}] AVG: ${formatHRTime(res.average)} | TOTAL: ${formatHRTime(res.total)} | SLOWEST: ${formatHRTime(res.slowest)} | FASTEST: ${formatHRTime(res.fastest)} | SPEED: ${res.speed.toLocaleString("en-US")} op/s`
-    );
+    const log = `PRG: ${iterations.toLocaleString("en-US").padStart(padding, " ")
+    } | AVG: ${formatHRTime(res.average)} | TOTAL: ${formatHRTime(res.total)
+    } | SPEED: ${formatUnitPerTimeUnit(res.speed, "OP")
+    }`;
+
+    logger.info(log);
+    return log.length;
 };
 
 /**
  * Main benchmarking function, executing cycles of different iterations.
  * @param fn The function to run.
  * @param useSandboxCycles Whether to use the sandbox cycles or the normal cycles.
+ * @returns The length of the longest log message.
  */
-export const benchmark = (fn: Function, useSandboxCycles = false): void => {
+export const benchmark = (fn: Function, useSandboxCycles = false): number => {
     const cycles = useSandboxCycles ? BENCHMARK_CONFIG.sandboxCycles : BENCHMARK_CONFIG.cycles;
     const padding = Math.max(...cycles.map((cycle) => cycle.toLocaleString("en-US").length));
 
+    let longestLogLength = 0;
+    let logLength = 0;
+
     for (const cycle of cycles) {
-        measureComputeSpeedFormatted(fn, cycle, padding);
+        logLength = measureComputeSpeedFormatted(fn, cycle, padding);
+        if (logLength > longestLogLength) longestLogLength = logLength;
     }
+
+    return longestLogLength;
 };
 
 /**
@@ -164,11 +167,8 @@ export const benchmarkRanger = (fn: () => bigint): void => {
             // Length of the private key (for report formatting)
             lengths.pk = resStr.length;
 
-            // Formatted high range
-            const formattedHighRange = BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US");
-
             // Pad the index with zeros to match the high range length
-            const paddedIndex = i.toLocaleString("en-US").padStart(formattedHighRange.length, " ");
+            const paddedIndex = i.toLocaleString("en-US").padStart(11, " ");
 
             // Generate the progress part of the report
             const progress = `${paddedIndex}`;
@@ -193,10 +193,9 @@ export const benchmarkRanger = (fn: () => bigint): void => {
     }
 
     // PKPS statistics
-    const avgPkpsFormatted = formatUnitPerTimeUnit(Math.round(totalPkps / nbOfPkpsMeasurements));
+    const avgPkpsFormatted = formatUnitPerTimeUnit(Math.round(totalPkps / nbOfPkpsMeasurements), "k", "s", 11);
     const totalPkpsFormatted = formatUnitPerTimeUnit(totalPkps, "k", null);
 
     logger.info("=".repeat(lengths.total));
-    logger.info(`AVG: ${avgPkpsFormatted.padStart(lengths.progress, " ")} | ALPK: ${totalPkpsFormatted} | Time: ${formatDuration(Date.now() - initialTime).padStart(lengths.pk + 1, " ")}`);
-    logger.info("=".repeat(lengths.total));
+    logger.info(`AVG: ${avgPkpsFormatted.padStart(lengths.progress, " ")} | ALPK: ${totalPkpsFormatted} | Time: ${formatDuration(Date.now() - initialTime).padStart(lengths.pk + 2, " ")}`);
 };

@@ -21,9 +21,13 @@ export const strInsert = (str: string, index: number, value: string): string => 
  * @param nb The number to format.
  * @param unit The unit to use (optional, defaults to "k" for keys).
  * @param timeUnit The time unit to use (optional, defaults to "s" for seconds).
+ * @param padding The padding to use (optional, defaults to 12).
  */
-export const formatUnitPerTimeUnit = (nb: number, unit = "k", timeUnit: string | null = "s"): string => {
-    const padding = 10;
+export const formatUnitPerTimeUnit = (
+    nb: number, unit = "K",
+    timeUnit: string | null = "s",
+    padding = 12
+): string => {
     const strUnit = timeUnit ? `${unit}/${timeUnit}` : unit;
 
     // T = tera
@@ -50,12 +54,12 @@ export const formatUnitPerTimeUnit = (nb: number, unit = "k", timeUnit: string |
         )} M${strUnit}`.padStart(padding, " ");
     }
 
-    // K = kilo
+    // k = kilo
     if (nb >= Math.pow(10, 3)) {
         return `${(nb / Math.pow(10, 3)).toLocaleString(
             "en-US",
             { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-        )} K${strUnit}`.padStart(padding, " ");
+        )} k${strUnit}`.padStart(padding, " ");
     }
 
     return `${Math.round(nb).toLocaleString(

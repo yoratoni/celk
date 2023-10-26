@@ -14,7 +14,8 @@ export default class Ranger {
     private currDescending: bigint;
 
     // Full random buffer
-    private tmpBuffer: Buffer = Buffer.alloc(4096);  // Best performance with 4096
+    private tmpBufferSize = 8192;
+    private tmpBuffer: Buffer = Buffer.alloc(this.tmpBufferSize);
     private tmpBufferIndex: number = 0;
 
 
@@ -40,13 +41,13 @@ export default class Ranger {
      * @returns The private key.
      */
     executeFullRandom = (): bigint => {
-        if (this.tmpBufferIndex >= 4096 - 1) {
+        if (this.tmpBufferIndex >= this.tmpBufferSize) {
             randomFillSync(this.tmpBuffer);
             this.tmpBufferIndex = 0;
         }
 
         this.tmpBufferIndex += 32;
-        return BigInt(`0x${this.tmpBuffer.subarray(this.tmpBufferIndex - 32, this.tmpBufferIndex - 1).toString("hex")}`) % (this.high - this.low) + this.low;
+        return BigInt(`0x${this.tmpBuffer.subarray(this.tmpBufferIndex - 32, this.tmpBufferIndex).toString("hex")}`) % (this.high - this.low) + this.low;
     };
 
     /**

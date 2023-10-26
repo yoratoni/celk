@@ -14,24 +14,24 @@ const main = () => {
     const iterations = `${BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US")} iterations`;
 
     const ranger = new Ranger(
-        bigIntPow(2n, 20n),
-        bigIntPow(2n, 21n) - 1n
+        1n,
+        bigIntPow(2n, 256n)
     );
 
     console.log("");
-    logger.info(`Full random mode (${iterations}):`);
+    logger.info(`> Full random mode (${iterations}):`);
     benchmarkRanger(
         ranger.executeFullRandom
     );
 
     console.log("");
-    logger.info(`Ascending mode (${iterations}):`);
+    logger.info(`> Ascending mode (${iterations}):`);
     benchmarkRanger(
         ranger.executeAscending
     );
 
     console.log("");
-    logger.info(`Descending mode (${iterations}):`);
+    logger.info(`> Descending mode (${iterations}):`);
     benchmarkRanger(
         ranger.executeDescending
     );

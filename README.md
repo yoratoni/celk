@@ -66,7 +66,7 @@ const FINDER_CONFIG = {
 - The `privateKeyGenMode` can be set to `FULL_RANDOM`, `ASCENDING` or `DESCENDING`. Ascending & descending will start from the beginning
 / end of the private key range, and full random will generate.. a random number in the range.
 - If you do not know the private key range, just let them like this, these are the default values for the `secp256k1` algorithm.
-- The report interval is the number of iterations to skip before showing the report, if you produces 55 Kk/s, and set it at `55_000n`,
+- The report interval is the number of iterations to skip before showing the report, if you produces 55 kK/s, and set it at `55_000n`,
   it will show the report every second.
 
 Performances
@@ -79,16 +79,16 @@ Benchmark environment:
 - Node.js: v20.8.1.
 
 ### Benchmarking of the Bitcoin addresses generator
-| Version     | Addresses per second (k/s) | Upgrade description                                               |
+| Version     | Addresses per second (K/s) | Upgrade description                                               |
 |-------------|----------------------------|-------------------------------------------------------------------|
-| `v1.0.0`    | 396 k/s                    | **Basic algorithm implementations**                               |
-| `v1.0.1`    | 792 k/s                    | **Improved benchmarking precision**                               |
-| `v1.0.2`    | 850 k/s                    | **Ghost executions + Better benchmark measures**                  |
-| `v1.0.2b`   | 1.18 Kk/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
-| `v1.0.3`    | 1.19 Kk/s                  | **Better private key generator (str -> bigint)**                  |
-| `v1.0.4`    | 1.24 Kk/s                  | **Using a single buffer**                                         |
+| `v1.0.0`    | 396 K/s                    | **Basic algorithm implementations**                               |
+| `v1.0.1`    | 792 K/s                    | **Improved benchmarking precision**                               |
+| `v1.0.2`    | 850 K/s                    | **Ghost executions + Better benchmark measures**                  |
+| `v1.0.2b`   | 1.18 kK/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
+| `v1.0.3`    | 1.19 kK/s                  | **Better private key generator (str -> bigint)**                  |
+| `v1.0.4`    | 1.24 kK/s                  | **Using a single buffer**                                         |
 | `v1.0.4b`   | N/D                        | **Allow to use the public key if known**                          |
-| `v1.0.5`    | 1.25 Kk/s                  | **Reverts the address to its RIPEMD-160 hash**                    |
+| `v1.0.5`    | 1.25 kK/s                  | **Reverts the address to its RIPEMD-160 hash**                    |
 
 #### About the single buffer:
 The cache itself is a 154 bytes buffer, which is enough to store all the steps of the generator.
@@ -127,11 +127,11 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 
 | Version     | `FULL_RANDOM` | `ASCENDING` | `DESCENDING` |
 |-------------|---------------|-------------|--------------|
-| `v1.0.0`    | 575.7 Kk/s    | 4.80 Mk/s   | 4.76 Mk/s    |
-| `v1.0.1`    | 590.2 Kk/s    | 4.12 Mk/s   | 4.60 Mk/s    |
-| `v1.0.2`    | 584.4 Kk/s    | 4.75 Mk/s   | 4.65 Mk/s    |
-| `v1.0.2b`   | 592.1 Kk/s    | 4.24 Mk/s   | 4.68 Mk/s    |
-| `v1.0.3`    | 1.21 Mk/s     | 10.66 Mk/s  | 12.71 Mk/s   |
+| `v1.0.0`    | 575.7 kK/s    | 4.80 MK/s   | 4.76 MK/s    |
+| `v1.0.1`    | 590.2 kK/s    | 4.12 MK/s   | 4.60 MK/s    |
+| `v1.0.2`    | 584.4 kK/s    | 4.75 MK/s   | 4.65 MK/s    |
+| `v1.0.2b`   | 592.1 kK/s    | 4.24 MK/s   | 4.68 MK/s    |
+| `v1.0.3`    | 1.21 MK/s     | 10.66 MK/s  | 12.71 MK/s   |
 
 Future updates
 --------------

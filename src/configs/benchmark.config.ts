@@ -9,7 +9,7 @@ const BENCHMARK_CONFIG: Configs.IsBenchmarkConfig = {
     sandboxCycles: [1000, 10_000, 100_000, 1_000_000],
 
     // Cycles for algorithms & encoders benchmarks
-    cycles: [1, 10, 100, 1000],
+    cycles: [1, 16, 128, 1024],
     // cycles: [1],
 
     // Ranger
