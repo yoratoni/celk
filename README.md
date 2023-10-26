@@ -146,7 +146,7 @@ The thing is that, these steps are not necessary to verify that we found the rig
 after all, the network byte is always the same, and the checksum depends on .. the RIPEMD-160 hash.
 
 Which means that we can reverse some steps from the original address to get the RIPEMD-160 hash,
-reducing the steps to `PRIVATE KEY -> SECP256K1 -> RIPEMD-160` only.
+reducing the steps to `PRIVATE KEY -> SECP256K1 -> SHA-256 -> RIPEMD-160` only.
 
 ### 02: Work on the secp256k1 algorithm
 The secp256k1 algorithm is the bottleneck of the toolbox for now, I'm gonna work on it to improve its performance.
