@@ -7,11 +7,6 @@
   resolved "https://registry.yarnpkg.com/@aashutoshrathi/word-wrap/-/word-wrap-1.2.6.tgz#bd9154aec9983f77b3a034ecaa015c2e4201f6cf"
   integrity sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==
 
-"@assemblyscript/loader@^0.27.14":
-  version "0.27.14"
-  resolved "https://registry.yarnpkg.com/@assemblyscript/loader/-/loader-0.27.14.tgz#d48da0989e6bad3c8e6a254b03e91dea2c25eb43"
-  integrity sha512-k+oE3Qgb54UIJlX9zj5b8yYwynXWWf6Y2r6nMv19LBP8lh5Npn7x7iK4T8Lsz0iCTO2YZtDCIO522TOMqb8jhg==
-
 "@colors/colors@1.6.0", "@colors/colors@^1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.6.0.tgz#ec6cd237440700bc23ca23087f513c75508958b0"
@@ -400,14 +395,6 @@ arraybuffer.prototype.slice@^1.0.2:
     is-array-buffer "^3.0.2"
     is-shared-array-buffer "^1.0.2"
 
-assemblyscript@^0.27.14:
-  version "0.27.14"
-  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.27.14.tgz#8494b2b354001818b31fcff0554cdf11dcbcebd0"
-  integrity sha512-bOEYT6SF0C0QRyG5kNzPY3EfklydQnzlg1X1p38vsYGq3T5wXfYSMyUTen1peTloE+1n4q6HvjaJt+3JkjyF5w==
-  dependencies:
-    binaryen "112.0.0-nightly.20230411"
-    long "^5.2.1"
-
 async@^3.2.3:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/async/-/async-3.2.4.tgz#2d22e00f8cddeb5fde5dd33522b56d1cf569a81c"
@@ -422,11 +409,6 @@ balanced-match@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
-
-binaryen@112.0.0-nightly.20230411:
-  version "112.0.0-nightly.20230411"
-  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-112.0.0-nightly.20230411.tgz#2f85cff68c0fe3e89014d2dd4e933c4e7e313ef1"
-  integrity sha512-4V9r9x9fjAVFZdR2yvBFc3BEJJIBYvd2X8X8k0zAuJsao2gl9wNHDmpQ30QsLo6hgkRfRImkCbCjhXW3RDOYXQ==
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -1349,11 +1331,6 @@ logform@^2.3.2, logform@^2.4.0:
     ms "^2.1.1"
     safe-stable-stringify "^2.3.1"
     triple-beam "^1.3.0"
-
-long@^5.2.1:
-  version "5.2.3"
-  resolved "https://registry.yarnpkg.com/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
-  integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
 
 lru-cache@^6.0.0:
   version "6.0.0"

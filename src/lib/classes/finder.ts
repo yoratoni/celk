@@ -145,35 +145,36 @@ export default class Finder {
         const initialTime = Date.now();
 
         // Internal variables
-        let privateKey: bigint;
-        let found: boolean;
+        let privateKey = 0n;
+        let found = false;
+        let value: Buffer;
 
-        // for (let i = 1n; i <= loopLimit; i++) {
-        //     privateKey = this.rangerExecuteFn();
-        //     // value = this.generator.execute(privateKey, this.generatorInfo.inputType) as Buffer;
+        for (let i = 1n; i <= loopLimit; i++) {
+            privateKey = this.rangerExecuteFn();
+            value = this.generator.execute(privateKey, this.generatorInfo.inputType) as Buffer;
 
-        //     // Progress report
-        //     if (i % config.progressReportInterval === 0n) {
-        //         this.progressReport(i, initialTime);
-        //     }
+            // Progress report
+            if (i % config.progressReportInterval === 0n) {
+                this.progressReport(i, initialTime);
+            }
 
-        //     // Check if the value matches the one we're looking for
-        //     // if (this.generatorInfo.input.equals(value)) {
-        //     //     found = true;
-        //     //     break;
-        //     // };
-        // }
+            // Check if the value matches the one we're looking for
+            if (this.generatorInfo.input.equals(value)) {
+                found = true;
+                break;
+            };
+        }
 
         console.log("");
 
         // Report the result
-        // if (!found) {
-        //     logger.error(`Couldn't find the private key of '${this.generatorInfo.untouchedInput}' within the given range!`);
-        //     logger.error(">> If you're using the \"FULL_RANDOM\" mode, try increasing the range.");
-        // } else {
-        //     logger.warn(`Found the private key of '${this.generatorInfo.untouchedInput}'!`);
-        //     logger.warn(`>> Private key: ${bigintToPrivateKey(privateKey)}`);
-        // }
+        if (!found) {
+            logger.error(`Couldn't find the private key of '${this.generatorInfo.untouchedInput}' within the given range!`);
+            logger.error(">> If you're using the \"FULL_RANDOM\" mode, try increasing the range.");
+        } else {
+            logger.warn(`Found the private key of '${this.generatorInfo.untouchedInput}'!`);
+            logger.warn(`>> Private key: ${bigintToPrivateKey(privateKey)}`);
+        }
 
         console.log("");
     };
