@@ -87,6 +87,8 @@ Benchmark environment:
 | `v1.0.2b`   | 1.18 Kk/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
 | `v1.0.3`    | 1.19 Kk/s                  | **Better private key generator (str -> bigint)**                  |
 | `v1.0.4`    | 1.24 Kk/s                  | **Using a single buffer**                                         |
+| `v1.0.4b`   | N/D                        | **Allow to use the public key if known**                          |
+| `v1.0.5`    | 1.25 Kk/s                  | **Reverts the address to its RIPEMD-160 hash**                    |
 
 #### About the single buffer:
 The cache itself is a 154 bytes buffer, which is enough to store all the steps of the generator.
@@ -109,20 +111,15 @@ Here's a table that shows the reserved spaces (in bytes):
 ### Benchmarking of the algorithms / encoders (512 ghost executions)
 This table is updated with the latest version of the toolbox.
 
-| Algorithm / encoder | Execution time (ms) | Workload              |
-|---------------------|---------------------|-----------------------|
-| SECP256K1           | 714µs               | 96.85%                |
-| RIPEMD-160          | 6µs                 | 0.83%                 |
-| BASE58              | 6µs                 | 0.83%                 |
-| SHA-256             | 4µs / 3µs / 3µs     | 0.57% / 0.35% / 0.35% |
+Note that all the classical steps
+are not included since `v1.0.5`, because I simply reversed the address to its RIPEMD-160 hash.
+Meaning that there's less steps to check if a private key is valid or not.
 
-#### Note about the SHA-256 algorithm:
-The three numbers correspond to the three SHA-256 executions:
-- 1 just before the RIPEMD-160 execution.
-- 2 for the double SHA-256 checksum.
-
-The first one is slower because the input is coming from the SECP256K1 algorithm,
-which makes it big to process for the SHA-256 algorithm.
+| Algorithm / encoder | Execution time (ms) | Workload |
+|---------------------|---------------------|----------|
+| SECP256K1           | 1.96ms              | 96.85%   |
+| SHA-256             | 3.1µs               | 0.16%    |
+| RIPEMD-160          | 5.8µs               | 0.29%    |
 
 ### Benchmarking of the private keys generator (1,000,000 iterations)
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
@@ -138,31 +135,14 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 
 Future updates
 --------------
-### 01: Why bothering with the network byte, the BASE58 & the checksum?
-The BASE58 encoder is not secure (and it is not its purpose), it is just a way to convert the RIPEMD-160 hash into a string,
-with a checksum to make sure that the address is valid.
-
-The thing is that, these steps are not necessary to verify that we found the right private key,
-after all, the network byte is always the same, and the checksum depends on .. the RIPEMD-160 hash.
-
-Which means that we can reverse some steps from the original address to get the RIPEMD-160 hash,
-reducing the steps to `PRIVATE KEY -> SECP256K1 -> SHA-256 -> RIPEMD-160` only.
-
 ### 02: Work on the secp256k1 algorithm
 The secp256k1 algorithm is the bottleneck of the toolbox for now, I'm gonna work on it to improve its performance.
 
 Here's a table that shows the execution time of the secp256k1 algorithm, with different implementations:
 | Description                                                                                      | Execution time |
 |--------------------------------------------------------------------------------------------------|----------------|
-| Implementation by [Paul Miller](https://github.com/paulmillr/noble-secp256k1/blob/main/index.ts) | 714µs          |
+| Implementation by [Paul Miller](https://github.com/paulmillr/noble-secp256k1/blob/main/index.ts) | 1.96ms         |
 | My implementation: `v1.0.0`                                                                      | -----          |
-
-Classes
--------
-The core of the toolbox is composed of the following classes:
-- `Ranger`: A class that generates private keys between a given range, with support for multiple modes.
-- `Generator`: This class wraps the algorithms & encoders to generate Bitcoin addresses from private keys.
-- `Finder`: A class that wraps the `Ranger` & the `Generator` classes to find the Bitcoin addresses that match the given criteria.
 
 1000 BTC Bitcoin Challenge
 --------------------------
