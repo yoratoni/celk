@@ -4,7 +4,7 @@ import { addressToRIPEMD160 } from "helpers/conversions";
 import { bigIntDiv, bigIntLength } from "helpers/maths";
 import Generator from "lib/classes/generator";
 import Ranger from "lib/classes/ranger";
-import { bigintToPrivateKey, formatDuration, formatUnitPerTimeUnit } from "utils/formats";
+import { bigintToPrivateKey, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
 
 
@@ -117,18 +117,18 @@ export default class Finder {
      * @param initialTime The initial time.
      */
     private progressReport = (index: bigint, initialTime: number): void => {
+        // Progress
+        const progress = formatUnitPerTimeUnit(Number(index), null, null, 8);
+
         // Generate the percentage part of the report (automatic precision based on high range length)
         const progressPercentage = bigIntDiv(index, config.privateKeyHighRange, bigIntLength(config.privateKeyHighRange)).str;
 
-        // Elapsed time
-        const rawElapsedTime = Date.now() - initialTime;
-        const elapsedTime = formatDuration(rawElapsedTime);
-
         // Calculate the average addresses per second
+        const rawElapsedTime = Date.now() - initialTime;
         const aps = formatUnitPerTimeUnit(Math.round(Number(index) / (rawElapsedTime / 1000)));
 
         // Log the progress
-        logger.info(`PRP: ${progressPercentage}% | APS: ${aps} | TIME: ${elapsedTime}`);
+        logger.info(`PRG: ${progress} | PRP: ${progressPercentage}% | APS: ${aps}`);
     };
 
     /**
@@ -139,42 +139,41 @@ export default class Finder {
         this.initialReport();
 
         // No loop limit if the mode is FULL_RANDOM
-        const loopLimit = config.privateKeyGenMode === "FULL_RANDOM" ? Infinity : config.privateKeyHighRange;
+        const loopLimit = config.privateKeyGenMode === "FULL_RANDOM" ? 2n ** 256n : config.privateKeyHighRange;
 
         // Initial time
         const initialTime = Date.now();
 
         // Internal variables
-        let value: Buffer;
-        let privateKey = 0n;
-        let found = false;
+        let privateKey: bigint;
+        let found: boolean;
 
-        for (let i = 1n; i <= loopLimit; i++) {
-            privateKey = this.rangerExecuteFn();
-            value = this.generator.execute(privateKey, this.generatorInfo.inputType) as Buffer;
+        // for (let i = 1n; i <= loopLimit; i++) {
+        //     privateKey = this.rangerExecuteFn();
+        //     // value = this.generator.execute(privateKey, this.generatorInfo.inputType) as Buffer;
 
-            // Progress report
-            if (i % config.progressReportInterval === 0n) {
-                this.progressReport(i, initialTime);
-            }
+        //     // Progress report
+        //     if (i % config.progressReportInterval === 0n) {
+        //         this.progressReport(i, initialTime);
+        //     }
 
-            // Check if the value matches the one we're looking for
-            if (this.generatorInfo.input.equals(value)) {
-                found = true;
-                break;
-            };
-        }
+        //     // Check if the value matches the one we're looking for
+        //     // if (this.generatorInfo.input.equals(value)) {
+        //     //     found = true;
+        //     //     break;
+        //     // };
+        // }
 
         console.log("");
 
         // Report the result
-        if (!found) {
-            logger.error(`Couldn't find the private key of '${this.generatorInfo.untouchedInput}' within the given range!`);
-            logger.error(">> If you're using the \"FULL_RANDOM\" mode, try increasing the range.");
-        } else {
-            logger.warn(`Found the private key of '${this.generatorInfo.untouchedInput}'!`);
-            logger.warn(`>> Private key: ${bigintToPrivateKey(privateKey)}`);
-        }
+        // if (!found) {
+        //     logger.error(`Couldn't find the private key of '${this.generatorInfo.untouchedInput}' within the given range!`);
+        //     logger.error(">> If you're using the \"FULL_RANDOM\" mode, try increasing the range.");
+        // } else {
+        //     logger.warn(`Found the private key of '${this.generatorInfo.untouchedInput}'!`);
+        //     logger.warn(`>> Private key: ${bigintToPrivateKey(privateKey)}`);
+        // }
 
         console.log("");
     };

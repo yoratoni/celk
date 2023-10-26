@@ -24,18 +24,43 @@ export const strInsert = (str: string, index: number, value: string): string => 
  * @param padding The padding to use (optional, defaults to 12).
  */
 export const formatUnitPerTimeUnit = (
-    nb: number, unit = "K",
+    nb: number,
+    unit: string | null = "K",
     timeUnit: string | null = "s",
     padding = 12
 ): string => {
-    const strUnit = timeUnit ? `${unit}/${timeUnit}` : unit;
+    let strUnit: string;
+
+    if (typeof unit === "string" && typeof timeUnit === "string") {
+        strUnit = `${unit}/${timeUnit}`;
+    } else if (typeof unit === "string") {
+        strUnit = unit;
+    } else {
+        strUnit = "";
+    }
+
+    // E = exa
+    if (nb >= Math.pow(10, 18)) {
+        return `${(Math.round(nb / Math.pow(10, 18))).toLocaleString(
+            "en-US",
+            { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+        )}E${strUnit}`.padStart(padding, " ");
+    }
+
+    // P = peta
+    if (nb >= Math.pow(10, 15)) {
+        return `${(Math.round(nb / Math.pow(10, 15))).toLocaleString(
+            "en-US",
+            { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+        )}P${strUnit}`.padStart(padding, " ");
+    }
 
     // T = tera
     if (nb >= Math.pow(10, 12)) {
         return `${(Math.round(nb / Math.pow(10, 12))).toLocaleString(
             "en-US",
             { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-        )} T${strUnit}`.padStart(padding, " ");
+        )}T${strUnit}`.padStart(padding, " ");
     }
 
     // G = giga
@@ -43,7 +68,7 @@ export const formatUnitPerTimeUnit = (
         return `${(Math.round(nb / Math.pow(10, 9))).toLocaleString(
             "en-US",
             { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-        )} G${strUnit}`.padStart(padding, " ");
+        )}G${strUnit}`.padStart(padding, " ");
     }
 
     // M = mega
@@ -51,7 +76,7 @@ export const formatUnitPerTimeUnit = (
         return `${(nb / Math.pow(10, 6)).toLocaleString(
             "en-US",
             { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-        )} M${strUnit}`.padStart(padding, " ");
+        )}M${strUnit}`.padStart(padding, " ");
     }
 
     // k = kilo
@@ -59,13 +84,13 @@ export const formatUnitPerTimeUnit = (
         return `${(nb / Math.pow(10, 3)).toLocaleString(
             "en-US",
             { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-        )} k${strUnit}`.padStart(padding, " ");
+        )}k${strUnit}`.padStart(padding, " ");
     }
 
     return `${Math.round(nb).toLocaleString(
         "en-US",
         { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-    )} ${strUnit}`.padStart(padding, " ");
+    )}${strUnit}`.padStart(padding, " ");
 };
 
 /**
@@ -79,7 +104,7 @@ export const formatHRTime = (
     const padding = 10;
 
     // Seconds
-    if (hrtime >= 1_000_000_000_000n) {
+    if (hrtime >= 1_000_000_000n) {
         return `${(Number(hrtime) / 1_000_000_000).toLocaleString("en-US", {
             minimumFractionDigits: 3,
             maximumFractionDigits: 3
