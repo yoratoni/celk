@@ -32,32 +32,36 @@ More about the finder configuration:
  * Bitcoin private key finder configuration.
  */
 const FINDER_CONFIG = {
-    // The public key to find the private key for if available (can have "0x" prefix or not)
+    // The public key to find the private key for if available.
     publicKeyToFind: null,
 
-    // The address to find the private key for (if publicKeyToFind is null).
-    addressToFind: "13zb1hQbWVsc2S7ZTZnP2G4undNNpdh5so",
+    // The address to find the private key for.
+    addressToFind: "...",
 
     // Use compressed public key (true) or uncompressed (false).
     // BTC addresses generally uses compressed keys.
+    // Default: true
     useCompressedPublicKey: true,
 
     // The private key generation mode (FULL_RANDOM, ASCENDING, DESCENDING).
+    // Default: FULL_RANDOM
     privateKeyGenMode: "FULL_RANDOM",
 
     // The private key low range (inclusive).
-    privateKeyLowRange: 1,
+    // Default: 1n
+    privateKeyLowRange: 2n ** 8n,
 
     // The private key high range (inclusive).
-    privateKeyHighRange: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn,
+    // Default: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn
+    privateKeyHighRange: 2n ** 9n - 1n,
 
     // The progress report interval (in number of iterations).
+    // Default: 1024n
     progressReportInterval: 1024n,
 };
 ```
-- If the public key is known, you can specify it in the `publicKeyToFind` field, it will overwrite the `addressToFind` field.
-  In the other case, the finder will try to find the address by applying all normal steps to the private key.
-  The private key can start with `0x`, it is supported.
+- If you fill the `publicKeyToFind` field, the `addressToFind` field will be ignored.
+- The private key can start with `0x`, it is supported.
 - The `useCompressedPublicKey` field is used to specify if the public key should be compressed or not, it is generally compressed.
 - The `privateKeyGenMode` can be set to `FULL_RANDOM`, `ASCENDING` or `DESCENDING`. Ascending & descending will start from the beginning
 / end of the private key range, and full random will generate.. a random number in the range.
@@ -134,12 +138,12 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 
 Future updates
 --------------
-### 01: Why bothering with the version byte, the BASE58 & the checksum?
+### 01: Why bothering with the network byte, the BASE58 & the checksum?
 The BASE58 encoder is not secure (and it is not its purpose), it is just a way to convert the RIPEMD-160 hash into a string,
 with a checksum to make sure that the address is valid.
 
 The thing is that, these steps are not necessary to verify that we found the right private key,
-after all, the version byte is always the same, and the checksum depends on .. the RIPEMD-160 hash.
+after all, the network byte is always the same, and the checksum depends on .. the RIPEMD-160 hash.
 
 Which means that we can reverse some steps from the original address to get the RIPEMD-160 hash,
 reducing the steps to `PRIVATE KEY -> SECP256K1 -> RIPEMD-160` only.

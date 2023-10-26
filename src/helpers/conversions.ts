@@ -1,3 +1,6 @@
+import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
+
+
 /**
  * Writes an array of big-endian words into a buffer.
  * @param input The buffer.
@@ -20,4 +23,19 @@ export const littleEndianWordsToBuffer = (input: Buffer, littleEndianWords: numb
     for (let i = 0; i < littleEndianWords.length * 32; i += 8) {
         input[writeToOffset + i / 8] = (littleEndianWords[i >> 5] >>> (i % 32)) & 0xFF;
     }
+};
+
+/**
+ * Converts a Bitcoin address to its RIPEMD-160 hash (Buffer).
+ * @param address The Bitcoin address.
+ * @returns The RIPEMD-160 hash.
+ */
+export const addressToRIPEMD160 = (address: string): Buffer => {
+    const base58Engine = new BASE58_ENGINE();
+
+    // Decode the BASE58 address
+    const decoded = base58Engine.decode(address);
+
+    // Extract the RIPEMD-160 hash (Remove the network byte and checksum)
+    return decoded.subarray(1, 21);
 };

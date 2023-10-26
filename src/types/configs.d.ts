@@ -8,8 +8,6 @@ declare namespace Configs {
         rangerIterations: bigint;
         rangerReportInterval: bigint;
         generatorGhostExecutionIterations: number;
-        generatorIterations: bigint;
-        generatorReportInterval: bigint;
     }
 
     /**

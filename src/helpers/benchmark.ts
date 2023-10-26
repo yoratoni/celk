@@ -136,49 +136,6 @@ export const benchmark = (fn: Function, useSandboxCycles = false): void => {
 };
 
 /**
- * Benchmarking function specifically made for the Bitcoin address generator.
- * @param fn The function to run.
- * @param privateKeyFn The function to get the input from at each iteration.
- * @param publicKeyOnly Whether to only generate the public key or not (optional, defaults to false).
- */
-export const benchmarkGenerator = (fn: Function, privateKeyFn: Function, publicKeyOnly = false): void => {
-    let input = privateKeyFn();
-
-    // Statistics
-    const initialTime = Date.now();
-
-    // Access function result to prevent optimization
-    let res = undefined;
-
-    for (let i = 1n; i <= BENCHMARK_CONFIG.generatorIterations; i++) {
-        res = fn(input, publicKeyOnly);
-
-        if (i % BENCHMARK_CONFIG.generatorReportInterval === 0n) {
-            // Formatted high range
-            const formattedHighRange = BENCHMARK_CONFIG.generatorIterations.toLocaleString("en-US");
-
-            // Pad the index with zeros to match the high range length
-            const paddedIndex = i.toLocaleString("en-US").padStart(formattedHighRange.length, " ");
-
-            // Generate the progress part of the report
-            const progress = `${paddedIndex} / ${formattedHighRange}`;
-
-            // Elapsed time
-            const rawElapsedTime = Date.now() - initialTime;
-
-            // Calculate the average addresses per second
-            const aps = formatUnitPerTimeUnit(Math.round(Number(i) / (rawElapsedTime / 1000)));
-
-            // Log the report
-            logger.info(`PRG: ${progress} | APS: ${aps} | Sample: ${publicKeyOnly ? "0x" : ""}${res}`);
-
-            // Change the input
-            input = privateKeyFn();
-        }
-    }
-};
-
-/**
  * Benchmarking function specifically made for the Ranger (Bitcoin private key generator).
  * @param fn The function to run.
  */
@@ -240,6 +197,6 @@ export const benchmarkRanger = (fn: () => bigint): void => {
     const totalPkpsFormatted = formatUnitPerTimeUnit(totalPkps, "k", null);
 
     logger.info("=".repeat(lengths.total));
-    logger.info(`AVG: ${avgPkpsFormatted.padStart(lengths.progress, " ")} | ALPK: ${totalPkpsFormatted} | Time: ${formatDuration(Date.now() - initialTime).padStart(lengths.pk + 2, " ")}`);
+    logger.info(`AVG: ${avgPkpsFormatted.padStart(lengths.progress, " ")} | ALPK: ${totalPkpsFormatted} | Time: ${formatDuration(Date.now() - initialTime).padStart(lengths.pk + 1, " ")}`);
     logger.info("=".repeat(lengths.total));
 };

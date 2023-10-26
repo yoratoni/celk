@@ -8,6 +8,7 @@
     "private": true,
     "scripts": {
         "v-bump": "yarn version --patch",
+        "test": "ts-node src/tests/index.ts",
         "find": "ts-node src/scripts/find.ts",
         "benchmark:crypto": "ts-node src/benchmarks/crypto.ts",
         "benchmark:generator": "ts-node src/benchmarks/generator.ts",

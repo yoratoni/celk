@@ -17,9 +17,7 @@ const BENCHMARK_CONFIG: Configs.IsBenchmarkConfig = {
     rangerReportInterval: 200_000n,             // Report interval
 
     // Generator
-    generatorGhostExecutionIterations: 512,     // Ghost executions to warm up the engine
-    generatorIterations: 1024n,                 // Real executions
-    generatorReportInterval: 128n,              // Report interval
+    generatorGhostExecutionIterations: 1024,     // Ghost executions to warm up the engine
 };
 
 

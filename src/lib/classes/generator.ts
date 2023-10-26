@@ -32,7 +32,7 @@ export default class Generator {
      * Spaces are reserved as follows (end index exclusive):
      * - `000::065` -> SECP256K1 public key (33/65 bytes).
      * - `065::097` -> SHA-256 output (32 bytes).
-     * - `097::098` -> 0x00 -> Version byte (1 byte).
+     * - `097::098` -> 0x00 -> Network byte (1 byte).
      * - `098::118` -> RIPEMD-160 output (20 bytes).
      * - `118::122` -> Checksum (4 bytes).
      * - `122::154` -> Double SHA-256 checksum (step 1 -> 32 bytes).
@@ -68,11 +68,17 @@ export default class Generator {
 
     /**
      * Bitcoin address debugging generation process with a complete report.
+     *
+     * Available modes:
+     * - `PUBLIC_KEY`: Only generate the public key.
+     * - `RIPEMD-160`: Generate the RIPEMD-160 hash of the public key.
+     * - `ADDRESS`: Generate the Bitcoin address.
+     *
      * @param privateKey The private key to generate the address from.
-     * @param publicKeyOnly Whether to only generate the public key or not (optional, defaults to false).
+     * @param mode The mode to use for the report.
      * @returns The Bitcoin address.
      */
-    executeReport = (privateKey: bigint, publicKeyOnly = false) => {
+    executeReport = (privateKey: bigint, mode: "PUBLIC_KEY" | "RIPEMD-160" | "ADDRESS") => {
         const VALUES: { [key: string]: string; } = {};
         const TIMES: { [key: string]: bigint; } = {};
 
@@ -84,43 +90,48 @@ export default class Generator {
             TIMES.pbl = process.hrtime.bigint() - pblStart;
             VALUES.pbl = this.cache.subarray(0, this.pkB).toString("hex");
 
-            if (!publicKeyOnly) {
-                // SHA-256
-                const shaStart = process.hrtime.bigint();
-                this.sha256Engine.execute(this.cache, [0, this.pkB], 65);
-                TIMES.sha = process.hrtime.bigint() - shaStart;
-                VALUES.sha = this.cache.subarray(65, 97).toString("hex");
+            // Stops here if we only want the public key
+            if (mode === "PUBLIC_KEY") continue;
 
-                // RIPEMD-160
-                const ripStart = process.hrtime.bigint();
-                this.ripemd160Engine.execute(this.cache, [65, 97], 98);
-                TIMES.rip = process.hrtime.bigint() - ripStart;
-                VALUES.rip = this.cache.subarray(98, 118).toString("hex");
+            // SHA-256
+            const shaStart = process.hrtime.bigint();
+            this.sha256Engine.execute(this.cache, [0, this.pkB], 65);
+            TIMES.sha = process.hrtime.bigint() - shaStart;
+            VALUES.sha = this.cache.subarray(65, 97).toString("hex");
 
-                // Double SHA-256 checksum (step 1)
-                const sc1Start = process.hrtime.bigint();
-                this.sha256Engine.execute(this.cache, [97, 118], 122);
-                TIMES.sc1 = process.hrtime.bigint() - sc1Start;
-                VALUES.sc1 = this.cache.subarray(122, 154).toString("hex");
+            // RIPEMD-160
+            const ripStart = process.hrtime.bigint();
+            this.ripemd160Engine.execute(this.cache, [65, 97], 98);
+            TIMES.rip = process.hrtime.bigint() - ripStart;
+            VALUES.rip = this.cache.subarray(98, 118).toString("hex");
 
-                // Double SHA-256 checksum (step 2 -> overwrites step 1)
-                const sc2Start = process.hrtime.bigint();
-                this.sha256Engine.execute(this.cache, [122, 154], 122);
-                TIMES.sc2 = process.hrtime.bigint() - sc2Start;
-                VALUES.sc2 = this.cache.subarray(122, 154).toString("hex");
+            // Stops here if we only want the RIPEMD-160 hash
+            if (mode === "RIPEMD-160") continue;
 
-                // Take the first 4 bytes of the double SHA-256 checksum
-                const chkStart = process.hrtime.bigint();
-                this.cache.writeUInt32BE(this.cache.readUInt32BE(122), 118);
-                TIMES.chk = process.hrtime.bigint() - chkStart;
-                VALUES.chk = this.cache.subarray(118, 122).toString("hex");
+            // Double SHA-256 checksum (step 1)
+            const sc1Start = process.hrtime.bigint();
+            this.sha256Engine.execute(this.cache, [97, 118], 122);
+            TIMES.sc1 = process.hrtime.bigint() - sc1Start;
+            VALUES.sc1 = this.cache.subarray(122, 154).toString("hex");
 
-                // Base58 encoding
-                const adrStart = process.hrtime.bigint();
-                VALUES.adr = this.base58Engine.encode(this.cache, [97, 122]);
-                TIMES.rad = process.hrtime.bigint() - adrStart;
-                VALUES.rad = this.cache.subarray(97, 122).toString("hex");
-            }
+            // Double SHA-256 checksum (step 2 -> overwrites step 1)
+            const sc2Start = process.hrtime.bigint();
+            this.sha256Engine.execute(this.cache, [122, 154], 122);
+            TIMES.sc2 = process.hrtime.bigint() - sc2Start;
+            VALUES.sc2 = this.cache.subarray(122, 154).toString("hex");
+
+            // Take the first 4 bytes of the double SHA-256 checksum
+            const chkStart = process.hrtime.bigint();
+            this.cache.writeUInt32BE(this.cache.readUInt32BE(122), 118);
+            TIMES.chk = process.hrtime.bigint() - chkStart;
+            VALUES.chk = this.cache.subarray(118, 122).toString("hex");
+
+            // Base58 encoding
+            const adrStart = process.hrtime.bigint();
+            VALUES.adr = this.base58Engine.encode(this.cache, [97, 122]);
+            TIMES.rad = process.hrtime.bigint() - adrStart;
+            VALUES.rad = this.cache.subarray(97, 122).toString("hex");
+
         }
 
         // Report variables
@@ -145,36 +156,42 @@ export default class Generator {
 
         // Conclusion
         logger.info("=".repeat(maxLogLength));
-
-        if (VALUES.adr) {
-            logger.info(`(...) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: ${VALUES.adr.padStart(VALUES.pbl.length + 2, " ")}`);
-        } else {
-            logger.info(`(...) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: 0x${VALUES.pbl}`);
+        switch (mode) {
+            case "PUBLIC_KEY":
+                logger.info(`(PBL) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: 0x${VALUES.pbl}`);
+                break;
+            case "RIPEMD-160":
+                logger.info(`(RIP) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: ${("0x" + VALUES.rip).padStart(VALUES.pbl.length + 2, " ")}`);
+                break;
+            case "ADDRESS":
+                logger.info(`(ADR) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: ${VALUES.adr.padStart(VALUES.pbl.length + 2, " ")}`);
+                break;
         }
-
         logger.info("=".repeat(maxLogLength));
-
         console.log("");
     };
 
     /**
-     * Generate a Bitcoin address from a private key.
+     * Generate a Bitcoin address from a private key .
      * @param privateKey The private key to generate the address from.
-     * @param publicKeyOnly Whether to only generate the public key or not (optional, defaults to false).
+     * @param mode The mode to use for the report.
      * @returns The Bitcoin address.
      */
-    execute = (privateKey: bigint, publicKeyOnly = false): string => {
+    execute = (privateKey: bigint, mode: "PUBLIC_KEY" | "RIPEMD-160" | "ADDRESS"): Buffer | string => {
         // SECP256K1
         this.secp256k1ExecuteFn(this.cache, privateKey);
 
-        // Return the public key if requested
-        if (publicKeyOnly) return this.cache.subarray(0, this.pkB).toString("hex");
+        // Stops here if we only want the public key
+        if (mode === "PUBLIC_KEY") return this.cache.subarray(0, this.pkB);
 
         // SHA-256
         this.sha256Engine.execute(this.cache, [0, this.pkB], 65);
 
         // RIPEMD-160
         this.ripemd160Engine.execute(this.cache, [65, 97], 98);
+
+        // Stops here if we only want the RIPEMD-160 hash
+        if (mode === "RIPEMD-160") return this.cache.subarray(98, 118);
 
         // Double SHA-256 checksum (step 1)
         this.sha256Engine.execute(this.cache, [97, 118], 122);

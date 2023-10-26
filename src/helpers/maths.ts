@@ -1,5 +1,4 @@
 import { strInsert } from "utils/formats";
-import logger from "utils/logger";
 
 
 /**
@@ -31,6 +30,9 @@ export const bigIntToTenPow = (input: bigint, incr = 0): bigint => {
 
 /**
  * Bigint division with decimal point at a specific precision (truncates the result).
+ *
+ * **NOTE:** For the result, the precision cannot be greater than 15 to be accurate.
+ * The str result is always accurate regardless of the precision (scientific notation).
  * @param numerator The numerator.
  * @param denominator The denominator.
  * @param precision The precision (optional, defaults to 2).
@@ -40,17 +42,15 @@ export const bigIntDiv = (numerator: bigint, denominator: bigint, precision = 2)
     result: number;
     str: string
 } => {
-    if (precision > 15) {
-        logger.warn("Precision cannot be greater than 15. Using 15 instead.");
-        precision = 15;
-    }
+    // Add a bit of precision to the result to avoid rounding errors
+    const hiddenAddedPrecision = 2;
 
     // Get the percentage with no decimal point
-    const percentageWithNoDP = (numerator * bigIntToTenPow(denominator, precision)) / denominator;
+    const percentageWithNoDP = (numerator * bigIntToTenPow(denominator, precision + hiddenAddedPrecision)) / denominator;
     const percentageWithNoDPStr = percentageWithNoDP.toString();
 
     // Get the position of the decimal point
-    const pos = (bigIntLength(denominator) - percentageWithNoDPStr.length + precision);
+    const pos = (bigIntLength(denominator) - percentageWithNoDPStr.length + precision + hiddenAddedPrecision);
 
     let percentageStr = "";
 
@@ -63,14 +63,14 @@ export const bigIntDiv = (numerator: bigint, denominator: bigint, precision = 2)
         percentageStr = strInsert(percentageWithNoDPStr, Math.abs(pos), ".");
 
         // Trim the amount of decimals to the precision after the decimal point
-        percentageStr = percentageStr.substring(0, percentageStr.indexOf(".") + precision + 1);
+        percentageStr = percentageStr.substring(0, percentageStr.indexOf(".") + precision + hiddenAddedPrecision + 1);
     } else {
         // Prevents to have "0." as a result when precision is 0
         if (precision === 0) {
             percentageStr = "0";
         } else {
             // Pad the decimal point with zeros
-            percentageStr = `0.${"".padEnd(pos, "0")}${percentageWithNoDP.toString()}`;
+            percentageStr = "0." + `${"".padEnd(pos, "0")}${percentageWithNoDPStr}`.slice(0, precision);
         }
     }
 

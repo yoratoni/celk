@@ -1,6 +1,7 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
-import FINDER_CONFIG from "configs/finder.config";
-import { bigIntDiv } from "helpers/maths";
+import config from "configs/finder.config";
+import { addressToRIPEMD160 } from "helpers/conversions";
+import { bigIntDiv, bigIntLength } from "helpers/maths";
 import Generator from "lib/classes/generator";
 import Ranger from "lib/classes/ranger";
 import { bigintToPrivateKey, formatDuration, formatUnitPerTimeUnit } from "utils/formats";
@@ -20,18 +21,21 @@ export default class Finder {
     private ranger: Ranger;
 
     private rangerExecuteFn: () => bigint;
-    private publicKeyOnly: boolean;
-    private findField: string;
+    private generatorInfo: {
+        inputType: "PUBLIC_KEY" | "RIPEMD-160";
+        untouchedInput: string;
+        input: Buffer;
+    };
 
 
     /**
      * Construct a new Bitcoin address finder (based on FINDER_CONFIG).
      */
     constructor() {
-        this.generator = new Generator(FINDER_CONFIG.useCompressedPublicKey);
-        this.ranger = new Ranger(FINDER_CONFIG.privateKeyLowRange, FINDER_CONFIG.privateKeyHighRange);
+        this.generator = new Generator(config.useCompressedPublicKey);
+        this.ranger = new Ranger(config.privateKeyLowRange, config.privateKeyHighRange);
 
-        switch (FINDER_CONFIG.privateKeyGenMode) {
+        switch (config.privateKeyGenMode) {
             case "FULL_RANDOM":
                 this.rangerExecuteFn = this.ranger.executeFullRandom;
                 break;
@@ -45,36 +49,85 @@ export default class Finder {
                 this.rangerExecuteFn = this.ranger.executeAscending;
         }
 
-        if (typeof FINDER_CONFIG.publicKeyToFind === "string" && (FINDER_CONFIG.publicKeyToFind as string).length > 0) {
-            this.publicKeyOnly = true;
-            const publicKey = FINDER_CONFIG.publicKeyToFind as string;
+        // Check if addressToFind or publicKeyToFind is defined
+        if (typeof config.addressToFind !== "string" && typeof config.publicKeyToFind !== "string") {
+            throw new Error("[FINDER] Either addressToFind or publicKeyToFind must be defined!");
+        }
 
-            if (publicKey.startsWith("0x")) this.findField = publicKey.substring(2);
-            else this.findField = publicKey;
+        // Prepare the generator info (default args)
+        this.generatorInfo = {
+            inputType: "PUBLIC_KEY",
+            untouchedInput: "",
+            input: Buffer.alloc(0)
+        };
+
+        // Address or public key, both converted to Buffer in the end
+        if (typeof config.publicKeyToFind === "string" && (config.publicKeyToFind as string).length > 0) {
+            this.generatorInfo.inputType = "PUBLIC_KEY";
+            this.generatorInfo.untouchedInput = config.publicKeyToFind;
+
+            // Convert the public key to Buffer (supports 0x prefix)
+            if (config.publicKeyToFind.startsWith("0x")) {
+                this.generatorInfo.input = Buffer.from(config.publicKeyToFind.slice(2), "hex");
+            } else {
+                this.generatorInfo.input = Buffer.from(config.publicKeyToFind, "hex");
+            }
         } else {
-            this.publicKeyOnly = false;
-            this.findField = FINDER_CONFIG.addressToFind as string;
+            this.generatorInfo.inputType = "RIPEMD-160";
+            this.generatorInfo.untouchedInput = config.addressToFind as string;
+
+            // Decode the BASE58 address
+            this.generatorInfo.input = addressToRIPEMD160(config.addressToFind as string);
         }
     }
 
+    /**
+     * The initial report.
+     */
     private initialReport = (): void => {
         logger.info("Starting the Bitcoin address finder.");
-        logger.info(`>> Private key generation mode: '${FINDER_CONFIG.privateKeyGenMode}'`);
-        logger.info(`>> Progress report interval: ${FINDER_CONFIG.progressReportInterval.toLocaleString("en-US")} iterations`);
-        logger.info(`>> Use compressed public key: ${FINDER_CONFIG.useCompressedPublicKey}`);
+        logger.info(`>> Private key generation mode: '${config.privateKeyGenMode}'`);
+        logger.info(`>> Progress report interval: ${config.progressReportInterval.toLocaleString("en-US")} iterations`);
+        logger.info(`>> Use compressed public key: ${config.useCompressedPublicKey}`);
+        logger.info(`>> Public key to find: ${this.generatorInfo.inputType === "PUBLIC_KEY" ? this.generatorInfo.untouchedInput : "N/A"}`);
+        logger.info(`>> Address to find: ${this.generatorInfo.inputType === "RIPEMD-160" ? this.generatorInfo.untouchedInput : "N/A"}`);
+
+        if (this.generatorInfo.inputType === "RIPEMD-160") {
+            logger.info(`>> RIPEMD-160 hash of this address: 0x${this.generatorInfo.input.toString("hex")}`);
+        }
 
         console.log("");
-        logger.info(`Finding the private key of '${this.findField}' within the range:`);
-        logger.info(`>> Low: ${FINDER_CONFIG.privateKeyLowRange.toLocaleString("en-US")}`);
-        logger.info(`>> High: ${FINDER_CONFIG.privateKeyHighRange.toLocaleString("en-US")}`);
+        logger.info("Private keys generated within the range:");
+        logger.info(`>> Low: ${config.privateKeyLowRange.toLocaleString("en-US")}`);
+        logger.info(`>> High: ${config.privateKeyHighRange.toLocaleString("en-US")}`);
 
         console.log("");
         const ghostIterations = `${BENCHMARK_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
         logger.info(`Ghost execution (${ghostIterations}):`);
-        this.generator.executeReport(this.ranger.executeFullRandom(), this.publicKeyOnly);
+        this.generator.executeReport(this.ranger.executeFullRandom(), this.generatorInfo.inputType);
 
         console.log("");
         logger.info("Beginning the search...");
+    };
+
+    /**
+     * Generate a progress report.
+     * @param index The current index.
+     * @param initialTime The initial time.
+     */
+    private progressReport = (index: bigint, initialTime: number): void => {
+        // Generate the percentage part of the report (automatic precision based on high range length)
+        const progressPercentage = bigIntDiv(index, config.privateKeyHighRange, bigIntLength(config.privateKeyHighRange)).str;
+
+        // Elapsed time
+        const rawElapsedTime = Date.now() - initialTime;
+        const elapsedTime = formatDuration(rawElapsedTime);
+
+        // Calculate the average addresses per second
+        const aps = formatUnitPerTimeUnit(Math.round(Number(index) / (rawElapsedTime / 1000)));
+
+        // Log the progress
+        logger.info(`PRP: ${progressPercentage}% | APS: ${aps} | TIME: ${elapsedTime}`);
     };
 
     /**
@@ -84,47 +137,28 @@ export default class Finder {
     execute = (): void => {
         this.initialReport();
 
-        // Statistics
+        // No loop limit if the mode is FULL_RANDOM
+        const loopLimit = config.privateKeyGenMode === "FULL_RANDOM" ? Infinity : config.privateKeyHighRange;
+
+        // Initial time
         const initialTime = Date.now();
 
         // Internal variables
-        let field: string;
+        let value: Buffer;
         let privateKey = 0n;
         let found = false;
 
-        for (let i = 1n; i <= FINDER_CONFIG.privateKeyHighRange; i++) {
+        for (let i = 1n; i <= loopLimit; i++) {
             privateKey = this.rangerExecuteFn();
-            field = this.generator.execute(privateKey, this.publicKeyOnly);
+            value = this.generator.execute(privateKey, this.generatorInfo.inputType) as Buffer;
 
-            // Report progress
-            if (i % FINDER_CONFIG.progressReportInterval === 0n) {
-                // Formatted high range
-                const formattedHighRange = FINDER_CONFIG.privateKeyHighRange.toLocaleString("en-US");
-
-                // Pad the index with zeros to match the high range length
-                const paddedIndex = i.toLocaleString("en-US").padStart(formattedHighRange.length, " ");
-
-                // Generate the progress part of the report
-                const progress = `${paddedIndex}`;
-                const rawProgress = bigIntDiv(i, FINDER_CONFIG.privateKeyHighRange, 15).result;
-                const paddedProgressPercentage = rawProgress.toLocaleString("en-US", {
-                    minimumFractionDigits: 15,
-                    maximumFractionDigits: 15
-                }).padStart(19, " ");
-
-                // Elapsed time
-                const rawElapsedTime = Date.now() - initialTime;
-                const elapsedTime = formatDuration(rawElapsedTime);
-
-                // Calculate the average addresses per second
-                const aps = formatUnitPerTimeUnit(Math.round(Number(i) / (rawElapsedTime / 1000)));
-
-                // Log the progress
-                logger.info(`PRG: ${progress} | PRP: ${paddedProgressPercentage}% | APS: ${aps} | TIME: ${elapsedTime}`);
+            // Progress report
+            if (i % config.progressReportInterval === 0n) {
+                this.progressReport(i, initialTime);
             }
 
-            // Check if the field matches the one we're looking for
-            if (field === this.findField) {
+            // Check if the value matches the one we're looking for
+            if (this.generatorInfo.input.equals(value)) {
                 found = true;
                 break;
             };
@@ -134,9 +168,10 @@ export default class Finder {
 
         // Report the result
         if (!found) {
-            logger.error(`Couldn't find the private key of '${this.findField}' within the given range!`);
+            logger.error(`Couldn't find the private key of '${this.generatorInfo.untouchedInput}' within the given range!`);
+            logger.error(">> If you're using the \"FULL_RANDOM\" mode, try increasing the range.");
         } else {
-            logger.warn(`Found the private key of '${this.findField}'!`);
+            logger.warn(`Found the private key of '${this.generatorInfo.untouchedInput}'!`);
             logger.warn(`>> Private key: ${bigintToPrivateKey(privateKey)}`);
         }
 
