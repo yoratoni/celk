@@ -71,33 +71,6 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 - The report interval is the number of iterations to skip before showing the report, if you produces 55 kK/s, and set it at `55_000n`,
   it will show the report every second.
 
-Architecture
-------------
-#### Generators / Algorithms / Encoders
-```TS
-|- class RANGER_ENGINE
-|  |- privateKeyGenMode: "FULL_RANDOM" | "ASCENDING" | "DESCENDING"
-|     |- execute(): bigint
-|        |- private executeFullRandom(): bigint
-|        |- private executeAscending(): bigint
-|        |- private executeDescending(): bigint
-|
-|- class SECP256K1_ENGINE
-|  |- publicKeyGenMode: "UNCOMPRESSED" | "COMPRESSED"
-|     |- execute(cache: Buffer, privateKey: bigint): void
-|        |- private executeUncompressed(cache: Buffer, privateKey: bigint): void
-|        |- private executeCompressed(cache: Buffer, privateKey: bigint): void
-|
-|- class SHA256_ENGINE
-|  |- execute(cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void
-|
-|- class RIPEMD160_ENGINE
-|  |- execute(cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void
-|
-|- class BASE58_ENGINE
-|  |- encode(cache: Buffer, bytesToTakeFromCache: [number, number]): string
-```
-
 Performances
 ------------
 Benchmark environment:
@@ -180,6 +153,32 @@ so I don't think it is necessary too.
 ### 2. NodeJS Workers
 Here's a schematic of the current toolbox architecture:
 
+Architecture
+------------
+#### Generators / Algorithms / Encoders
+```TS
+|- class RANGER_ENGINE
+|  |- privateKeyGenMode: "FULL_RANDOM" | "ASCENDING" | "DESCENDING"
+|     |- execute(): bigint
+|        |- private executeFullRandom(): bigint
+|        |- private executeAscending(): bigint
+|        |- private executeDescending(): bigint
+|
+|- class SECP256K1_ENGINE
+|  |- publicKeyGenMode: "UNCOMPRESSED" | "COMPRESSED"
+|     |- execute(cache: Buffer, privateKey: bigint): void
+|        |- private executeUncompressed(cache: Buffer, privateKey: bigint): void
+|        |- private executeCompressed(cache: Buffer, privateKey: bigint): void
+|
+|- class SHA256_ENGINE
+|  |- execute(cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void
+|
+|- class RIPEMD160_ENGINE
+|  |- execute(cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void
+|
+|- class BASE58_ENGINE
+|  |- encode(cache: Buffer, bytesToTakeFromCache: [number, number]): string
+```
 
 1000 BTC Bitcoin Challenge
 --------------------------
