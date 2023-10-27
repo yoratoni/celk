@@ -13,9 +13,9 @@ import logger from "utils/logger";
  * Used to generate Bitcoin addresses (mainnet).
  *
  * Based on the three algorithms & 1 encoder implemented by myself:
- *   - RIPEMD-160
  *   - SECP256K1
  *   - SHA-256
+ *   - RIPEMD-160
  *   - BASE58
  */
 export default class Generator {

@@ -1,0 +1,25 @@
+{
+    "entries": [
+        "src/lib/crypto/encoders/BASE58.ts"
+    ],
+    "targets": {
+        "dev": {
+            "outFile": "src/lib/crypto/wasm/release.wasm",
+            "textFile": "src/lib/crypto/wasm/release.wat",
+            "sourceMap": true,
+            "debug": true
+        },
+        "prod": {
+            "outFile": "src/lib/crypto/wasm/release.wasm",
+            "textFile": "src/lib/crypto/wasm/release.wat",
+            "sourceMap": true,
+            "optimizeLevel": 3,
+            "shrinkLevel": 0,
+            "converge": true,
+            "noAssert": false
+        }
+    },
+    "options": {
+        "bindings": "esm"
+    }
+}

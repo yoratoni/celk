@@ -67,7 +67,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 - The `publicKeyGenMode` field is used to specify if the public key should be compressed or not, it is generally compressed.
 - The `privateKeyGenMode` can be set to `FULL_RANDOM`, `ASCENDING` or `DESCENDING`. Ascending & descending will start from the beginning
   / end of the private key range, and full random will generate.. a random number in the range.
-- If you do not know the private key range, just let them like this, these are the default values for the `secp256k1` algorithm.
+- If you do not know the private key range, just let them like this, these are the default values for the `SECP256K1` algorithm.
 - The report interval is the number of iterations to skip before showing the report, if you produces 55 kK/s, and set it at `55_000n`,
   it will show the report every second.
 
@@ -151,7 +151,7 @@ initialized only once. The Finder class could also be converted, but it's litera
 so I don't think it is necessary too.
 
 ### 2. NodeJS Workers
-Here's a schematic of the current toolbox architecture:
+Thinking about it, but after a lot of performance improvements..
 
 Architecture
 ------------

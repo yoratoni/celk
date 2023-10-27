@@ -8,6 +8,8 @@
     "private": true,
     "scripts": {
         "v-bump": "yarn version --patch",
+        "asbuild:dev": "asc --target dev --exportRuntime",
+        "asbuild:prod": "asc --target prod --exportRuntime",
         "test": "ts-node src/tests/index.ts",
         "find": "ts-node src/scripts/find.ts",
         "benchmark:crypto": "ts-node src/benchmarks/crypto.ts",
@@ -15,6 +17,7 @@
         "benchmark:sandbox": "ts-node src/benchmarks/sandbox.ts"
     },
     "dependencies": {
+        "@assemblyscript/loader": "^0.27.14",
         "date-and-time": "^3.0.3",
         "dotenv": "^16.3.1",
         "mongodb": "5.8.1",
@@ -28,6 +31,7 @@
         "@types/node-os-utils": "^1.3.2",
         "@typescript-eslint/eslint-plugin": "^6.7.5",
         "@typescript-eslint/parser": "^6.7.5",
+        "assemblyscript": "^0.27.14",
         "eslint": "^8.51.0",
         "eslint-import-resolver-typescript": "^3.6.1",
         "eslint-plugin-import": "^2.28.1",
