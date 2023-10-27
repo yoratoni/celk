@@ -184,35 +184,8 @@ Technically, I could also convert the generator, but I don't think it is necessa
 initialized only once. The Finder class could also be converted, but it's literally a loop that calls the generator,
 so I don't think it is necessary too.
 
-### 2. NodeJS Workers
+### 2. Workers
 Thinking about it, but after a lot of performance improvements..
-
-Architecture
-------------
-#### Generators / Algorithms / Encoders
-```TS
-|- class PKG_ENGINE
-|  |- privateKeyGenMode: "FULL_RANDOM" | "ASCENDING" | "DESCENDING"
-|     |- execute(): bigint
-|        |- private executeFullRandom(): bigint
-|        |- private executeAscending(): bigint
-|        |- private executeDescending(): bigint
-|
-|- class SECP256K1_ENGINE
-|  |- publicKeyGenMode: "UNCOMPRESSED" | "COMPRESSED"
-|     |- execute(cache: Buffer, privateKey: bigint): void
-|        |- private executeUncompressed(cache: Buffer, privateKey: bigint): void
-|        |- private executeCompressed(cache: Buffer, privateKey: bigint): void
-|
-|- class SHA256_ENGINE
-|  |- execute(cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void
-|
-|- class RIPEMD160_ENGINE
-|  |- execute(cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void
-|
-|- class BASE58_ENGINE
-|  |- encode(cache: Buffer, bytesToTakeFromCache: [number, number]): string
-```
 
 1000 BTC Bitcoin Challenge
 --------------------------
