@@ -40,7 +40,7 @@ I chose to use fix configuration files instead of command line arguments, becaus
 - `src/configs/finder.config.ts`: Finder config file.
 - `src/configs/global.config.ts`: Global config file.
 
-#### More about the benchmarking configuration:
+#### More about the benchmarks configuration:
 ```typescript
 const BENCHMARKS_CONFIG: Configs.IsBenchmarksConfig = {
     // Total number of reports to display
