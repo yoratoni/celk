@@ -1,6 +1,6 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
 import Generator from "lib/classes/generator";
-import Ranger from "lib/classes/ranger";
+import RANGER_ENGINE from "lib/crypto/generators/RANGER";
 import logger from "utils/logger";
 
 
@@ -12,18 +12,20 @@ const main = () => {
 
     const ghostIterations = `${BENCHMARK_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
 
-    const ranger = new Ranger(0n, 2n ** 256n - 1n);
-    const generator = new Generator(true);
+    const rangerEngine = new RANGER_ENGINE("FULL_RANDOM", 1n, 2n ** 256n - 1n);
+    const generator = new Generator("COMPRESSED", "PUBLIC_KEY");
 
     console.log("");
     logger.info(`Ghost execution (${ghostIterations}, "PUBLIC_KEY" mode, random private key):`);
-    generator.executeReport(ranger.executeFullRandom(), "PUBLIC_KEY");
+    generator.executeReport(rangerEngine.execute());
 
     logger.info(`Ghost execution (${ghostIterations}, "RIPEMD-160" mode, random private key):`);
-    generator.executeReport(ranger.executeFullRandom(), "RIPEMD-160");
+    generator.setGeneratorGenMode("RIPEMD-160");
+    generator.executeReport(rangerEngine.execute());
 
     logger.info(`Ghost execution (${ghostIterations}, "ADDRESS" mode, random private key):`);
-    generator.executeReport(ranger.executeFullRandom(), "ADDRESS");
+    generator.setGeneratorGenMode("ADDRESS");
+    generator.executeReport(rangerEngine.execute());
 };
 
 

@@ -3,22 +3,17 @@ import config from "configs/finder.config";
 import { addressToRIPEMD160 } from "helpers/conversions";
 import { bigIntDiv, bigIntLength } from "helpers/maths";
 import Generator from "lib/classes/generator";
-import Ranger from "lib/classes/ranger";
+import RANGER_ENGINE from "lib/crypto/generators/RANGER";
 import { bigintToPrivateKey, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
 
 
 /**
  * Used to find a private key from a given Bitcoin address.
- *
- * **NOTES ABOUT PRIVATE KEY GENERATION MODES:**
- * - `fullRandom`: Completely random within range.
- * - `ascending`: Starts from the low range and goes up.
- * - `descending`: Starts from the high range and goes down.
  */
 export default class Finder {
+    private ranger: RANGER_ENGINE;
     private generator: Generator;
-    private ranger: Ranger;
 
     private generatorInfo: {
         inputType: "PUBLIC_KEY" | "RIPEMD-160";
@@ -26,29 +21,12 @@ export default class Finder {
         input: Buffer;
     };
 
-    private rangerExecuteFn: () => bigint;
-
 
     /**
      * Construct a new Bitcoin address finder (based on FINDER_CONFIG).
      */
     constructor() {
-        this.generator = new Generator(config.useCompressedPublicKey);
-        this.ranger = new Ranger(config.privateKeyLowRange, config.privateKeyHighRange);
-
-        switch (config.privateKeyGenMode) {
-            case "FULL_RANDOM":
-                this.rangerExecuteFn = this.ranger.executeFullRandom;
-                break;
-            case "ASCENDING":
-                this.rangerExecuteFn = this.ranger.executeAscending;
-                break;
-            case "DESCENDING":
-                this.rangerExecuteFn = this.ranger.executeDescending;
-                break;
-            default:
-                this.rangerExecuteFn = this.ranger.executeAscending;
-        }
+        this.ranger = new RANGER_ENGINE(config.privateKeyGenMode, config.privateKeyLowRange, config.privateKeyHighRange);
 
         // Check if addressToFind or publicKeyToFind is defined
         if (typeof config.addressToFind !== "string" && typeof config.publicKeyToFind !== "string") {
@@ -80,6 +58,8 @@ export default class Finder {
             // Decode the BASE58 address
             this.generatorInfo.input = addressToRIPEMD160(config.addressToFind as string);
         }
+
+        this.generator = new Generator(config.publicKeyGenMode, this.generatorInfo.inputType);
     }
 
     /**
@@ -87,11 +67,11 @@ export default class Finder {
      */
     private initialReport = (): void => {
         logger.info("Starting the Bitcoin address finder.");
-        logger.info(`>> Private key generation mode: '${config.privateKeyGenMode}'`);
         logger.info(`>> Progress report interval: ${config.progressReportInterval.toLocaleString("en-US")} iterations`);
-        logger.info(`>> Use compressed public key: ${config.useCompressedPublicKey}`);
-        logger.info(`>> Public key to find: ${this.generatorInfo.inputType === "PUBLIC_KEY" ? this.generatorInfo.untouchedInput : "N/A"}`);
-        logger.info(`>> Address to find: ${this.generatorInfo.inputType === "RIPEMD-160" ? this.generatorInfo.untouchedInput : "N/A"}`);
+        logger.info(`>> Private key generation mode: '${config.privateKeyGenMode}'`);
+        logger.info(`>> Public key generation mode: '${config.publicKeyGenMode}'`);
+        logger.info(`>> Public key to find: ${this.generatorInfo.inputType === "PUBLIC_KEY" ? `'${this.generatorInfo.untouchedInput}'` : "N/A"}`);
+        logger.info(`>> Address to find: ${this.generatorInfo.inputType === "RIPEMD-160" ? `'${this.generatorInfo.untouchedInput}'` : "N/A"}`);
 
         if (this.generatorInfo.inputType === "RIPEMD-160") {
             logger.info(`>> RIPEMD-160 hash of this address: 0x${this.generatorInfo.input.toString("hex")}`);
@@ -105,7 +85,7 @@ export default class Finder {
         console.log("");
         const ghostIterations = `${BENCHMARK_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
         logger.info(`Ghost execution (${ghostIterations}):`);
-        this.generator.executeReport(this.ranger.executeFullRandom(), this.generatorInfo.inputType);
+        this.generator.executeReport(this.ranger.execute());
 
         console.log("");
         logger.info("Beginning the search...");
@@ -149,9 +129,10 @@ export default class Finder {
         let found = false;
         let value: Buffer;
 
+        // Main loop
         for (let i = 1n; i <= loopLimit; i++) {
-            privateKey = this.rangerExecuteFn();
-            value = this.generator.execute(privateKey, this.generatorInfo.inputType) as Buffer;
+            privateKey = this.ranger.execute();
+            value = this.generator.execute(privateKey) as Buffer;
 
             // Progress report
             if (i % config.progressReportInterval === 0n) {
@@ -170,7 +151,6 @@ export default class Finder {
         // Report the result
         if (!found) {
             logger.error(`Couldn't find the private key of '${this.generatorInfo.untouchedInput}' within the given range!`);
-            logger.error(">> If you're using the \"FULL_RANDOM\" mode, try increasing the range.");
         } else {
             logger.warn(`Found the private key of '${this.generatorInfo.untouchedInput}'!`);
             logger.warn(`>> Private key: ${bigintToPrivateKey(privateKey)}`);

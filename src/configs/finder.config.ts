@@ -11,10 +11,10 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
     // The address to find the private key for.
     addressToFind: "128z5d7nN7PkCuX5qoA4Ys6pmxUYnEy86k",
 
-    // Use compressed public key (true) or uncompressed (false).
+    // Use compressed public key ("COMPRESSED") or uncompressed ("UNCOMPRESSED").
     // BTC addresses generally uses compressed keys.
     // Default: true
-    useCompressedPublicKey: true,
+    publicKeyGenMode: "COMPRESSED",
 
     // The private key generation mode (FULL_RANDOM, ASCENDING, DESCENDING).
     // Default: FULL_RANDOM
@@ -30,7 +30,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 
     // The progress report interval (in number of iterations).
     // Default: 1024n
-    progressReportInterval: 500_000n,
+    progressReportInterval: 128n,
 };
 
 

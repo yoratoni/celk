@@ -70,7 +70,7 @@ export default class RIPEMD160_ENGINE {
                             "ERROR";
 
         if (res === "ERROR") {
-            throw new Error("[RIPEMD-160] F: j is out of range.");
+            throw new Error("[RIPEMD160] F: j is out of range.");
         }
 
         return res;
@@ -88,7 +88,7 @@ export default class RIPEMD160_ENGINE {
                             "ERROR";
 
         if (res === "ERROR") {
-            throw new Error("[RIPEMD-160] K1: j is out of range.");
+            throw new Error("[RIPEMD160] K1: j is out of range.");
         }
 
         return res;
@@ -106,7 +106,7 @@ export default class RIPEMD160_ENGINE {
                             "ERROR";
 
         if (res === "ERROR") {
-            throw new Error("[RIPEMD-160] K2: j is out of range.");
+            throw new Error("[RIPEMD160] K2: j is out of range.");
         }
 
         return res;

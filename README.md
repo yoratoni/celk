@@ -7,9 +7,8 @@ Commands
 - `yarn find`: Executes the finder class with the configuration.
 
 ### Benchmarking
-- `yarn benchmark:crypto`: Each encoder / algorithm.
+- `yarn benchmark:crypto`: Each generators / encoder / algorithm.
 - `yarn benchmark:generator`: Bitcoin address generator.
-- `yarn benchmark:ranger`: Private key generator.
 - `yarn benchmark:sandbox`: To compare different techniques while implementing new stuff.
 
 Notes about the benchmarking:
@@ -28,20 +27,17 @@ I chose to use fix configuration files instead of command line arguments, becaus
 
 More about the finder configuration:
 ```typescript
-/**
- * Bitcoin private key finder configuration.
- */
-const FINDER_CONFIG = {
-    // The public key to find the private key for if available.
-    publicKeyToFind: null,
+const FINDER_CONFIG: Configs.IsFinderConfig = {
+    // The public key to find the private key for if available (supports 0x prefix).
+    publicKeyToFind: "0x02e0a8b039282faf6fe0fd769cfbc4b6b4cf8758ba68220eac420e32b91ddfa673",
 
     // The address to find the private key for.
-    addressToFind: "...",
+    addressToFind: "128z5d7nN7PkCuX5qoA4Ys6pmxUYnEy86k",
 
-    // Use compressed public key (true) or uncompressed (false).
+    // Use compressed public key ("COMPRESSED") or uncompressed ("UNCOMPRESSED").
     // BTC addresses generally uses compressed keys.
     // Default: true
-    useCompressedPublicKey: true,
+    publicKeyGenMode: "COMPRESSED",
 
     // The private key generation mode (FULL_RANDOM, ASCENDING, DESCENDING).
     // Default: FULL_RANDOM
@@ -49,11 +45,11 @@ const FINDER_CONFIG = {
 
     // The private key low range (inclusive).
     // Default: 1n
-    privateKeyLowRange: 2n ** 8n,
+    privateKeyLowRange: 2n ** 159n,
 
     // The private key high range (inclusive).
     // Default: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn
-    privateKeyHighRange: 2n ** 9n - 1n,
+    privateKeyHighRange: 2n ** 160n - 1n,
 
     // The progress report interval (in number of iterations).
     // Default: 1024n
@@ -62,12 +58,40 @@ const FINDER_CONFIG = {
 ```
 - If you fill the `publicKeyToFind` field, the `addressToFind` field will be ignored.
 - The private key can start with `0x`, it is supported.
-- The `useCompressedPublicKey` field is used to specify if the public key should be compressed or not, it is generally compressed.
+- The `publicKeyGenMode` field is used to specify if the public key should be compressed or not, it is generally compressed.
 - The `privateKeyGenMode` can be set to `FULL_RANDOM`, `ASCENDING` or `DESCENDING`. Ascending & descending will start from the beginning
-/ end of the private key range, and full random will generate.. a random number in the range.
+  / end of the private key range, and full random will generate.. a random number in the range.
 - If you do not know the private key range, just let them like this, these are the default values for the `secp256k1` algorithm.
 - The report interval is the number of iterations to skip before showing the report, if you produces 55 kK/s, and set it at `55_000n`,
   it will show the report every second.
+
+Architecture
+------------
+#### Generators / Algorithms / Encoders
+```TS
+|  // Generates the private key.
+|- class RANGER_ENGINE
+|  |- privateKeyGenMode: "FULL_RANDOM" | "ASCENDING" | "DESCENDING"
+|     |- execute(): bigint
+|        |- private executeFullRandom(): bigint
+|        |- private executeAscending(): bigint
+|        |- private executeDescending(): bigint
+|
+|- class SECP256K1_ENGINE
+|  |- publicKeyGenMode: "UNCOMPRESSED" | "COMPRESSED"
+|     |- execute(cache: Buffer, privateKey: bigint): void
+|        |- private executeUncompressed(cache: Buffer, privateKey: bigint): void
+|        |- private executeCompressed(cache: Buffer, privateKey: bigint): void
+|
+|- class SHA256_ENGINE
+|  |- execute(cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void
+|
+|- class RIPEMD160_ENGINE
+|  |- execute(cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void
+|
+|- class BASE58_ENGINE
+|  |- encode(cache: Buffer, bytesToTakeFromCache: [number, number]): string
+```
 
 Performances
 ------------
@@ -94,8 +118,8 @@ Benchmark environment:
 The cache itself is a 154 bytes buffer, which is enough to store all the steps of the generator.
 
 The goal of the single buffer update is not to directly improve the performance of the generator (for now),
-as the bottleneck is still the ECDSA algorithm, but to at least, not make it the bottleneck later,
-when the ECDSA algorithm will be improved.
+as the bottleneck is still the SECP256K1 algorithm, but to at least, not make it the bottleneck later,
+when the SECP256K1 algorithm will be improved.
 
 Here's a table that shows the reserved spaces (in bytes):
 | Step           | ID     | Start index | End index   | Length |
@@ -133,25 +157,24 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 | `v1.0.2b`   | 592.1 kK/s    | 4.24 MK/s   | 4.68 MK/s    |
 | `v1.0.3`    | 1.21 MK/s     | 10.66 MK/s  | 12.71 MK/s   |
 
-Future updates
---------------
-### From TS to AssemblyScript
-Multiple things will be written in AssemblyScript, to improve the performance of the toolbox.
+Ideas of future updates
+-----------------------
+### 1. From TS to AssemblyScript
+I need to choose what part of the toolbox I want to convert to AssemblyScript, the best would be to convert only the low level stuff,
+here's a list of the things that could be converted:
+- The private key generator.
+- The SECP256K1 algorithm.
+- The SHA-256 algorithm.
+- The RIPEMD-160 algorithm.
+- The BASE58 encoder.
 
-Including:
-- The Ranger (private key generator).
-- The Generator (and all its algorithms / encoders).
+Technically, I could also convert the generator, but I don't think it is necessary as it only executes operations on a single buffer,
+initialized only once. The Finder class could also be converted, but it's literally a loop that calls the generator,
+so I don't think it is necessary too.
 
-The goal is to put the main loop inside of the AssemblyScript code, and return results at every report interval.
+### 2. NodeJS Workers
+Here's a schematic of the current toolbox architecture:
 
-### Work on the secp256k1 algorithm
-The secp256k1 algorithm is the bottleneck of the toolbox for now, I'm gonna work on it to improve its performance.
-
-Here's a table that shows the execution time of the secp256k1 algorithm, with different implementations:
-| Description                                                                                      | Execution time |
-|--------------------------------------------------------------------------------------------------|----------------|
-| Implementation by [Paul Miller](https://github.com/paulmillr/noble-secp256k1/blob/main/index.ts) | 1.96ms         |
-| My implementation: `v1.0.0`                                                                      | -----          |
 
 1000 BTC Bitcoin Challenge
 --------------------------
@@ -177,7 +200,7 @@ but one thing that matters is that some of the public keys has been shared by th
 and the first available public key in the list (wallet still full) is from the puzzle #130.
 - A difference between no public key and an available public key is the computation time, because, to convert the public key
 into a valid Bitcoin address, it is necessary to compute `3 * SHA-256 + RIPEMD-160 + BASE58` too, which takes a bit more time.
-- Now, the thing that always takes most of the computation time is the ECDSA algorithm..
+- Now, the thing that always takes most of the computation time is the SECP256K1 algorithm..
 
 Sources & Credits
 -----------------

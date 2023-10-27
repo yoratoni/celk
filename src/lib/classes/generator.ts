@@ -4,6 +4,7 @@ import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
 import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
+import General from "types/general";
 import { formatHRTime } from "utils/formats";
 import logger from "utils/logger";
 
@@ -18,13 +19,12 @@ import logger from "utils/logger";
  *   - BASE58
  */
 export default class Generator {
-    private ripemd160Engine: RIPEMD160_ENGINE;
     private secp256k1Engine: SECP256K1_ENGINE;
     private sha256Engine: SHA256_ENGINE;
+    private ripemd160Engine: RIPEMD160_ENGINE;
     private base58Engine: BASE58_ENGINE;
 
-    /** Main SECP256K1 function */
-    private secp256k1ExecuteFn: (cache: Buffer, privateKey: bigint) => void;
+    private mode: General.IsGeneratorGenMode;
 
     /**
      * Reusable buffer used as a cache for all operations (186 bytes).
@@ -50,35 +50,39 @@ export default class Generator {
 
     /**
      * Construct a new Bitcoin address generator.
-     * @param useCompressedPublicKey Whether to use the compressed public key or not (optional, defaults to true).
+     * @param publicKeyGenMode The public key generation mode (compressed or uncompressed).
+     * @param generatorGenMode The generator generation mode (public key, RIPEMD-160 hash or Bitcoin address).
      */
-    constructor(useCompressedPublicKey = true) {
-        this.ripemd160Engine = new RIPEMD160_ENGINE();
-        this.secp256k1Engine = new SECP256K1_ENGINE();
+    constructor(
+        publicKeyGenMode: General.IsPublicKeyGenMode,
+        generatorGenMode: General.IsGeneratorGenMode
+    ) {
+        this.secp256k1Engine = new SECP256K1_ENGINE(publicKeyGenMode);
         this.sha256Engine = new SHA256_ENGINE();
+        this.ripemd160Engine = new RIPEMD160_ENGINE();
         this.base58Engine = new BASE58_ENGINE();
 
-        this.secp256k1ExecuteFn = useCompressedPublicKey ?
-            this.secp256k1Engine.executeCompressed :
-            this.secp256k1Engine.executeUncompressed;
+        this.mode = generatorGenMode;
 
         // Initialize the public key bytes (33 for compressed, 65 for uncompressed)
-        this.pkB = useCompressedPublicKey ? 33 : 65;
+        this.pkB = (publicKeyGenMode === "COMPRESSED") ? 33 : 65;
     }
+
+
+    /**
+     * Change the Generator generation mode.
+     * @param generatorGenMode The new Generator generation mode.
+     */
+    setGeneratorGenMode = (generatorGenMode: General.IsGeneratorGenMode): void => {
+        this.mode = generatorGenMode;
+    };
 
     /**
      * Bitcoin address debugging generation process with a complete report.
-     *
-     * Available modes:
-     * - `PUBLIC_KEY`: Only generate the public key (buffer).
-     * - `RIPEMD-160`: Generate the RIPEMD-160 hash of the public key (buffer).
-     * - `ADDRESS`: Generate the Bitcoin address (string).
-     *
      * @param privateKey The private key to generate the address from.
-     * @param mode The mode to use for the report.
      * @returns The Bitcoin address.
      */
-    executeReport = (privateKey: bigint, mode: "PUBLIC_KEY" | "RIPEMD-160" | "ADDRESS") => {
+    executeReport = (privateKey: bigint): void => {
         const VALUES: { [key: string]: string; } = {};
         const TIMES: { [key: string]: bigint; } = {};
 
@@ -86,12 +90,12 @@ export default class Generator {
         for (let i = 0; i <= BENCHMARK_CONFIG.generatorGhostExecutionIterations; i++) {
             // SECP256K1
             const pblStart = process.hrtime.bigint();
-            this.secp256k1ExecuteFn(this.cache, privateKey);
+            this.secp256k1Engine.execute(this.cache, privateKey);
             TIMES.pbl = process.hrtime.bigint() - pblStart;
             VALUES.pbl = this.cache.subarray(0, this.pkB).toString("hex");
 
             // Stops here if we only want the public key
-            if (mode === "PUBLIC_KEY") continue;
+            if (this.mode === "PUBLIC_KEY") continue;
 
             // SHA-256
             const shaStart = process.hrtime.bigint();
@@ -106,7 +110,7 @@ export default class Generator {
             VALUES.rip = this.cache.subarray(98, 118).toString("hex");
 
             // Stops here if we only want the RIPEMD-160 hash
-            if (mode === "RIPEMD-160") continue;
+            if (this.mode === "RIPEMD-160") continue;
 
             // Double SHA-256 checksum (step 1)
             const sc1Start = process.hrtime.bigint();
@@ -156,7 +160,7 @@ export default class Generator {
 
         // Conclusion
         logger.info("=".repeat(maxLogLength));
-        switch (mode) {
+        switch (this.mode) {
             case "PUBLIC_KEY":
                 logger.info(`(PBL) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: 0x${VALUES.pbl}`);
                 break;
@@ -172,22 +176,15 @@ export default class Generator {
 
     /**
      * Generate a Bitcoin address from a private key.
-     *
-     * Available modes:
-     * - `PUBLIC_KEY`: Only generate the public key (buffer).
-     * - `RIPEMD-160`: Generate the RIPEMD-160 hash of the public key (buffer).
-     * - `ADDRESS`: Generate the Bitcoin address (string).
-     *
      * @param privateKey The private key to generate the address from.
-     * @param mode The mode to use for the report.
-     * @returns The Bitcoin address.
+     * @returns The public key (buffer), RIPEMD-160 hash (buffer) or Bitcoin address (string).
      */
-    execute = (privateKey: bigint, mode: "PUBLIC_KEY" | "RIPEMD-160" | "ADDRESS"): Buffer | string => {
+    execute = (privateKey: bigint): Buffer | string => {
         // SECP256K1
-        this.secp256k1ExecuteFn(this.cache, privateKey);
+        this.secp256k1Engine.execute(this.cache, privateKey);
 
         // Stops here if we only want the public key
-        if (mode === "PUBLIC_KEY") return this.cache.subarray(0, this.pkB);
+        if (this.mode === "PUBLIC_KEY") return this.cache.subarray(0, this.pkB);
 
         // SHA-256
         this.sha256Engine.execute(this.cache, [0, this.pkB], 65);
@@ -196,7 +193,7 @@ export default class Generator {
         this.ripemd160Engine.execute(this.cache, [65, 97], 98);
 
         // Stops here if we only want the RIPEMD-160 hash
-        if (mode === "RIPEMD-160") return this.cache.subarray(98, 118);
+        if (this.mode === "RIPEMD-160") return this.cache.subarray(98, 118);
 
         // Double SHA-256 checksum (step 1)
         this.sha256Engine.execute(this.cache, [97, 118], 122);

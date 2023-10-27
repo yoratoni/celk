@@ -1,3 +1,6 @@
+import General from "types/general";
+
+
 /**
  * [Official parameters](https://www.secg.org/sec2-v2.pdf):
  * Page 9, section 2.4.1.
@@ -345,11 +348,25 @@ export class JacobianPoint {
 export default class SECP256K1_ENGINE {
     private readonly G = new Point(CURVE.Gx, CURVE.Gy);
 
+    private executeEndpoint: (cache: Buffer, privateKey: bigint) => void;
+
 
     /**
      * Construct a new SECP256K1 engine.
+     * @param publicKeyGenMode The public key generation mode (compressed or uncompressed).
      */
-    constructor() { }
+    constructor(publicKeyGenMode: General.IsPublicKeyGenMode) {
+        switch (publicKeyGenMode) {
+            case "UNCOMPRESSED":
+                this.executeEndpoint = this.executeUncompressed;
+                break;
+            case "COMPRESSED":
+                this.executeEndpoint = this.executeCompressed;
+                break;
+            default:
+                throw new Error(`[SECP256K1] Invalid public key generation mode: '${publicKeyGenMode}'`);
+        }
+    }
 
 
     /**
@@ -358,7 +375,7 @@ export default class SECP256K1_ENGINE {
      * @param privateKey The private key.
      * @param privateKey The private key as a buffer.
      */
-    executeUncompressed = (cache: Buffer, privateKey: bigint): void => {
+    private executeUncompressed = (cache: Buffer, privateKey: bigint): void => {
         const point = this.G.multiply(privateKey);
 
         // X coordinate of the public key (base 16)
@@ -380,7 +397,7 @@ export default class SECP256K1_ENGINE {
      * @param cache The buffer cache to use (input & output).
      * @param privateKey The private key as a buffer.
      */
-    executeCompressed = (cache: Buffer, privateKey: bigint): void => {
+    private executeCompressed = (cache: Buffer, privateKey: bigint): void => {
         const point = this.G.multiply(privateKey);
 
         // X coordinate of the public key (base 16)
@@ -392,4 +409,28 @@ export default class SECP256K1_ENGINE {
         // Write the public key to the cache
         cache.write(`${point.y % 2n === 0n ? "02" : "03"}${x}`, "hex");
     };
+
+    /**
+     * Change the public key generation mode.
+     * @param publicKeyGenMode The new public key generation mode (compressed or uncompressed).
+     */
+    setPublicKeyGenMode = (publicKeyGenMode: General.IsPublicKeyGenMode): void => {
+        switch (publicKeyGenMode) {
+            case "UNCOMPRESSED":
+                this.executeEndpoint = this.executeUncompressed;
+                break;
+            case "COMPRESSED":
+                this.executeEndpoint = this.executeCompressed;
+                break;
+            default:
+                throw new Error(`[SECP256K1] Invalid SECP256K1 generation mode: '${publicKeyGenMode}'`);
+        }
+    };
+
+    /**
+     * Main endpoint to execute the SECP256K1 algorithm (defined in the constructor).
+     * @param cache The buffer cache to use (input & output).
+     * @param privateKey The private key.
+     */
+    execute = (cache: Buffer, privateKey: bigint): void => this.executeEndpoint(cache, privateKey);
 }

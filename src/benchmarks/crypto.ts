@@ -1,8 +1,10 @@
-import { benchmark } from "helpers/benchmark";
+import BENCHMARK_CONFIG from "configs/benchmark.config";
+import { benchmark, benchmarkRanger } from "helpers/benchmark";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
 import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
+import RANGER_ENGINE from "lib/crypto/generators/RANGER";
 import logger from "utils/logger";
 
 
@@ -13,15 +15,17 @@ const main = () => {
     logger.info("Starting benchmarking of the encoders / algorithms.");
 
     // Engines
-    const secp256k1Engine = new SECP256K1_ENGINE();
-    const ripemd160Engine = new RIPEMD160_ENGINE();
+    const rangerEngine = new RANGER_ENGINE("FULL_RANDOM", 1n, 2n ** 256n - 1n);
+    const secp256k1Engine = new SECP256K1_ENGINE("COMPRESSED");
     const sha256Engine = new SHA256_ENGINE();
+    const ripemd160Engine = new RIPEMD160_ENGINE();
     const base58Engine = new BASE58_ENGINE();
 
     // Reusable variables
     let logLength = 0;
 
     // Test values
+    const rangerIterations = `${BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US")} iterations`;
     const secp256k1_input = 452312848583266388373324160190187140051835877600158453279131187530910662655n;
     const secp256k1_compressedOutput = "03513BA6E632B03D116D8BD9B96B1E64D39BA15A3CD56E371A2852D1B1331280D3";
     const secp256k1_uncompressedOutput = "04513BA6E632B03D116D8BD9B96B1E64D39BA15A3CD56E371A2852D1B1331280D3547D6E528F9CDACE903849DF2E9D7AAF5DAE533949F6DF47327E3DD1EF6679E3";
@@ -33,15 +37,37 @@ const main = () => {
 
 
     console.log("");
+    logger.info(`> RANGER GENERATOR (Full random mode, ${rangerIterations}):`);
+    benchmarkRanger(
+        rangerEngine.execute
+    );
+
+    console.log("");
+    logger.info(`> RANGER GENERATOR (Ascending mode, ${rangerIterations}):`);
+    rangerEngine.setPrivateKeyGenMode("ASCENDING");
+    benchmarkRanger(
+        rangerEngine.execute
+    );
+
+    console.log("");
+    logger.info(`> RANGER GENERATOR (Descending mode, ${rangerIterations}):`);
+    rangerEngine.setPrivateKeyGenMode("DESCENDING");
+    benchmarkRanger(
+        rangerEngine.execute
+    );
+
+
+
+    console.log("");
     logger.info("> SECP256K1 ALGORITHM (Compressed, largest private key on 62 bytes):");
 
     // Compressed public key is 33 bytes long.
     const secp256k1Buffer_C = Buffer.alloc(33);
 
-    logLength = benchmark(() => secp256k1Engine.executeCompressed(secp256k1Buffer_C, secp256k1_input));
+    logLength = benchmark(() => secp256k1Engine.execute(secp256k1Buffer_C, secp256k1_input));
 
     // Executes once for checking the output
-    secp256k1Engine.executeCompressed(secp256k1Buffer_C, secp256k1_input);
+    secp256k1Engine.execute(secp256k1Buffer_C, secp256k1_input);
 
     logger.info("=".repeat(logLength));
 
@@ -52,14 +78,15 @@ const main = () => {
 
     console.log("");
     logger.info("> SECP256K1 ALGORITHM (Uncompressed, largest private key on 62 bytes):");
+    secp256k1Engine.setPublicKeyGenMode("UNCOMPRESSED");
 
     // Uncompressed public key is 65 bytes long.
     const secp256k1Buffer_U = Buffer.alloc(65);
 
-    logLength = benchmark(() => secp256k1Engine.executeUncompressed(secp256k1Buffer_U, secp256k1_input));
+    logLength = benchmark(() => secp256k1Engine.execute(secp256k1Buffer_U, secp256k1_input));
 
     // Executes once for checking the output
-    secp256k1Engine.executeUncompressed(secp256k1Buffer_U, secp256k1_input);
+    secp256k1Engine.execute(secp256k1Buffer_U, secp256k1_input);
 
     logger.info("=".repeat(logLength));
 

@@ -1,12 +1,15 @@
+import General from "types/general";
+
+
 declare namespace Configs {
     /**
      * Benchmark configuration.
      */
     interface IsBenchmarkConfig {
         sandboxCycles: number[];
-        cycles: number[];
         rangerIterations: bigint;
         rangerReportInterval: bigint;
+        cycles: number[];
         generatorGhostExecutionIterations: number;
     }
 
@@ -16,8 +19,8 @@ declare namespace Configs {
     interface IsFinderConfig {
         publicKeyToFind: string | null;
         addressToFind: string | null;
-        useCompressedPublicKey: boolean;
-        privateKeyGenMode: "FULL_RANDOM" | "ASCENDING" | "DESCENDING";
+        publicKeyGenMode: General.IsPublicKeyGenMode;
+        privateKeyGenMode: General.IsPrivateKeyGenMode;
         privateKeyLowRange: bigint;
         privateKeyHighRange: bigint;
         progressReportInterval: bigint;

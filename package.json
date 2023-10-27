@@ -12,7 +12,6 @@
         "find": "ts-node src/scripts/find.ts",
         "benchmark:crypto": "ts-node src/benchmarks/crypto.ts",
         "benchmark:generator": "ts-node src/benchmarks/generator.ts",
-        "benchmark:ranger": "ts-node src/benchmarks/ranger.ts",
         "benchmark:sandbox": "ts-node src/benchmarks/sandbox.ts"
     },
     "dependencies": {

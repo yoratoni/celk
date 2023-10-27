@@ -14,6 +14,7 @@ export default class BASE58_ENGINE {
      */
     constructor() { }
 
+
     /**
      * Execute the BASE58 decoder.
      * @param input The BASE58 encoded string to decode.
@@ -31,7 +32,7 @@ export default class BASE58_ENGINE {
             const digit = this.ALPHABET.indexOf(c);
 
             if (digit < 0) {
-                throw new Error(`[BASE58] Invalid character found: ${c}`);
+                throw new Error(`[BASE58] decode: Invalid character found: ${c}`);
             }
 
             for (let j = 0; j < bytes.length; j++) {
