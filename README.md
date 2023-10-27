@@ -99,7 +99,7 @@ Benchmark environment:
 - GPU: NVIDIA GeForce RTX 3070.
 - RAM: 32 GB DDR4 @ 3200 MHz.
 - OS: Windows 10 64 bits.
-- Node.js: v20.8.1.
+- Node.js: v20.9.0.
 
 ### Benchmarking of the Bitcoin addresses generator
 | Version     | Addresses per second (K/s) | Upgrade description                                               |
@@ -107,7 +107,7 @@ Benchmark environment:
 | `v1.0.0`    | 396 K/s                    | **Basic algorithm implementations**                               |
 | `v1.0.1`    | 792 K/s                    | **Improved benchmarking precision**                               |
 | `v1.0.2`    | 850 K/s                    | **Ghost executions + Better benchmark measures**                  |
-| `v1.0.2b`   | 1.18 kK/s                  | **Upgrading Node.js from v16.20.2 to v20.8.1**                    |
+| `v1.0.2b`   | 1.18 kK/s                  | **Upgrading Node.js from v16.20.2 to v20.9.0**                    |
 | `v1.0.3`    | 1.19 kK/s                  | **Better private key generator (str -> bigint)**                  |
 | `v1.0.4`    | 1.24 kK/s                  | **Using a single buffer**                                         |
 | `v1.0.4b`   | N/D                        | **Allow to use the public key if known**                          |
