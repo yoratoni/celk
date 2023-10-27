@@ -6,8 +6,8 @@ declare namespace Configs {
      * Benchmarks configuration interface.
      */
     interface IsBenchmarksConfig {
-        iterations: bigint;
-        reportInterval: bigint;
+        nbReports: number;
+        reportInterval: number;
         generatorGhostExecutionIterations: number;
     }
 

@@ -147,7 +147,7 @@ export default class Generator {
             const percentage = bigIntDiv(value, totalTime, 6).result * 100;
             const paddedPercentage = percentage.toFixed(2).padStart(6, " ");
 
-            const log = `(${key.toUpperCase()}) TIME: ${formatHRTime(value)} | WORKLOAD: ${paddedPercentage}% | SAMPLE: ${`0x${VALUES[key]}`.padStart(VALUES.pbl.length + 2, " ")}`;
+            const log = `(${key.toUpperCase()}) EXECUTION: ${formatHRTime(value)} | WORKLOAD: ${paddedPercentage}% | SAMPLE: ${`0x${VALUES[key]}`.padStart(VALUES.pbl.length + 2, " ")}`;
 
             if (percentage >= 50) logger.error(log);
             else if (percentage >= 8) logger.warn(log);
@@ -162,13 +162,13 @@ export default class Generator {
         logger.info("=".repeat(maxLogLength));
         switch (this.mode) {
             case "PUBLIC_KEY":
-                logger.info(`(PBL) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: 0x${VALUES.pbl}`);
+                logger.info(`(PBL) EXECUTION: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: 0x${VALUES.pbl}`);
                 break;
             case "RIPEMD-160":
-                logger.info(`(RIP) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: ${("0x" + VALUES.rip).padStart(VALUES.pbl.length + 2, " ")}`);
+                logger.info(`(RIP) EXECUTION: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: ${("0x" + VALUES.rip).padStart(VALUES.pbl.length + 2, " ")}`);
                 break;
             case "ADDRESS":
-                logger.info(`(ADR) TIME: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: ${VALUES.adr.padStart(VALUES.pbl.length + 2, " ")}`);
+                logger.info(`(ADR) EXECUTION: ${formatHRTime(totalTime)} | WORKLOAD: 100.00% | RESULT: ${VALUES.adr.padStart(VALUES.pbl.length + 2, " ")}`);
                 break;
         }
         console.log("");

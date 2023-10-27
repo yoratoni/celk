@@ -17,6 +17,11 @@ import logger from "utils/logger";
  * Main function for the benchmarking of the encoders / algorithms.
  */
 const execute = (mode: General.IsCryptoBenchmarkMode) => {
+    logger.info("Starting crypto benchmarks...");
+    logger.info(`>> Number of reports per benchmark: ${BENCHMARKS_CONFIG.nbReports}`);
+    logger.info(`>> Report interval: ${BENCHMARKS_CONFIG.reportInterval} second(s)`);
+    logger.info(`>> Benchmark mode: '${mode}'`);
+
     // Reusable variables
     let logLength = 0;
 
@@ -31,11 +36,10 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
 
     if (mode === "all" || mode === "pkg") {
-        const pkgIterations = `${BENCHMARKS_CONFIG.iterations.toLocaleString("en-US")} iterations`;
         const pkgEngine = new PKG_ENGINE("FULL_RANDOM", 1n, 2n ** 256n - 1n);
 
         console.log("");
-        logger.info(`> PRIVATE KEY GENERATOR (Full random mode, ${pkgIterations}):`);
+        logger.info("> PRIVATE KEY GENERATOR (Full random mode):");
         benchmark(
             pkgEngine.execute,
             (input: unknown) => bigintToPrivateKey(input as bigint)
@@ -43,7 +47,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
 
         console.log("");
-        logger.info(`> PRIVATE KEY GENERATOR (Ascending mode, ${pkgIterations}):`);
+        logger.info("> PRIVATE KEY GENERATOR (Ascending mode):");
         pkgEngine.setPrivateKeyGenMode("ASCENDING");
         benchmark(
             pkgEngine.execute,
@@ -51,7 +55,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         );
 
         console.log("");
-        logger.info(`> PRIVATE KEY GENERATOR (Descending mode, ${pkgIterations}):`);
+        logger.info("> PRIVATE KEY GENERATOR (Descending mode):");
         pkgEngine.setPrivateKeyGenMode("DESCENDING");
         benchmark(
             pkgEngine.execute,
@@ -75,8 +79,8 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
         logger.info("=".repeat(logLength));
 
-        if (secp256k1Buffer_C.toString("hex").toUpperCase() === secp256k1_compressedOutput) logger.info("Compressed public key check passed.");
-        else logger.error("Compressed public key check failed.");
+        if (secp256k1Buffer_C.toString("hex").toUpperCase() === secp256k1_compressedOutput) logger.info("TEST: Compressed public key check passed.");
+        else logger.error("TEST: Compressed public key check failed.");
 
         console.log("");
         logger.info("> SECP256K1 ALGORITHM (Uncompressed, largest private key on 62 bytes):");
@@ -92,8 +96,8 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
         logger.info("=".repeat(logLength));
 
-        if (secp256k1Buffer_U.toString("hex").toUpperCase() === secp256k1_uncompressedOutput) logger.info("Uncompressed public key check passed.");
-        else logger.error("Uncompressed public key check failed.");
+        if (secp256k1Buffer_U.toString("hex").toUpperCase() === secp256k1_uncompressedOutput) logger.info("TEST: Uncompressed public key check passed.");
+        else logger.error("TEST: Uncompressed public key check failed.");
     }
 
 
@@ -121,8 +125,8 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         logger.info("=".repeat(logLength));
 
         // Subarray is used to get the first 32 bytes of the output (256 bits)
-        if (sha256Buffer.subarray(0, 32).toString("hex").toUpperCase() === sha256_output) logger.info("SHA-256 check passed.");
-        else logger.error("SHA-256 check failed.");
+        if (sha256Buffer.subarray(0, 32).toString("hex").toUpperCase() === sha256_output) logger.info("TEST: SHA-256 check passed.");
+        else logger.error("TEST: SHA-256 check failed.");
     }
 
 
@@ -149,8 +153,8 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         logger.info("=".repeat(logLength));
 
         // Subarray is used to get the first 20 bytes of the output (160 bits)
-        if (ripemd160Buffer.subarray(0, 20).toString("hex").toUpperCase() === ripemd160_output) logger.info("RIPEMD-160 check passed.");
-        else logger.error("RIPEMD-160 check failed.");
+        if (ripemd160Buffer.subarray(0, 20).toString("hex").toUpperCase() === ripemd160_output) logger.info("TEST: RIPEMD-160 check passed.");
+        else logger.error("TEST: RIPEMD-160 check failed.");
     }
 
 
@@ -173,8 +177,8 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
         logger.info("=".repeat(logLength));
 
-        if (addr === address) logger.info("BASE58 check passed.");
-        else logger.error("BASE58 check failed.");
+        if (addr === address) logger.info("TEST: BASE58 check passed.");
+        else logger.error("TEST: BASE58 check failed.");
     }
 
     console.log("");

@@ -32,15 +32,38 @@ Notes about the benchmarking:
 ### Other commands
 - `yarn test`: An empty test file, just to check some functions.
 
-Configuration
--------------
+Configurations
+-------------_
 I chose to use fix configuration files instead of command line arguments, because it is easier to work with, at least in this case.
 
 - `src/configs/benchmarks.config.ts`: Benchmarking config file.
 - `src/configs/finder.config.ts`: Finder config file.
 - `src/configs/global.config.ts`: Global config file.
 
-More about the finder configuration:
+#### More about the benchmarking configuration:
+```typescript
+const BENCHMARKS_CONFIG: Configs.IsBenchmarksConfig = {
+    // Total number of reports to display
+    nbReports: 5,
+
+    // Number of seconds to wait between each report (> 1)
+    reportInterval: 1,
+
+    // Generator ghost executions to warm up the engine
+    generatorGhostExecutionIterations: 1024
+};
+```
+As the number of iterations per second really depends of the algorithm / encoder / generator,
+I decided to use a report interval instead of a number of iterations.
+
+Now, it is not perfect, it reduces a bit the number of iterations per second, but it is not a big deal,
+as it better matches the real performance of the algorithm / encoder / generator. That's why I decided
+to use a corrector (estimated at 1.45 for now) to get the real number of iterations per second.
+
+I still separated them in the reports, that's what the `THEORETICAL` field means, it is the theoretical number of iterations per second,
+without all the other stuff going on in the background.
+
+#### More about the finder configuration:
 ```typescript
 const FINDER_CONFIG: Configs.IsFinderConfig = {
     // The public key to find the private key for if available (supports 0x prefix).
@@ -100,6 +123,7 @@ Benchmark environment:
 | `v1.0.4`    | 1.24 kK/s                  | **Using a single buffer**                                         |
 | `v1.0.4b`   | N/D                        | **Allow to use the public key if known**                          |
 | `v1.0.5`    | 1.25 kK/s                  | **Reverts the address to its RIPEMD-160 hash**                    |
+| `v1.0.5b`   | N/D                        | **Better benchmarking & reports per second**                      |
 
 #### About the single buffer:
 The cache itself is a 154 bytes buffer, which is enough to store all the steps of the generator.
@@ -132,7 +156,7 @@ Meaning that there's less steps to check if a private key is valid or not.
 | SHA-256             | 3.1µs               | 0.16%    |
 | RIPEMD-160          | 5.8µs               | 0.29%    |
 
-### Benchmarking of the Private Key Generator (PKG) (1,000,000 iterations)
+### Benchmarking of the Private Key Generator (PKG) (5 seconds)
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
 because it is not the bottleneck of the toolbox. I would be glad if it becomes one day lol.
 
@@ -142,7 +166,7 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 | `v1.0.1`    | 590.2 kK/s    | 4.12 MK/s      | 4.60 MK/s        |
 | `v1.0.2`    | 584.4 kK/s    | 4.75 MK/s      | 4.65 MK/s        |
 | `v1.0.2b`   | 592.1 kK/s    | 4.24 MK/s      | 4.68 MK/s        |
-| `v1.0.3`    | **1.21 MK/s** | **10.66 MK/s** | **12.71 MK/s**   |
+| `v1.0.3`    | **1.67 MK/s** | **11.15 MK/s** | **11.41 MK/s**   |
 
 Ideas of future updates
 -----------------------
