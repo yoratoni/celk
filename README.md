@@ -69,7 +69,6 @@ Architecture
 ------------
 #### Generators / Algorithms / Encoders
 ```TS
-|  // Generates the private key.
 |- class RANGER_ENGINE
 |  |- privateKeyGenMode: "FULL_RANDOM" | "ASCENDING" | "DESCENDING"
 |     |- execute(): bigint
