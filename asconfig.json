@@ -1,17 +1,17 @@
 {
     "entries": [
-        "src/lib/wasm/src/index.ts"
+        "src/wasm/src/index.ts"
     ],
     "targets": {
         "dev": {
-            "outFile": "src/lib/wasm/index.wasm",
-            "textFile": "src/lib/wasm/index.wat",
+            "outFile": "src/lib/binary/index.wasm",
+            "textFile": "src/lib/binary/index.wat",
             "sourceMap": true,
             "debug": true
         },
         "prod": {
-            "outFile": "src/lib/wasm/index.wasm",
-            "textFile": "src/lib/wasm/index.wat",
+            "outFile": "src/lib/binary/index.wasm",
+            "textFile": "src/lib/binary/index.wat",
             "sourceMap": true,
             "optimizeLevel": 3,
             "shrinkLevel": 0,
