@@ -144,7 +144,7 @@ Meaning that there's less steps to check if a private key is valid or not.
 | SHA-256             | 3.1µs               | 0.16%    |
 | RIPEMD-160          | 5.8µs               | 0.29%    |
 
-### Benchmarking of the private keys generator (1,000,000 iterations)
+### Benchmarking of the Ranger (private keys generator) (1,000,000 iterations)
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
 because it is not the bottleneck of the toolbox. I would be glad if it becomes one day lol.
 
