@@ -33,7 +33,7 @@ Notes about the benchmarking:
 - `yarn test`: An empty test file, just to check some functions.
 
 Configurations
--------------_
+--------------
 I chose to use fix configuration files instead of command line arguments, because it is easier to work with, at least in this case.
 
 - `src/configs/benchmarks.config.ts`: Benchmarking config file.
