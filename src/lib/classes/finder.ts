@@ -3,7 +3,7 @@ import config from "configs/finder.config";
 import { addressToRIPEMD160 } from "helpers/conversions";
 import { bigIntDiv, bigIntLength } from "helpers/maths";
 import Generator from "lib/classes/generator";
-import RANGER_ENGINE from "lib/crypto/generators/RANGER";
+import PKG_ENGINE from "lib/crypto/generators/PKG";
 import { bigintToPrivateKey, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
 
@@ -12,7 +12,7 @@ import logger from "utils/logger";
  * Used to find a private key from a given Bitcoin address.
  */
 export default class Finder {
-    private ranger: RANGER_ENGINE;
+    private pkg: PKG_ENGINE;
     private generator: Generator;
 
     private generatorInfo: {
@@ -26,7 +26,7 @@ export default class Finder {
      * Construct a new Bitcoin address finder (based on FINDER_CONFIG).
      */
     constructor() {
-        this.ranger = new RANGER_ENGINE(config.privateKeyGenMode, config.privateKeyLowRange, config.privateKeyHighRange);
+        this.pkg = new PKG_ENGINE(config.privateKeyGenMode, config.privateKeyLowRange, config.privateKeyHighRange);
 
         // Check if addressToFind or publicKeyToFind is defined
         if (typeof config.addressToFind !== "string" && typeof config.publicKeyToFind !== "string") {
@@ -85,7 +85,7 @@ export default class Finder {
         console.log("");
         const ghostIterations = `${BENCHMARK_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
         logger.info(`Ghost execution (${ghostIterations}):`);
-        this.generator.executeReport(this.ranger.execute());
+        this.generator.executeReport(this.pkg.execute());
 
         console.log("");
         logger.info("Beginning the search...");
@@ -131,7 +131,7 @@ export default class Finder {
 
         // Main loop
         for (let i = 1n; i <= loopLimit; i++) {
-            privateKey = this.ranger.execute();
+            privateKey = this.pkg.execute();
             value = this.generator.execute(privateKey) as Buffer;
 
             // Progress report

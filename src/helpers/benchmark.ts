@@ -139,10 +139,10 @@ export const benchmark = (fn: Function, useSandboxCycles = false): number => {
 };
 
 /**
- * Benchmarking function specifically made for the Ranger (Bitcoin private key generator).
+ * Benchmarking function specifically made for the Private Key Generator (PKG).
  * @param fn The function to run.
  */
-export const benchmarkRanger = (fn: () => bigint): void => {
+export const benchmarkPkg = (fn: () => bigint): void => {
     // Statistics
     const initialTime = Date.now();
     const lengths = {
@@ -157,10 +157,10 @@ export const benchmarkRanger = (fn: () => bigint): void => {
     // Access function result to prevent optimization
     let res: bigint = 0n;
 
-    for (let i = 1n; i <= BENCHMARK_CONFIG.rangerIterations; i++) {
+    for (let i = 1n; i <= BENCHMARK_CONFIG.pkgIterations; i++) {
         res = fn();
 
-        if (i % BENCHMARK_CONFIG.rangerReportInterval === 0n) {
+        if (i % BENCHMARK_CONFIG.pkgReportInterval === 0n) {
             // Convert the bigint result to a private key string
             const resStr = bigintToPrivateKey(res);
 

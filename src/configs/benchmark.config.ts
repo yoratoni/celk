@@ -8,9 +8,9 @@ const BENCHMARK_CONFIG: Configs.IsBenchmarkConfig = {
     // Cycles for the sandbox
     sandboxCycles: [1000, 10_000, 100_000, 1_000_000],
 
-    // Ranger
-    rangerIterations: 1_000_000n,               // Executions
-    rangerReportInterval: 200_000n,             // Report interval
+    // Private Key Generator (PKG)
+    pkgIterations: 1_000_000n,               // Executions
+    pkgReportInterval: 200_000n,             // Report interval
 
     // Cycles for algorithms & encoders benchmarks
     cycles: [1, 16, 128, 1024],

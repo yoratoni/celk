@@ -1,10 +1,10 @@
 import BENCHMARK_CONFIG from "configs/benchmark.config";
-import { benchmark, benchmarkRanger } from "helpers/benchmark";
+import { benchmark, benchmarkPkg } from "helpers/benchmark";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
 import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
-import RANGER_ENGINE from "lib/crypto/generators/RANGER";
+import PKG_ENGINE from "lib/crypto/generators/PKG";
 import logger from "utils/logger";
 
 
@@ -15,7 +15,7 @@ const main = () => {
     logger.info("Starting benchmarking of the encoders / algorithms.");
 
     // Engines
-    const rangerEngine = new RANGER_ENGINE("FULL_RANDOM", 1n, 2n ** 256n - 1n);
+    const pkgEngine = new PKG_ENGINE("FULL_RANDOM", 1n, 2n ** 256n - 1n);
     const secp256k1Engine = new SECP256K1_ENGINE("COMPRESSED");
     const sha256Engine = new SHA256_ENGINE();
     const ripemd160Engine = new RIPEMD160_ENGINE();
@@ -25,7 +25,7 @@ const main = () => {
     let logLength = 0;
 
     // Test values
-    const rangerIterations = `${BENCHMARK_CONFIG.rangerIterations.toLocaleString("en-US")} iterations`;
+    const pkgIterations = `${BENCHMARK_CONFIG.pkgIterations.toLocaleString("en-US")} iterations`;
     const secp256k1_input = 452312848583266388373324160190187140051835877600158453279131187530910662655n;
     const secp256k1_compressedOutput = "03513BA6E632B03D116D8BD9B96B1E64D39BA15A3CD56E371A2852D1B1331280D3";
     const secp256k1_uncompressedOutput = "04513BA6E632B03D116D8BD9B96B1E64D39BA15A3CD56E371A2852D1B1331280D3547D6E528F9CDACE903849DF2E9D7AAF5DAE533949F6DF47327E3DD1EF6679E3";
@@ -37,23 +37,23 @@ const main = () => {
 
 
     console.log("");
-    logger.info(`> RANGER GENERATOR (Full random mode, ${rangerIterations}):`);
-    benchmarkRanger(
-        rangerEngine.execute
+    logger.info(`> PRIVATE KEY GENERATOR (Full random mode, ${pkgIterations}):`);
+    benchmarkPkg(
+        pkgEngine.execute
     );
 
     console.log("");
-    logger.info(`> RANGER GENERATOR (Ascending mode, ${rangerIterations}):`);
-    rangerEngine.setPrivateKeyGenMode("ASCENDING");
-    benchmarkRanger(
-        rangerEngine.execute
+    logger.info(`> PRIVATE KEY GENERATOR (Ascending mode, ${pkgIterations}):`);
+    pkgEngine.setPrivateKeyGenMode("ASCENDING");
+    benchmarkPkg(
+        pkgEngine.execute
     );
 
     console.log("");
-    logger.info(`> RANGER GENERATOR (Descending mode, ${rangerIterations}):`);
-    rangerEngine.setPrivateKeyGenMode("DESCENDING");
-    benchmarkRanger(
-        rangerEngine.execute
+    logger.info(`> PRIVATE KEY GENERATOR (Descending mode, ${pkgIterations}):`);
+    pkgEngine.setPrivateKeyGenMode("DESCENDING");
+    benchmarkPkg(
+        pkgEngine.execute
     );
 
 

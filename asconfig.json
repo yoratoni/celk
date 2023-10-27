@@ -1,17 +1,17 @@
 {
     "entries": [
-        "src/lib/crypto/encoders/BASE58.ts"
+        "src/lib/wasm/src/"
     ],
     "targets": {
         "dev": {
-            "outFile": "src/lib/crypto/wasm/release.wasm",
-            "textFile": "src/lib/crypto/wasm/release.wat",
+            "outFile": "src/lib/wasm/index.wasm",
+            "textFile": "src/lib/wasm/index.wat",
             "sourceMap": true,
             "debug": true
         },
         "prod": {
-            "outFile": "src/lib/crypto/wasm/release.wasm",
-            "textFile": "src/lib/crypto/wasm/release.wat",
+            "outFile": "src/lib/wasm/index.wasm",
+            "textFile": "src/lib/wasm/index.wat",
             "sourceMap": true,
             "optimizeLevel": 3,
             "shrinkLevel": 0,

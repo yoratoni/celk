@@ -7,8 +7,8 @@ declare namespace Configs {
      */
     interface IsBenchmarkConfig {
         sandboxCycles: number[];
-        rangerIterations: bigint;
-        rangerReportInterval: bigint;
+        pkgIterations: bigint;
+        pkgReportInterval: bigint;
         cycles: number[];
         generatorGhostExecutionIterations: number;
     }
