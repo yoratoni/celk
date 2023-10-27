@@ -1,4 +1,4 @@
-import BENCHMARK_CONFIG from "configs/benchmark.config";
+import BENCHMARK_CONFIG from "configs/benchmarks.config";
 import Generator from "lib/classes/generator";
 import PKG_ENGINE from "lib/crypto/generators/PKG";
 import logger from "utils/logger";

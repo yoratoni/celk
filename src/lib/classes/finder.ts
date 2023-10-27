@@ -1,4 +1,4 @@
-import BENCHMARK_CONFIG from "configs/benchmark.config";
+import BENCHMARK_CONFIG from "configs/benchmarks.config";
 import config from "configs/finder.config";
 import { addressToRIPEMD160 } from "helpers/conversions";
 import { bigIntDiv, bigIntLength } from "helpers/maths";

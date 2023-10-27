@@ -1,7 +1,7 @@
 import dedent from "dedent-js";
 import minimist from "minimist";
 
-import BENCHMARK_CONFIG from "configs/benchmark.config";
+import BENCHMARK_CONFIG from "configs/benchmarks.config";
 import { benchmark, benchmarkPkg } from "helpers/benchmark";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
@@ -172,6 +172,8 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         if (addr === address) logger.info("BASE58 check passed.");
         else logger.error("BASE58 check failed.");
     }
+
+    console.log("");
 };
 
 /**

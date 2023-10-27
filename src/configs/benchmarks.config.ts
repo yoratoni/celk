@@ -2,9 +2,9 @@ import Configs from "types/configs";
 
 
 /**
- * Benchmark configuration.
+ * Benchmarks configuration.
  */
-const BENCHMARK_CONFIG: Configs.IsBenchmarkConfig = {
+const BENCHMARKS_CONFIG: Configs.IsBenchmarksConfig = {
     // Cycles for the sandbox
     sandboxCycles: [1000, 10_000, 100_000, 1_000_000],
 
@@ -20,4 +20,4 @@ const BENCHMARK_CONFIG: Configs.IsBenchmarkConfig = {
 };
 
 
-export default BENCHMARK_CONFIG;
+export default BENCHMARKS_CONFIG;

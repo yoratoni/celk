@@ -3,9 +3,9 @@ import General from "types/general";
 
 declare namespace Configs {
     /**
-     * Benchmark configuration.
+     * Benchmarks configuration interface.
      */
-    interface IsBenchmarkConfig {
+    interface IsBenchmarksConfig {
         sandboxCycles: number[];
         pkgIterations: bigint;
         pkgReportInterval: bigint;

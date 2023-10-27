@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import BENCHMARK_CONFIG from "configs/benchmark.config";
+import BENCHMARK_CONFIG from "configs/benchmarks.config";
 import { bigintToPrivateKey, formatDuration, formatHRTime, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
 

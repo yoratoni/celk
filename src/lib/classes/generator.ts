@@ -1,4 +1,4 @@
-import BENCHMARK_CONFIG from "configs/benchmark.config";
+import BENCHMARK_CONFIG from "configs/benchmarks.config";
 import { bigIntDiv } from "helpers/maths";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";

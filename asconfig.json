@@ -1,6 +1,6 @@
 {
     "entries": [
-        "src/lib/wasm/src/"
+        "src/lib/wasm/src/index.ts"
     ],
     "targets": {
         "dev": {

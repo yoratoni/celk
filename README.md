@@ -36,7 +36,7 @@ Configuration
 -------------
 I chose to use fix configuration files instead of command line arguments, because it is easier to work with, at least in this case.
 
-- `src/configs/benchmark.config.ts`: Benchmarking config file.
+- `src/configs/benchmarks.config.ts`: Benchmarking config file.
 - `src/configs/finder.config.ts`: Finder config file.
 - `src/configs/global.config.ts`: Global config file.
 
@@ -164,6 +164,11 @@ Thinking about it, but after a lot of performance improvements..
 
 Architecture
 ------------
+#### Folder structure
+- `src/benchmarks`: Each file corresponds to a category of benchmarking (crypto, generator, sandbox).
+- `src/configs`: Each file corresponds to a configuration file (benchmark, finder, global).
+- `src/helpers`: Each file corresponds to a helper (benchmark, finder, global).
+
 #### Generators / Algorithms / Encoders
 ```TS
 |- class PKG_ENGINE
