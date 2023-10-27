@@ -10,7 +10,16 @@ Commands
 - `yarn find`: Executes the main function made to find the private key for a given public key / address.
 
 ### Benchmarking
-- `yarn benchmark:crypto`: Each generators / encoder / algorithm.
+- `yarn benchmark:crypto -m [option]`: Each generators / encoder / algorithm.
+    - Options:
+        - `all`: All the generators / encoders / algorithms.
+        - `pkg`: The private key generator.
+        - `algorithms`: The algorithms category.
+        - `encoders`: The encoders category.
+        - `secp256k1`: The SECP256K1 algorithm.
+        - `sha256`: The SHA-256 algorithm.
+        - `ripemd160`: The RIPEMD-160 algorithm.
+        - `base58`: The BASE58 encoder.
 - `yarn benchmark:generator`: Bitcoin address generator.
 - `yarn benchmark:sandbox`: To compare different techniques while implementing new stuff.
 
