@@ -1,6 +1,7 @@
 /* eslint-disable arrow-body-style */
 
 import { benchmark } from "helpers/benchmark";
+import logger from "utils/logger";
 
 
 /**
@@ -28,16 +29,17 @@ const testFn_1 = (arg0: `0x${string}`) => {
  * Main function for the sandbox benchmarking.
  */
 const main = () => {
-    console.log("Starting sandbox benchmarking.");
+    logger.info("Starting sandbox benchmarking.");
 
     console.log("");
-    console.log("Benchmarking testFn_0().");
+    logger.info("Benchmarking testFn_0:");
     benchmark(
         () => testFn_0(406406891762530007676983468101857752779095154063922479276071118116148301075720n),
         true
     );
 
-    console.log("Benchmarking testFn_1().");
+    console.log("");
+    logger.info("Benchmarking testFn_1:");
     benchmark(
         () => testFn_1("0x82895e91fe5b276b0880dc7db44989c14000c1eb"),
         true
