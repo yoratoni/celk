@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import BENCHMARKS_CONFIG from "configs/benchmarks.config";
+import { bigIntDiv } from "helpers/maths";
 import { formatHRTime, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
 
@@ -45,7 +46,7 @@ export const benchmark = (
         const formattedTime = formatHRTime(currTime - timeBeforeFn);
 
         // Calculate the theoretical number of iterations per second
-        const iterationsPerSecond = 1_000_000_000n / (currTime - timeBeforeFn + 1n);
+        const iterationsPerSecond = bigIntDiv(1_000_000_000n, currTime - timeBeforeFn).result;
 
         // Format the number of iterations per second
         const formattedIterationsPerSecond = formatUnitPerTimeUnit(Number(iterationsPerSecond), "IT", "s", 14, true);

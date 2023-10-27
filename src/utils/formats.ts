@@ -111,24 +111,24 @@ export const formatHRTime = (
     // Hours
     if (hrtime >= 3_600_000_000_000_000n) {
         return `${(Number(hrtime) / 3_600_000_000_000_000).toLocaleString("en-US", {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         })}h`.padStart(padding, " ");
     }
 
     // Minutes
     if (hrtime >= 60_000_000_000n) {
         return `${(Number(hrtime) / 60_000_000_000).toLocaleString("en-US", {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         })}m`.padStart(padding, " ");
     }
 
     // Seconds
     if (hrtime >= 1_000_000_000n) {
         return `${(Number(hrtime) / 1_000_000_000).toLocaleString("en-US", {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         })}s`.padStart(padding, " ");
     }
 
@@ -143,14 +143,14 @@ export const formatHRTime = (
     // Microseconds
     if (hrtime >= 1000n) {
         return `${(Number(hrtime) / 1000).toLocaleString("en-US", {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         })}µs`.padStart(padding, " ");
     }
 
     // Nanoseconds
     return `${hrtime.toLocaleString("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     })}ns`.padStart(padding, " ");
 };
