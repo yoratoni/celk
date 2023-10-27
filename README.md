@@ -56,14 +56,6 @@ const BENCHMARKS_CONFIG: Configs.IsBenchmarksConfig = {
 As the number of iterations per second really depends of the algorithm / encoder / generator,
 I decided to use a report interval instead of a number of iterations.
 
-Now, it is not perfect, it reduces a bit the number of iterations per second. That's why I decided
-to use a corrector (estimated at `1.45` for now) to get an estimation of
-what it would be without the other calculations in the loop.
-
-I still separated the actual number of the theoretical one in the reports,
-that's what the `THEORETICAL` field means, it is the theoretical number of iterations per second,
-without all the other stuff going on in the loop.
-
 #### More about the finder configuration:
 ```typescript
 const FINDER_CONFIG: Configs.IsFinderConfig = {
