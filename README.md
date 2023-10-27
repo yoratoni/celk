@@ -21,9 +21,9 @@ Configuration
 -------------
 I chose to use fix configuration files instead of command line arguments, because it is easier to work with, at least in this case.
 
-- `benchmark.config.ts`: The configuration file for the benchmarking.
-- `finder.config.ts`: The configuration file for the finder.
-- `global.config.ts`: The global configuration file.
+- `src/configs/benchmark.config.ts`: The configuration file for the benchmarking.
+- `src/configs/finder.config.ts`: The configuration file for the finder.
+- `src/configs/global.config.ts`: The global configuration file.
 
 More about the finder configuration:
 ```typescript
