@@ -1,4 +1,4 @@
-import BENCHMARK_CONFIG from "configs/benchmarks.config";
+import BENCHMARKS_CONFIG from "configs/benchmarks.config";
 import { bigIntDiv } from "helpers/maths";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
@@ -87,7 +87,7 @@ export default class Generator {
         const TIMES: { [key: string]: bigint; } = {};
 
         // Run the ghost execution n times to to warm up the engine
-        for (let i = 0; i <= BENCHMARK_CONFIG.generatorGhostExecutionIterations; i++) {
+        for (let i = 0; i <= BENCHMARKS_CONFIG.generatorGhostExecutionIterations; i++) {
             // SECP256K1
             const pblStart = process.hrtime.bigint();
             this.secp256k1Engine.execute(this.cache, privateKey);

@@ -6,10 +6,8 @@ declare namespace Configs {
      * Benchmarks configuration interface.
      */
     interface IsBenchmarksConfig {
-        sandboxCycles: number[];
-        pkgIterations: bigint;
-        pkgReportInterval: bigint;
-        cycles: number[];
+        iterations: bigint;
+        reportInterval: bigint;
         generatorGhostExecutionIterations: number;
     }
 

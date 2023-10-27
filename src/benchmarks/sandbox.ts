@@ -1,6 +1,6 @@
 /* eslint-disable arrow-body-style */
 
-import { benchmark } from "helpers/benchmark";
+import { benchmark } from "utils/benchmarks";
 import logger from "utils/logger";
 
 
@@ -34,15 +34,13 @@ const main = () => {
     console.log("");
     logger.info("Benchmarking testFn_0:");
     benchmark(
-        () => testFn_0(406406891762530007676983468101857752779095154063922479276071118116148301075720n),
-        true
+        () => testFn_0(406406891762530007676983468101857752779095154063922479276071118116148301075720n)
     );
 
     console.log("");
     logger.info("Benchmarking testFn_1:");
     benchmark(
-        () => testFn_1("0x82895e91fe5b276b0880dc7db44989c14000c1eb"),
-        true
+        () => testFn_1("0x82895e91fe5b276b0880dc7db44989c14000c1eb")
     );
 };
 

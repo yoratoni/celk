@@ -1,4 +1,4 @@
-import BENCHMARK_CONFIG from "configs/benchmarks.config";
+import BENCHMARKS_CONFIG from "configs/benchmarks.config";
 import config from "configs/finder.config";
 import { addressToRIPEMD160 } from "helpers/conversions";
 import { bigIntDiv, bigIntLength } from "helpers/maths";
@@ -83,7 +83,7 @@ export default class Finder {
         logger.info(`>> High: ${config.privateKeyHighRange.toLocaleString("en-US")}`);
 
         console.log("");
-        const ghostIterations = `${BENCHMARK_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
+        const ghostIterations = `${BENCHMARKS_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
         logger.info(`Ghost execution (${ghostIterations}):`);
         this.generator.executeReport(this.pkg.execute());
 

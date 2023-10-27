@@ -1,14 +1,15 @@
 import dedent from "dedent-js";
 import minimist from "minimist";
 
-import BENCHMARK_CONFIG from "configs/benchmarks.config";
-import { benchmark, benchmarkPkg } from "helpers/benchmark";
+import BENCHMARKS_CONFIG from "configs/benchmarks.config";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
 import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
 import PKG_ENGINE from "lib/crypto/generators/PKG";
 import General from "types/general";
+import { benchmark } from "utils/benchmarks";
+import { bigintToPrivateKey } from "utils/formats";
 import logger from "utils/logger";
 
 
@@ -30,28 +31,31 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
 
     if (mode === "all" || mode === "pkg") {
-        const pkgIterations = `${BENCHMARK_CONFIG.pkgIterations.toLocaleString("en-US")} iterations`;
+        const pkgIterations = `${BENCHMARKS_CONFIG.iterations.toLocaleString("en-US")} iterations`;
         const pkgEngine = new PKG_ENGINE("FULL_RANDOM", 1n, 2n ** 256n - 1n);
 
         console.log("");
         logger.info(`> PRIVATE KEY GENERATOR (Full random mode, ${pkgIterations}):`);
-        benchmarkPkg(
-            pkgEngine.execute
+        benchmark(
+            pkgEngine.execute,
+            (input: unknown) => bigintToPrivateKey(input as bigint)
         );
 
 
         console.log("");
         logger.info(`> PRIVATE KEY GENERATOR (Ascending mode, ${pkgIterations}):`);
         pkgEngine.setPrivateKeyGenMode("ASCENDING");
-        benchmarkPkg(
-            pkgEngine.execute
+        benchmark(
+            pkgEngine.execute,
+            (input: unknown) => bigintToPrivateKey(input as bigint)
         );
 
         console.log("");
         logger.info(`> PRIVATE KEY GENERATOR (Descending mode, ${pkgIterations}):`);
         pkgEngine.setPrivateKeyGenMode("DESCENDING");
-        benchmarkPkg(
-            pkgEngine.execute
+        benchmark(
+            pkgEngine.execute,
+            (input: unknown) => bigintToPrivateKey(input as bigint)
         );
     }
 

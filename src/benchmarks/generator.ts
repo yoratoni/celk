@@ -1,4 +1,4 @@
-import BENCHMARK_CONFIG from "configs/benchmarks.config";
+import BENCHMARKS_CONFIG from "configs/benchmarks.config";
 import Generator from "lib/classes/generator";
 import PKG_ENGINE from "lib/crypto/generators/PKG";
 import logger from "utils/logger";
@@ -10,7 +10,7 @@ import logger from "utils/logger";
 const main = () => {
     logger.info("Starting benchmarking of the Bitcoin address generator.");
 
-    const ghostIterations = `${BENCHMARK_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
+    const ghostIterations = `${BENCHMARKS_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
 
     const pkgEngine = new PKG_ENGINE("FULL_RANDOM", 1n, 2n ** 256n - 1n);
     const generator = new Generator("COMPRESSED", "PUBLIC_KEY");

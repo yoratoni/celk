@@ -103,6 +103,22 @@ export const formatHRTime = (
 ): string => {
     const padding = 10;
 
+    // Hours
+    if (hrtime >= 3_600_000_000_000_000n) {
+        return `${(Number(hrtime) / 3_600_000_000_000_000).toLocaleString("en-US", {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+        })}h`.padStart(padding, " ");
+    }
+
+    // Minutes
+    if (hrtime >= 60_000_000_000n) {
+        return `${(Number(hrtime) / 60_000_000_000).toLocaleString("en-US", {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+        })}m`.padStart(padding, " ");
+    }
+
     // Seconds
     if (hrtime >= 1_000_000_000n) {
         return `${(Number(hrtime) / 1_000_000_000).toLocaleString("en-US", {
@@ -132,25 +148,4 @@ export const formatHRTime = (
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     })}ns`.padStart(padding, " ");
-};
-
-/**
- * Format a duration in the format: "xxxx:xx:xx:xx".
- * @param duration the duration to format (in ms).
- * @returns The formatted string.
- */
-export const formatDuration = (duration: number): string => {
-    let seconds = Math.floor((duration) / 1000);
-    let minutes = Math.floor(seconds / 60);
-    let hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    hours = hours - (days * 24);
-    minutes = minutes - (days * 24 * 60) - (hours * 60);
-    seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
-
-    return `${days.toString().padStart(2, "0")
-    }:${hours.toString().padStart(2, "0")
-    }:${minutes.toString().padStart(2, "0")
-    }:${seconds.toString().padStart(2, "0")}`;
 };
