@@ -127,13 +127,13 @@ Meaning that there's less steps to check if a private key is valid or not.
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
 because it is not the bottleneck of the toolbox. I would be glad if it becomes one day lol.
 
-| Version     | `FULL_RANDOM` | `ASCENDING` | `DESCENDING` |
-|-------------|---------------|-------------|--------------|
-| `v1.0.0`    | 575.7 kK/s    | 4.80 MK/s   | 4.76 MK/s    |
-| `v1.0.1`    | 590.2 kK/s    | 4.12 MK/s   | 4.60 MK/s    |
-| `v1.0.2`    | 584.4 kK/s    | 4.75 MK/s   | 4.65 MK/s    |
-| `v1.0.2b`   | 592.1 kK/s    | 4.24 MK/s   | 4.68 MK/s    |
-| `v1.0.3`    | 1.21 MK/s     | 10.66 MK/s  | 12.71 MK/s   |
+| Version     | `FULL_RANDOM` | `ASCENDING`    | `DESCENDING`     |
+|-------------|---------------|----------------|------------------|
+| `v1.0.0`    | 575.7 kK/s    | 4.80 MK/s      | 4.76 MK/s        |
+| `v1.0.1`    | 590.2 kK/s    | 4.12 MK/s      | 4.60 MK/s        |
+| `v1.0.2`    | 584.4 kK/s    | 4.75 MK/s      | 4.65 MK/s        |
+| `v1.0.2b`   | 592.1 kK/s    | 4.24 MK/s      | 4.68 MK/s        |
+| `v1.0.3`    | **1.21 MK/s** | **10.66 MK/s** | **12.71 MK/s**   |
 
 Ideas of future updates
 -----------------------
