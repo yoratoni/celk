@@ -14,6 +14,9 @@ Commands
 - `yarn benchmark:generator`: Bitcoin address generator.
 - `yarn benchmark:sandbox`: To compare different techniques while implementing new stuff.
 
+### Other commands
+- `yarn test`: An empty test file, just to check some functions.
+
 Notes about the benchmarking:
 - What I call the "ghost execution report" is a single showed execution of the generator with multiple previous hidden executions.
   It allows the JIT compiler to optimize the code, and to show the real performance of the generator.
