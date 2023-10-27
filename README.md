@@ -113,8 +113,8 @@ Here's a table that shows the reserved spaces (in bytes):
 ### Benchmarking of the algorithms / encoders (512 ghost executions)
 This table is updated with the latest version of the toolbox.
 
-Note that all the classical steps
-are not included since `v1.0.5`, because I simply reversed the address to its RIPEMD-160 hash.
+Note that all the normal generator steps are not included anymore, since `v1.0.5`,
+because I simply reversed the address to its RIPEMD-160 hash.
 Meaning that there's less steps to check if a private key is valid or not.
 
 | Algorithm / encoder | Execution time (ms) | Workload |
