@@ -4,7 +4,7 @@ A toolbox to work with Bitcoin addresses & private keys, entirely written in Typ
 Commands
 --------
 ### Main commands
-- `yarn find`: Executes the main function used to find the private key for a given public key / address.
+- `yarn find`: Executes the main function made to find the private key for a given public key / address.
 
 ### Benchmarking
 - `yarn benchmark:crypto`: Each generators / encoder / algorithm.
