@@ -57,7 +57,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 };
 ```
 - If you fill the `publicKeyToFind` field, the `addressToFind` field will be ignored.
-- The private key can start with `0x`, it is supported.
+- The public key can start with `0x`, it is supported.
 - The `publicKeyGenMode` field is used to specify if the public key should be compressed or not, it is generally compressed.
 - The `privateKeyGenMode` can be set to `FULL_RANDOM`, `ASCENDING` or `DESCENDING`. Ascending & descending will start from the beginning
   / end of the private key range, and full random will generate.. a random number in the range.
