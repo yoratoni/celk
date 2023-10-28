@@ -26,50 +26,62 @@ export const benchmark = (
     // Statistics
     let lastReportTime = process.hrtime.bigint();
     let currReportNb = 0;
-    let timeBeforeFn = 0n;
-    let currTime = 0n;
 
-    while (currReportNb < BENCHMARKS_CONFIG.nbReports) {
-        timeBeforeFn = process.hrtime.bigint();
+    let totalTime = 0n;
+    let t0 = 0n;
+    let t1 = 0n;
+
+    for (let i = 0; i < Infinity; i++) {
+        t0 = process.hrtime.bigint();
         res = fn();
-        currTime = process.hrtime.bigint();
+        t1 = process.hrtime.bigint();
+        totalTime += t1 - t0;
 
-        // Continue if the time elapsed since the last report is less than the report interval
-        if (currTime - lastReportTime < reportInterval) continue;
+        if (t1 - lastReportTime >= reportInterval) {
+            lastReportTime = t1;
 
-        // If the time elapsed since the last report is greater than the report interval
+            // Calculate the average execution time
+            const averageTime = bigIntDiv(totalTime, BigInt(i)).result;
 
-        // Update the last report time & report
-        lastReportTime = currTime;
+            // Format the execution time
+            const formattedTime = formatHRTime(averageTime);
 
-        // Format the execution time
-        const formattedTime = formatHRTime(currTime - timeBeforeFn);
+            // Format the number of iterations per second
+            const formattedIterationsPerSecond = formatUnitPerTimeUnit(
+                1_000_000_000 / averageTime,
+                "IT",
+                "s",
+                14,
+                true
+            );
 
-        // Calculate the theoretical number of iterations per second
-        const iterationsPerSecond = bigIntDiv(1_000_000_000n, currTime - timeBeforeFn).result;
+            // Format the result if a function is provided and if the result is valid
+            let formattedRes = "N/D";
 
-        // Format the number of iterations per second
-        const formattedIterationsPerSecond = formatUnitPerTimeUnit(Number(iterationsPerSecond), "IT", "s", 14, true);
+            if (res) {
+                if (formatFn) formattedRes = formatFn(res);
+                else formattedRes = `${res}`;
+            }
 
-        // Format the result if a function is provided and if the result is valid
-        let formattedRes = "N/D";
+            // Final log
+            const log = `EXECUTION: ${formattedTime} | ITERATIONS: ${formattedIterationsPerSecond} | SAMPLE: ${formattedRes}`;
 
-        if (res) {
-            if (formatFn) formattedRes = formatFn(res);
-            else formattedRes = `${res}`;
+            // Get the longest log length
+            if (log.length > maxLogLength) maxLogLength = log.length;
+
+            // Report
+            logger.info(log);
+
+            // Increment the number of reports
+            currReportNb++;
+
+            // Reset the total time & the number of iterations
+            totalTime = 0n;
+            i = 0;
+
+            // Break if the number of reports is greater than the maximum number of reports
+            if (currReportNb >= BENCHMARKS_CONFIG.nbReports) break;
         }
-
-        // Final log
-        const log = `EXECUTION: ${formattedTime} | ITERATIONS: ${formattedIterationsPerSecond} | SAMPLE: ${formattedRes}`;
-
-        // Get the longest log length
-        if (log.length > maxLogLength) maxLogLength = log.length;
-
-        // Report
-        logger.info(log);
-
-        // Increment the number of reports
-        currReportNb++;
     }
 
     return maxLogLength;

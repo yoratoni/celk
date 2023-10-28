@@ -104,7 +104,7 @@ export const formatUnitPerTimeUnit = (
  * @returns The formatted string.
  */
 export const formatHRTime = (
-    hrtime: bigint
+    hrtime: bigint | number
 ): string => {
     const padding = 10;
 
