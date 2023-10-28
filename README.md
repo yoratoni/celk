@@ -20,14 +20,13 @@ Commands
         - `sha256`: The SHA-256 algorithm.
         - `ripemd160`: The RIPEMD-160 algorithm.
         - `base58`: The BASE58 encoder.
-- `yarn benchmark:generator`: Bitcoin address generator.
-- `yarn benchmark:sandbox`: To compare different techniques while implementing new stuff.
+- `yarn benchmark:generator`: Bitcoin address generator (`> Public key`, `> RIPEMD-160 Hash`, `> Address`).
+- `yarn benchmark:sandbox`: To compare different techniques while implementing new stuff, empty by default.
 
 Notes about the benchmarking:
-- What I call the "ghost execution report" is a single showed execution of the generator with multiple previous hidden executions.
+- What I call the `ghost execution report` in some of my benchmarks results,
+  is a single showed execution of the generator with multiple previous hidden executions.
   It allows the JIT compiler to optimize the code, and to show the real performance of the generator.
-- It's the same thing for the other benchmarking, the goal is to run the functions a lot of times to get the real performance.
-  Or the JIT compiler will not really optimize the code, it's even more important when we want to check the workload of the different functions.
 
 ### Other commands
 - `yarn test`: An empty test file, just to check some functions.
@@ -60,10 +59,10 @@ I decided to use a report interval instead of a number of iterations.
 ```typescript
 const FINDER_CONFIG: Configs.IsFinderConfig = {
     // The public key to find the private key for if available (supports 0x prefix).
-    publicKeyToFind: "0x02e0a8b039282faf6fe0fd769cfbc4b6b4cf8758ba68220eac420e32b91ddfa673",
+    publicKeyToFind: "0x02e0a8b039682fbf4fe0fd769cfbc4b6b4cf8758ba68220bac420e32b91ddfa673",
 
     // The address to find the private key for.
-    addressToFind: "128z5d7nN7PkCuX5qoA4Ys6pmxUYnEy86k",
+    addressToFind: "127z5d2nN7PkCuX5voA4Ys6pmxUYnEy86k",
 
     // Use compressed public key ("COMPRESSED") or uncompressed ("UNCOMPRESSED").
     // BTC addresses generally uses compressed keys.
@@ -76,7 +75,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 
     // The private key low range (inclusive).
     // Default: 1n
-    privateKeyLowRange: 2n ** 159n,
+    privateKeyLowRange: 1n,
 
     // The private key high range (inclusive).
     // Default: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn
@@ -84,7 +83,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 
     // The progress report interval (in number of iterations).
     // Default: 1024n
-    progressReportInterval: 1024n,
+    progressReportInterval: 1024n
 };
 ```
 - If you fill the `publicKeyToFind` field, the `addressToFind` field will be ignored.
