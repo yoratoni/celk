@@ -1,12 +1,7 @@
-const buffer = new Uint8Array(8);
+import Cache from "helpers/cache";
 
 
-const test = (buf: Uint8Array) => {
-    console.log("Internal buffer value", buf.toString());
-    console.log("Internal buffer value", buf.toString());
-};
+const cache = Cache.alloc(10);
+cache.write("Hello World");
 
-
-console.log("External buffer value", buffer.toString());
-test(buffer);
-console.log("External buffer value", buffer.toString());
+console.log(cache.toString());

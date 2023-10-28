@@ -213,7 +213,7 @@ export class JacobianPoint {
     /**
      * Fast algo for doubling 2 Jacobian Points when curve's a=0.
      *
-     * **NOTES**:
+     * **Notes**:
      * - Cannot be reused for other curves when a != 0.
      * - Cost: 2M + 5S + 6add + 3*2 + 1*3 + 1*8.
      *
@@ -241,7 +241,7 @@ export class JacobianPoint {
     /**
      * Fast algo for adding 2 Jacobian Points when curve's a=0.
      *
-     * **NOTES**:
+     * **Notes**:
      * - Cannot be reused for other curves when a != 0.
      * - Cost: 12M + 4S + 6add + 1*2.
      * - 2007 Bernstein-Lange (11M + 5S + 9add + 4*2) is actually *slower*. No idea why.

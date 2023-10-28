@@ -181,7 +181,7 @@ in Uint8Arrays, here's more details in method comparison:
 - [x] `buffer[i]` -> `uint8Array[i]`.
 - [x] `buffer.length` -> `uint8Array.length`.
 - [x] `buffer.subarray()` -> `uint8Array.subarray()`.
-- [ ] `Buffer.from()` -> `Uint8Array.from()`.
+- [x] `Buffer.from()` -> `Uint8Array.from()`.
 - [ ] `Buffer.write()` -> `Uint8Array.write()`.
 
 ### 2. From TS to AssemblyScript
