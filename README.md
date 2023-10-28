@@ -170,7 +170,16 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 
 Ideas of future updates
 -----------------------
-### 1. From TS to AssemblyScript
+### 1. Converting Node.js Buffer to Uint8Array
+AssemblyScript & other languages that can be converted to WebAssembly does not support Node.js Buffers,
+so I need to convert them to Uint8Array, which is supported by AssemblyScript, allowing for really
+fast data transfer between JS & WASM.
+
+I need to create a bunch of methods to match what I did with Buffers, which is not natively present
+in Uint8Arrays, such as the `write()` method, but only a part of it (hex encoding). And some other stuff,
+which is not really hard to do.
+
+### 2. From TS to AssemblyScript
 I need to choose what part of the toolbox I want to convert to AssemblyScript, the best would be to convert only the low level stuff,
 here's a list of the things that could be converted:
 - The private key generator.
@@ -183,7 +192,7 @@ Technically, I could also convert the generator, but I don't think it is necessa
 initialized only once. The Finder class could also be converted, but it's literally a loop that calls the generator,
 so I don't think it is necessary too.
 
-### 2. Workers
+### 3. Workers
 Thinking about it, but after a lot of performance improvements..
 
 1000 BTC Bitcoin Challenge

@@ -1,4 +1,12 @@
-import { bigIntDiv } from "helpers/maths";
+const buffer = new Uint8Array(8);
 
 
-console.log(bigIntDiv(2654616516516516516565651566516516165165165n, 55445151515154n));
+const test = (buf: Uint8Array) => {
+    console.log("Internal buffer value", buf.toString());
+    console.log("Internal buffer value", buf.toString());
+};
+
+
+console.log("External buffer value", buffer.toString());
+test(buffer);
+console.log("External buffer value", buffer.toString());

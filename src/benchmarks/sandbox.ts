@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable arrow-body-style */
 
 import { benchmark } from "utils/benchmarks";
