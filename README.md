@@ -139,15 +139,21 @@ Here's a table that shows the reserved spaces (in bytes):
 ### Benchmarking of the algorithms / encoders (512 ghost executions)
 This table is updated with the latest version of the toolbox.
 
-Note that all the normal generator steps are not included anymore, since `v1.0.5`,
-because I simply reversed the address to its RIPEMD-160 hash.
-Meaning that there's less steps to check if a private key is valid or not.
+Note that, since `v1.0.5`, the input address is reversed to its RIPEMD-160 hash,
+meaning that there's less steps to check if a private key is valid or not. I still
+kept all the necessary stuff to generate addresses directly from the private key,
+that's why the Base58 encoder is still here.
 
-| Algorithm / encoder | Execution time (ms) | Workload |
-|---------------------|---------------------|----------|
-| SECP256K1           | 1.94ms              | 99.56%   |
-| SHA-256             | 3.0µs               | 0.15%    |
-| RIPEMD-160          | 5.5µs               | 0.28%    |
+I'm using two of my benchmarks to get the results:
+- `yarn benchmark:crypto`: Benchmarking of the algorithms / encoders to get their iterations per second.
+- `yarn benchmark:generator`: Benchmarking of the generator to get execution time & workload.
+
+| Algorithm / encoder | Execution time | Workload | Evaluated iterations per second |
+|---------------------|----------------|----------|---------------------------------|
+| SECP256K1           | 2.14ms         | 99.14%   | 472.00 IT/s                     |
+| SHA-256             | 2.9µs          | 0.13%    | 245.60 kIT/s                    |
+| RIPEMD-160          | 5.4µs          | 0.25%    | 238.78 kIT/s                    |
+| BASE58              | 5.0µs          | 0.23%    | 216.62 kIT/s                    |
 
 ### Benchmarking of the Private Key Generator (PKG) (5 seconds)
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,

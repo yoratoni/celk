@@ -9,13 +9,16 @@ import logger from "utils/logger";
  * Main benchmarking function.
  * @param fn The function to run.
  * @param formatFn The function to format the result (optional).
+ * @param testPassed Whether the test passed (optional).
  * @returns The length of the log (for further formatting).
  */
 export const benchmark = (
     fn: () => unknown,
-    formatFn?: (input: unknown) => string
+    formatFn?: (input: unknown) => string,
+    testPassed?: boolean
 ): number => {
     let res: unknown;
+    let formattedRes = "N/D";
 
     // Time in nanoseconds between each report
     const reportInterval = 1_000_000_000n * BigInt(BENCHMARKS_CONFIG.reportInterval);
@@ -26,6 +29,10 @@ export const benchmark = (
     // Statistics
     let lastReportTime = process.hrtime.bigint();
     let currReportNb = 0;
+
+    // Averages
+    let avgTimeAdder = 0;
+    let avgIterationsPerSecondAdder = 0;
 
     let totalTime = 0n;
     let t0 = 0n;
@@ -42,9 +49,14 @@ export const benchmark = (
 
             // Calculate the average execution time
             const averageTime = bigIntDiv(totalTime, BigInt(i)).result;
+            avgTimeAdder += averageTime;
 
             // Format the execution time
             const formattedTime = formatHRTime(averageTime);
+
+            // Calculate the number of iterations per second
+            const iterationsPerSecond = 1_000_000_000 / averageTime;
+            avgIterationsPerSecondAdder += iterationsPerSecond;
 
             // Format the number of iterations per second
             const formattedIterationsPerSecond = formatUnitPerTimeUnit(
@@ -56,8 +68,6 @@ export const benchmark = (
             );
 
             // Format the result if a function is provided and if the result is valid
-            let formattedRes = "N/D";
-
             if (res) {
                 if (formatFn) formattedRes = formatFn(res);
                 else formattedRes = `${res}`;
@@ -83,6 +93,27 @@ export const benchmark = (
             if (currReportNb >= BENCHMARKS_CONFIG.nbReports) break;
         }
     }
+
+    // Format the average execution time
+    const formattedAvgTime = formatHRTime(avgTimeAdder / currReportNb);
+
+    // Format the average number of iterations per second
+    const formattedAvgIterationsPerSecond = formatUnitPerTimeUnit(
+        avgIterationsPerSecondAdder / currReportNb,
+        "IT",
+        "s",
+        14,
+        true
+    );
+
+    // Test passed ?
+    let testPassedStr = "N/D";
+    if (testPassed === false) testPassedStr = "KO";
+    else if (testPassed === true) testPassedStr = "OK";
+
+    // Conclusion
+    logger.info("=".repeat(maxLogLength));
+    logger.info(`EXECUTION: ${formattedAvgTime} | ITERATIONS: ${formattedAvgIterationsPerSecond} | TEST:   ${testPassedStr.padStart(formattedRes.length, " ")}`);
 
     return maxLogLength;
 };
