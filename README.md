@@ -176,8 +176,13 @@ so I need to convert them to Uint8Array, which is supported by AssemblyScript, a
 fast data transfer between JS & WASM.
 
 I need to create a bunch of methods to match what I did with Buffers, which is not natively present
-in Uint8Arrays, such as the `write()` method, but only a part of it (hex encoding). And some other stuff,
-which is not really hard to do.
+in Uint8Arrays, here's more details in method comparison:
+- [x] `Buffer.alloc()` -> `new Uint8Array()`.
+- [x] `buffer[i]` -> `uint8Array[i]`.
+- [x] `buffer.length` -> `uint8Array.length`.
+- [x] `buffer.subarray()` -> `uint8Array.subarray()`.
+- [ ] `Buffer.from()` -> `Uint8Array.from()`.
+- [ ] `Buffer.write()` -> `Uint8Array.write()`.
 
 ### 2. From TS to AssemblyScript
 I need to choose what part of the toolbox I want to convert to AssemblyScript, the best would be to convert only the low level stuff,
