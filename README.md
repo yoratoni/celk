@@ -145,9 +145,9 @@ Meaning that there's less steps to check if a private key is valid or not.
 
 | Algorithm / encoder | Execution time (ms) | Workload |
 |---------------------|---------------------|----------|
-| SECP256K1           | 1.96ms              | 96.85%   |
-| SHA-256             | 3.1µs               | 0.16%    |
-| RIPEMD-160          | 5.8µs               | 0.29%    |
+| SECP256K1           | 1.94ms              | 99.56%   |
+| SHA-256             | 3.0µs               | 0.15%    |
+| RIPEMD-160          | 5.5µs               | 0.28%    |
 
 ### Benchmarking of the Private Key Generator (PKG) (5 seconds)
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
