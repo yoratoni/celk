@@ -1,4 +1,5 @@
 import BENCHMARKS_CONFIG from "configs/benchmarks.config";
+import Cache from "helpers/cache";
 import { bigIntDiv } from "helpers/maths";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
@@ -27,7 +28,7 @@ export default class Generator {
     private mode: General.IsGeneratorGenMode;
 
     /**
-     * Reusable buffer used as a cache for all operations (186 bytes).
+     * Reusable cache used as a cache for all operations (186 bytes).
      *
      * Spaces are reserved as follows (end index exclusive):
      * - `000::065` -> SECP256K1 public key (33/65 bytes).
@@ -42,7 +43,7 @@ export default class Generator {
      * - `097::118` being the final RIPEMD-160 hash before double SHA-256 checksum (21 bytes).
      * - `097::122` being the final Bitcoin hash before BASE58 (25 bytes).
      */
-    private cache = Buffer.alloc(154).fill(0);
+    private cache = Cache.alloc(154).fill(0);
 
     /** Number of bytes for the public key */
     private pkB: number;
@@ -126,7 +127,7 @@ export default class Generator {
 
             // Take the first 4 bytes of the double SHA-256 checksum
             const chkStart = process.hrtime.bigint();
-            this.cache.writeUInt32BE(this.cache.readUInt32BE(122), 118);
+            this.cache.writeUint32BE(this.cache.readUint32BE(122), 118);
             TIMES.chk = process.hrtime.bigint() - chkStart;
             VALUES.chk = this.cache.subarray(118, 122).toString("hex");
 
@@ -177,9 +178,9 @@ export default class Generator {
     /**
      * Generate a Bitcoin address from a private key.
      * @param privateKey The private key to generate the address from.
-     * @returns The public key (buffer), RIPEMD-160 hash (buffer) or Bitcoin address (string).
+     * @returns The public key (cache), RIPEMD-160 hash (cache) or Bitcoin address (string).
      */
-    execute = (privateKey: bigint): Buffer | string => {
+    execute = (privateKey: bigint): Cache | string => {
         // SECP256K1
         this.secp256k1Engine.execute(this.cache, privateKey);
 
@@ -202,7 +203,7 @@ export default class Generator {
         this.sha256Engine.execute(this.cache, [122, 154], 122);
 
         // Take the first 4 bytes of the double SHA-256 checksum
-        this.cache.writeUInt32BE(this.cache.readUInt32BE(122), 118);
+        this.cache.writeUint32BE(this.cache.readUint32BE(122), 118);
 
         // Base58 encoding
         return this.base58Engine.encode(this.cache, [97, 122]);

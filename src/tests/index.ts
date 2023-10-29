@@ -1,4 +1,11 @@
-import { bigIntDiv } from "helpers/maths";
+import Cache from "helpers/cache";
 
 
-console.log(bigIntDiv(2654616516516516516565651566516516165165165n, 55445151515154n));
+// const cache = Cache.alloc(10);
+// cache.write("0xF0FF");
+
+// console.log(cache.toString());
+
+const cache = Cache.fromString("0xF0FF");
+
+console.log(cache.toString());
