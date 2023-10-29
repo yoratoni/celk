@@ -1,11 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable arrow-body-style */
 
+import Cache from "helpers/cache";
 import { benchmark } from "utils/benchmarks";
 import logger from "utils/logger";
 
 
 /**
- * Test buffer.
+ * Test cache.
+ */
+const cache = Cache.alloc(4096);
+
+/**
+ * Test Buffer.
  */
 const buffer = Buffer.alloc(4096);
 
@@ -13,15 +20,15 @@ const buffer = Buffer.alloc(4096);
 /**
  * **[FN 0]** Test function to benchmark.
  */
-const testFn_0 = (arg0: bigint) => {
-
+const testFn_0 = () => {
+    cache.write("0xFF");
 };
 
 /**
  * **[FN 1]** Test function to benchmark.
  */
-const testFn_1 = (arg0: `0x${string}`) => {
-
+const testFn_1 = () => {
+    buffer.write("0xFF");
 };
 
 
@@ -34,13 +41,13 @@ const main = () => {
     console.log("");
     logger.info("Benchmarking testFn_0:");
     benchmark(
-        () => testFn_0(406406891762530007676983468101857752779095154063922479276071118116148301075720n)
+        testFn_0
     );
 
     console.log("");
     logger.info("Benchmarking testFn_1:");
     benchmark(
-        () => testFn_1("0x82895e91fe5b276b0880dc7db44989c14000c1eb")
+        testFn_1
     );
 };
 
