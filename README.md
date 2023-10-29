@@ -112,15 +112,24 @@ Benchmark environment:
 | `v1.0.2`    | 850 K/s                    | **Ghost executions + Better benchmark measures**                  |
 | `v1.0.2b`   | 1.18 kK/s                  | **Upgrading Node.js from v16.20.2 to v20.9.0**                    |
 | `v1.0.3`    | 1.19 kK/s                  | **Better private key generator (str -> bigint)**                  |
-| `v1.0.4`    | 1.24 kK/s                  | **Using a single buffer**                                         |
+| `v1.0.4`    | 1.24 kK/s                  | **Using a single buffer for all operations**                      |
 | `v1.0.4b`   | N/D                        | **Allow to use the public key if known**                          |
 | `v1.0.5`    | 1.25 kK/s                  | **Reverts the address to its RIPEMD-160 hash**                    |
 | `v1.0.5b`   | N/D                        | **Better benchmarking & reports per second**                      |
 
-#### About the single buffer:
-The cache itself is a 154 bytes buffer, which is enough to store all the steps of the generator.
+#### About the cache:
+> Note that I was previously using Node.js Buffers, but for better compatibility with WASM modules,
+> I decided to switch to Uin8Arrays (in `v1.0.6`).
+> Now, I still extended Uint8Arrays to add methods similar to the ones that can be found in the Buffer class,
+> but I kept the Uint8Array class as the main class, to avoid any conversion.
 
-The goal of the single buffer update is not to directly improve the performance of the generator (for now),
+The cache itself is a 154 bytes Uint8Array, which is enough to store all the steps of the generator.
+
+Note that the `Cache` class is an extension of the `Uint8Array` class supporting methods similar
+to the ones that can be found in the `Buffer` class, while totally being compatible with the `Uint8Array` class
+without the need for any conversion.
+
+The goal of the single cache update is not to directly improve the performance of the generator (for now),
 as the bottleneck is still the SECP256K1 algorithm, but to at least, not make it the bottleneck later,
 when the SECP256K1 algorithm will be improved.
 
@@ -170,21 +179,7 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 
 Ideas of future updates
 -----------------------
-### 1. Converting Node.js Buffer to Uint8Array
-AssemblyScript & other languages that can be converted to WebAssembly does not support Node.js Buffers,
-so I need to convert them to Uint8Array, which is supported by AssemblyScript, allowing for really
-fast data transfer between JS & WASM.
-
-I need to create a bunch of methods to match what I did with Buffers, which is not natively present
-in Uint8Arrays, here's more details in method comparison:
-- [x] `Buffer.alloc()` -> `new Uint8Array()`.
-- [x] `buffer[i]` -> `uint8Array[i]`.
-- [x] `buffer.length` -> `uint8Array.length`.
-- [x] `buffer.subarray()` -> `uint8Array.subarray()`.
-- [x] `Buffer.from()` -> `Uint8Array.from()`.
-- [ ] `Buffer.write()` -> `Uint8Array.write()`.
-
-### 2. From TS to AssemblyScript
+### 1. From TS to AssemblyScript
 I need to choose what part of the toolbox I want to convert to AssemblyScript, the best would be to convert only the low level stuff,
 here's a list of the things that could be converted:
 - The private key generator.
@@ -193,11 +188,11 @@ here's a list of the things that could be converted:
 - The RIPEMD-160 algorithm.
 - The BASE58 encoder.
 
-Technically, I could also convert the generator, but I don't think it is necessary as it only executes operations on a single buffer,
+Technically, I could also convert the generator, but I don't think it is necessary as it only executes operations on a single cache,
 initialized only once. The Finder class could also be converted, but it's literally a loop that calls the generator,
 so I don't think it is necessary too.
 
-### 3. Workers
+### 2. Workers
 Thinking about it, but after a lot of performance improvements..
 
 1000 BTC Bitcoin Challenge

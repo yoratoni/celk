@@ -38,7 +38,7 @@ const mod = (a: bigint, b = CURVE.P): bigint => {
  */
 const invert = (number: bigint, modulo = CURVE.P): bigint => {
     if (number === 0n || modulo <= 0n) {
-        throw new Error(`[SECP256K1] invert: Expected positive integers, got n=${number} mod=${modulo}.`);
+        throw new Error(`[SECP256K1] invert: Expected positive integers, got n=${number} mod=${modulo}`);
     }
 
     // Euclidean GCD
@@ -59,7 +59,7 @@ const invert = (number: bigint, modulo = CURVE.P): bigint => {
     }
 
     const gcd = b;
-    if (gcd !== 1n) throw new Error("[SECP256K1] invert: Does not exist.");
+    if (gcd !== 1n) throw new Error("[SECP256K1] invert: Does not exist");
 
     return mod(x, modulo);
 };
@@ -80,7 +80,7 @@ const normalizeScalar = (num: number | bigint): bigint => {
     if (typeof num === "number" && num > 0 && Number.isSafeInteger(num)) return BigInt(num);
     if (typeof num === "bigint" && isWithinCurveOrder(num)) return num;
 
-    throw new TypeError("[SECP256K1] normalizeScalar: Expected valid private scalar: 0 < scalar < curve.n.");
+    throw new TypeError("[SECP256K1] normalizeScalar: Expected valid private scalar: 0 < scalar < curve.n");
 };
 
 /**
@@ -117,7 +117,9 @@ const splitScalarEndo = (k: bigint): {
     if (k1neg) k1 = n - k1;
     if (k2neg) k2 = n - k2;
 
-    if (k1 > POW_2_128 || k2 > POW_2_128) throw new Error("[SECP256K1] splitScalarEndo: Endomorphism failed");
+    if (k1 > POW_2_128 || k2 > POW_2_128) {
+        throw new Error("[SECP256K1] splitScalarEndo: Endomorphism failed");
+    }
 
     return { k1neg, k1, k2neg, k2 };
 };
@@ -250,7 +252,7 @@ export class JacobianPoint {
      */
     add = (other: JacobianPoint): JacobianPoint => {
         if (!(other instanceof JacobianPoint)) {
-            throw new TypeError("[SECP256K1] JacobianPoint#add: expected JacobianPoint.");
+            throw new TypeError("[SECP256K1] JacobianPoint#add: expected JacobianPoint");
         }
 
         const X1 = this.x;

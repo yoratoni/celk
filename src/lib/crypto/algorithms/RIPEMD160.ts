@@ -1,4 +1,5 @@
-import { littleEndianWordsToBuffer } from "helpers/conversions";
+import Cache from "helpers/cache";
+import { littleEndianWordsToCache } from "helpers/conversions";
 
 
 /**
@@ -70,7 +71,7 @@ export default class RIPEMD160_ENGINE {
                             "ERROR";
 
         if (res === "ERROR") {
-            throw new Error("[RIPEMD160] F: j is out of range.");
+            throw new Error("[RIPEMD160] F: j is out of range");
         }
 
         return res;
@@ -88,7 +89,7 @@ export default class RIPEMD160_ENGINE {
                             "ERROR";
 
         if (res === "ERROR") {
-            throw new Error("[RIPEMD160] K1: j is out of range.");
+            throw new Error("[RIPEMD160] K1: j is out of range");
         }
 
         return res;
@@ -106,7 +107,7 @@ export default class RIPEMD160_ENGINE {
                             "ERROR";
 
         if (res === "ERROR") {
-            throw new Error("[RIPEMD160] K2: j is out of range.");
+            throw new Error("[RIPEMD160] K2: j is out of range");
         }
 
         return res;
@@ -127,11 +128,11 @@ export default class RIPEMD160_ENGINE {
 
     /**
      * RIPEMD-160 internal hash computation.
-     * @param cache The buffer cache to write to.
+     * @param cache The cache to write to.
      * @param subarray The subarray to use as an input.
      * @param writeToOffset The offset to write to (optional, defaults to 0).
      */
-    private ripemd160 = (cache: Buffer, subarray: Buffer, writeToOffset?: number): void => {
+    private ripemd160 = (cache: Cache, subarray: Cache, writeToOffset?: number): void => {
         const HASH = [
             0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476,
             0xC3D2E1F0
@@ -187,33 +188,33 @@ export default class RIPEMD160_ENGINE {
         }
 
         // Write to cache at offset
-        littleEndianWordsToBuffer(cache, HASH, writeToOffset);
+        littleEndianWordsToCache(cache, HASH, writeToOffset);
     };
 
     /**
-     * Converts an input buffer to an array of little-endian words
+     * Converts an input cache to an array of little-endian words
      * using the predefined input array as an output
-     * @param buffer The input buffer.
+     * @param cache The input cache.
      */
-    private bufferToLittleEndianWords = (buffer: Buffer): void => {
-        for (let i = 0; i < buffer.length * 8; i += 8) {
+    private cacheToLittleEndianWords = (cache: Cache): void => {
+        for (let i = 0; i < cache.length * 8; i += 8) {
             // Write the byte to the word
-            this.inputArray[i >> 5] |= (buffer[i / 8] & 0xFF) << (i % 32);
+            this.inputArray[i >> 5] |= (cache[i / 8] & 0xFF) << (i % 32);
         }
     };
 
     /**
      * Execute the RIPEMD-160 algorithm.
-     * @param cache The buffer cache to use (input & output).
+     * @param cache The cache to use (input & output).
      * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end] (optional).
      * @param writeToOffset The offset to write to (optional, defaults to 0).
      */
-    execute = (cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void => {
+    execute = (cache: Cache, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void => {
         // Empty the input array by keeping the reference
         this.inputArray.length = 0;
 
         const subarray = cache.subarray(bytesToTakeFromCache?.[0] || 0, bytesToTakeFromCache?.[1]);
-        this.bufferToLittleEndianWords(subarray);
+        this.cacheToLittleEndianWords(subarray);
         this.ripemd160(cache, subarray, writeToOffset);
     };
 }
