@@ -79,7 +79,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 
     // The private key high range (inclusive).
     // Default: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn
-    privateKeyHighRange: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn,
+    privateKeyHighRange: 2n ** 160n - 1n,
 
     // The progress report interval (in number of iterations).
     // Default: 1024n
