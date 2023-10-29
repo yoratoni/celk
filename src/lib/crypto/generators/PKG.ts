@@ -50,7 +50,7 @@ export default class PKG_ENGINE {
         this.currAscending = this.low;
         this.currDescending = this.high;
 
-        // Fill the buffer with random data
+        // Fill the cache with random data
         this.tmpCache.randomFill();
     }
 

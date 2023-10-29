@@ -1,4 +1,5 @@
-import { bigEndianWordsToBuffer } from "helpers/conversions";
+import Cache from "helpers/cache";
+import { bigEndianWordsToCache } from "helpers/conversions";
 
 
 /**
@@ -97,11 +98,11 @@ export default class SHA256_ENGINE {
 
     /**
      * SHA-256 internal hash computation.
-     * @param cache The buffer cache to write to.
+     * @param cache The cache to write to.
      * @param subarray The subarray to use as an input.
      * @param writeToOffset The offset to write to (optional, defaults to 0).
      */
-    private sha256 = (cache: Buffer, subarray: Buffer, writeToOffset?: number): void => {
+    private sha256 = (cache: Cache, subarray: Cache, writeToOffset?: number): void => {
         const HASH = [
             0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
             0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
@@ -181,18 +182,18 @@ export default class SHA256_ENGINE {
         }
 
         // Write to cache at offset
-        bigEndianWordsToBuffer(cache, HASH, writeToOffset);
+        bigEndianWordsToCache(cache, HASH, writeToOffset);
     };
 
     /**
-     * Converts an input buffer to an array of big-endian words
+     * Converts an input cache to an array of big-endian words
      * using the predefined input array as an output.
-     * @param buffer The input buffer.
+     * @param cache The input cache.
      */
-    private bufferToBigEndianWords = (buffer: Buffer): void => {
-        for (let i = 0; i < buffer.length * 8; i += 8) {
+    private cacheToBigEndianWords = (cache: Cache): void => {
+        for (let i = 0; i < cache.length * 8; i += 8) {
             // Write the byte to the word
-            this.inputArray[i >> 5] |= (buffer[i / 8] & 0xFF) << (24 - i % 32);
+            this.inputArray[i >> 5] |= (cache[i / 8] & 0xFF) << (24 - i % 32);
         }
     };
 
@@ -202,12 +203,12 @@ export default class SHA256_ENGINE {
      * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end] (optional).
      * @param writeToOffset The offset to write to (optional, defaults to 0).
      */
-    execute = (cache: Buffer, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void => {
+    execute = (cache: Cache, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void => {
         // Empty the input array by keeping the reference
         this.inputArray.length = 0;
 
         const subarray = cache.subarray(bytesToTakeFromCache?.[0] || 0, bytesToTakeFromCache?.[1]);
-        this.bufferToBigEndianWords(subarray);
+        this.cacheToBigEndianWords(subarray);
         this.sha256(cache, subarray, writeToOffset);
     };
 }

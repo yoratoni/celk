@@ -1,3 +1,6 @@
+import Cache from "helpers/cache";
+
+
 /**
  * A TypeScript implementation of the binary-to-text encoder, BASE58.
  *
@@ -20,9 +23,9 @@ export default class BASE58_ENGINE {
      * @param input The BASE58 encoded string to decode.
      * @returns The decoded bytes.
      */
-    decode = (input: string): Buffer => {
+    decode = (input: string): Cache => {
         if (input.length === 0) {
-            return Buffer.alloc(0);
+            return Cache.alloc(0);
         }
 
         const bytes = [0];
@@ -58,7 +61,7 @@ export default class BASE58_ENGINE {
             bytes.push(0);
         }
 
-        return Buffer.from(bytes.reverse());
+        return Cache.fromNumbers(bytes.reverse());
     };
 
     /**
@@ -67,7 +70,7 @@ export default class BASE58_ENGINE {
      * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end].
      * @returns The BASE58 encoded version of the bytes.
      */
-    encode = (cache: Buffer, bytesToTakeFromCache: [number, number]): string => {
+    encode = (cache: Cache, bytesToTakeFromCache: [number, number]): string => {
         const bytes = cache.subarray(...bytesToTakeFromCache);
         const digits = [0];
 

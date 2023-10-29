@@ -1,3 +1,4 @@
+import Cache from "helpers/cache";
 import General from "types/general";
 
 
@@ -350,7 +351,7 @@ export class JacobianPoint {
 export default class SECP256K1_ENGINE {
     private readonly G = new Point(CURVE.Gx, CURVE.Gy);
 
-    private executeEndpoint: (cache: Buffer, privateKey: bigint) => void;
+    private executeEndpoint: (cache: Cache, privateKey: bigint) => void;
 
 
     /**
@@ -373,11 +374,10 @@ export default class SECP256K1_ENGINE {
 
     /**
      * Execute the SECP256K1 algorithm (uncompressed key - 65 bytes).
-     * @param cache The buffer cache to use (input & output).
+     * @param cache The cache to use (input & output).
      * @param privateKey The private key.
-     * @param privateKey The private key as a buffer.
      */
-    private executeUncompressed = (cache: Buffer, privateKey: bigint): void => {
+    private executeUncompressed = (cache: Cache, privateKey: bigint): void => {
         const point = this.G.multiply(privateKey);
 
         // X coordinate of the public key (base 16)
@@ -391,15 +391,15 @@ export default class SECP256K1_ENGINE {
         while (y.length < 64) y = `0${y}`;
 
         // Write the public key to the cache
-        cache.write(`04${x}${y}`, "hex");
+        cache.write(`04${x}${y}`);
     };
 
     /**
      * Execute the SECP256K1 algorithm (compressed key - 33 bytes).
-     * @param cache The buffer cache to use (input & output).
-     * @param privateKey The private key as a buffer.
+     * @param cache The cache to use (input & output).
+     * @param privateKey The private key.
      */
-    private executeCompressed = (cache: Buffer, privateKey: bigint): void => {
+    private executeCompressed = (cache: Cache, privateKey: bigint): void => {
         const point = this.G.multiply(privateKey);
 
         // X coordinate of the public key (base 16)
@@ -409,7 +409,7 @@ export default class SECP256K1_ENGINE {
         while (x.length < 64) x = `0${x}`;
 
         // Write the public key to the cache
-        cache.write(`${point.y % 2n === 0n ? "02" : "03"}${x}`, "hex");
+        cache.write(`${point.y % 2n === 0n ? "02" : "03"}${x}`);
     };
 
     /**
@@ -431,8 +431,8 @@ export default class SECP256K1_ENGINE {
 
     /**
      * Main endpoint to execute the SECP256K1 algorithm (defined in the constructor).
-     * @param cache The buffer cache to use (input & output).
+     * @param cache The cache to use (input & output).
      * @param privateKey The private key.
      */
-    execute = (cache: Buffer, privateKey: bigint): void => this.executeEndpoint(cache, privateKey);
+    execute = (cache: Cache, privateKey: bigint): void => this.executeEndpoint(cache, privateKey);
 }

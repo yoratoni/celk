@@ -121,13 +121,9 @@ Benchmark environment:
 > Note that I was previously using Node.js Buffers, but for better compatibility with WASM modules,
 > I decided to switch to Uin8Arrays (in `v1.0.6`).
 > Now, I still extended Uint8Arrays to add methods similar to the ones that can be found in the Buffer class,
-> but I kept the Uint8Array class as the main class, to avoid any conversion.
+> but I kept the Uint8Array class as the main class, to avoid any need for some conversions.
 
 The cache itself is a 154 bytes Uint8Array, which is enough to store all the steps of the generator.
-
-Note that the `Cache` class is an extension of the `Uint8Array` class supporting methods similar
-to the ones that can be found in the `Buffer` class, while totally being compatible with the `Uint8Array` class
-without the need for any conversion.
 
 The goal of the single cache update is not to directly improve the performance of the generator (for now),
 as the bottleneck is still the SECP256K1 algorithm, but to at least, not make it the bottleneck later,

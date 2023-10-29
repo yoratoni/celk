@@ -109,7 +109,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         const sha256Cache = Cache.alloc(65);
 
         // Secp256k1 uncompressed output into sha256Cache
-        sha256Cache.write(secp256k1_uncompressedOutput, "hex");
+        sha256Cache.write(secp256k1_uncompressedOutput);
 
         // Executes once for checking the output
         sha256Engine.execute(sha256Cache);
@@ -119,7 +119,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         else testPassed = false;
 
         // Secp256k1 uncompressed output into sha256Cache
-        sha256Cache.write(secp256k1_uncompressedOutput, "hex");
+        sha256Cache.write(secp256k1_uncompressedOutput);
 
         benchmark(() => sha256Engine.execute(sha256Cache), undefined, testPassed);
     }
@@ -135,7 +135,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         const ripemd160Cache = Cache.alloc(32);
 
         // SHA-256 output into ripemd160Cache
-        ripemd160Cache.write(sha256_output, "hex");
+        ripemd160Cache.write(sha256_output);
 
         // Executes once for checking the output
         ripemd160Engine.execute(ripemd160Cache);
@@ -145,7 +145,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         else testPassed = false;
 
         // SHA-256 output into ripemd160Cache
-        ripemd160Cache.write(sha256_output, "hex");
+        ripemd160Cache.write(sha256_output);
 
         benchmark(() => ripemd160Engine.execute(ripemd160Cache), undefined, testPassed);
     }
@@ -161,7 +161,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         const base58Cache = Cache.alloc(25);
 
         // Raw address into base58Cache
-        base58Cache.write(rawAddress, "hex");
+        base58Cache.write(rawAddress);
 
         // Encode once for checking the output
         const addr = base58Engine.encode(base58Cache, [0, 25]);

@@ -52,6 +52,21 @@ export default class Cache extends Uint8Array {
     };
 
     /**
+     * Creates a new Cache object from the specified array of numbers.
+     * @param numbers The array of numbers to create the cache from.
+     * @returns A new Cache object.
+     */
+    static fromNumbers = (numbers: number[]): Cache => {
+        const cache = new Cache(numbers.length);
+
+        for (let i = 0; i < numbers.length; i++) {
+            cache[i] = numbers[i];
+        }
+
+        return cache;
+    };
+
+    /**
      * A private method that writes an hexadecimal string to the cache.
      * @param value The hexadecimal string to write to the cache.
      * @param start The offset to start writing at.
@@ -116,11 +131,26 @@ export default class Cache extends Uint8Array {
 
     /**
      * Overrides the default Uint8Array 'subarray' method allowing to keep the 'Cache' type.
+     *
+     * **Note:** We can't use the 'subarray' method directly because it returns a 'Uint8Array' object.
+     * And maximum call stack size will be exceeded if we try to cast it to a 'Cache' object.
      * @param begin The start offset.
      * @param end The end offset.
      * @returns The subarray.
      */
-    subarray = (begin: number, end?: number): Cache => this.subarray(begin, end);
+    subarray = (begin: number, end?: number): Cache => {
+        if (end === undefined) {
+            end = this.length;
+        }
+
+        const cache = new Cache(end - begin);
+
+        for (let i = begin; i < end; i++) {
+            cache[i - begin] = this[i];
+        }
+
+        return cache;
+    };
 
     /**
      * Overrides the default Uint8Array 'toString' method.
