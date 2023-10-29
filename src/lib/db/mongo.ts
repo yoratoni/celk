@@ -37,7 +37,8 @@ export const connectToDB = async (
             mongoDB: mongoDB
         };
     } catch (error) {
-        throw new Error(`[MONGODB] Error while connecting to the MongoDB database:\n${error}`);
+        logger.error(`[MONGODB] Error while connecting to the MongoDB database:\n${error}.`);
+        sys.exit(1);
     }
 };
 
@@ -53,6 +54,6 @@ export const closeDBConnection = async (mongoClient: MongoClient): Promise<void>
 
         logger.verbose("Successfully closed the database connection.");
     } catch (error) {
-        throw new Error(`[MONGODB] Error while closing the database connection:\n${error}`);
+        logger.error(`[MONGODB] Error while closing the database connection:\n${error}.`);
     }
 };

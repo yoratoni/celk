@@ -31,7 +31,7 @@ export const bigIntToTenPow = (input: bigint, incr = 0): bigint => {
 /**
  * Bigint division with decimal point at a specific precision (truncates the result).
  *
- * **Note:** For the result, the precision cannot be greater than 15 to be accurate.
+ * **NOTE:** For the result, the precision cannot be greater than 15 to be accurate.
  * The str result is always accurate regardless of the precision (scientific notation).
  * @param numerator The numerator.
  * @param denominator The denominator.

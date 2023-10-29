@@ -2,7 +2,6 @@ import dedent from "dedent-js";
 import minimist from "minimist";
 
 import BENCHMARKS_CONFIG from "configs/benchmarks.config";
-import Cache from "helpers/cache";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
@@ -12,6 +11,7 @@ import General from "types/general";
 import { benchmark } from "utils/benchmarks";
 import { bigintToPrivateKey } from "utils/formats";
 import logger from "utils/logger";
+
 
 /**
  * Main function for the benchmarking of the encoders / algorithms.
@@ -70,15 +70,15 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         const secp256k1Engine = new SECP256K1_ENGINE("COMPRESSED");
 
         // Compressed public key is 33 bytes long.
-        const secp256k1Cache_C = Cache.alloc(33);
+        const secp256k1Buffer_C = Buffer.alloc(33);
 
         // Executes once for checking the output
-        secp256k1Engine.execute(secp256k1Cache_C, secp256k1_input);
+        secp256k1Engine.execute(secp256k1Buffer_C, secp256k1_input);
 
-        if (secp256k1Cache_C.toString("hex").toUpperCase() === secp256k1_compressedOutput) testPassed = true;
+        if (secp256k1Buffer_C.toString("hex").toUpperCase() === secp256k1_compressedOutput) testPassed = true;
         else testPassed = false;
 
-        benchmark(() => secp256k1Engine.execute(secp256k1Cache_C, secp256k1_input), undefined, testPassed);
+        benchmark(() => secp256k1Engine.execute(secp256k1Buffer_C, secp256k1_input), undefined, testPassed);
 
 
         console.log("");
@@ -86,15 +86,15 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         secp256k1Engine.setPublicKeyGenMode("UNCOMPRESSED");
 
         // Uncompressed public key is 65 bytes long.
-        const secp256k1Cache_U = Cache.alloc(65);
+        const secp256k1Buffer_U = Buffer.alloc(65);
 
         // Executes once for checking the output
-        secp256k1Engine.execute(secp256k1Cache_U, secp256k1_input);
+        secp256k1Engine.execute(secp256k1Buffer_U, secp256k1_input);
 
-        if (secp256k1Cache_U.toString("hex").toUpperCase() === secp256k1_uncompressedOutput) testPassed = true;
+        if (secp256k1Buffer_U.toString("hex").toUpperCase() === secp256k1_uncompressedOutput) testPassed = true;
         else testPassed = false;
 
-        benchmark(() => secp256k1Engine.execute(secp256k1Cache_U, secp256k1_input), undefined, testPassed);
+        benchmark(() => secp256k1Engine.execute(secp256k1Buffer_U, secp256k1_input), undefined, testPassed);
     }
 
 
@@ -106,22 +106,22 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         // Input from SECP256K1 algorithm.
         // Input is 33 to 65 bytes long (compressed / uncompressed public key)
         // Output is 32 bytes long
-        const sha256Cache = Cache.alloc(65);
+        const sha256Buffer = Buffer.alloc(65);
 
-        // Secp256k1 uncompressed output into sha256Cache
-        sha256Cache.write(secp256k1_uncompressedOutput, "hex");
+        // Secp256k1 uncompressed output into sha256Buffer
+        sha256Buffer.write(secp256k1_uncompressedOutput, "hex");
 
         // Executes once for checking the output
-        sha256Engine.execute(sha256Cache);
+        sha256Engine.execute(sha256Buffer);
 
         // Subarray is used to get the first 32 bytes of the output (256 bits)
-        if (sha256Cache.subarray(0, 32).toString("hex").toUpperCase() === sha256_output) testPassed = true;
+        if (sha256Buffer.subarray(0, 32).toString("hex").toUpperCase() === sha256_output) testPassed = true;
         else testPassed = false;
 
-        // Secp256k1 uncompressed output into sha256Cache
-        sha256Cache.write(secp256k1_uncompressedOutput, "hex");
+        // Secp256k1 uncompressed output into sha256Buffer
+        sha256Buffer.write(secp256k1_uncompressedOutput, "hex");
 
-        benchmark(() => sha256Engine.execute(sha256Cache), undefined, testPassed);
+        benchmark(() => sha256Engine.execute(sha256Buffer), undefined, testPassed);
     }
 
 
@@ -132,22 +132,22 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
         // Input from SHA-256 algorithm.
         // Input is always 32 bytes long
-        const ripemd160Cache = Cache.alloc(32);
+        const ripemd160Buffer = Buffer.alloc(32);
 
-        // SHA-256 output into ripemd160Cache
-        ripemd160Cache.write(sha256_output, "hex");
+        // SHA-256 output into ripemd160Buffer
+        ripemd160Buffer.write(sha256_output, "hex");
 
         // Executes once for checking the output
-        ripemd160Engine.execute(ripemd160Cache);
+        ripemd160Engine.execute(ripemd160Buffer);
 
         // Subarray is used to get the first 20 bytes of the output (160 bits)
-        if (ripemd160Cache.subarray(0, 20).toString("hex").toUpperCase() === ripemd160_output) testPassed = true;
+        if (ripemd160Buffer.subarray(0, 20).toString("hex").toUpperCase() === ripemd160_output) testPassed = true;
         else testPassed = false;
 
-        // SHA-256 output into ripemd160Cache
-        ripemd160Cache.write(sha256_output, "hex");
+        // SHA-256 output into ripemd160Buffer
+        ripemd160Buffer.write(sha256_output, "hex");
 
-        benchmark(() => ripemd160Engine.execute(ripemd160Cache), undefined, testPassed);
+        benchmark(() => ripemd160Engine.execute(ripemd160Buffer), undefined, testPassed);
     }
 
 
@@ -158,18 +158,18 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
         // Input from raw address.
         // Input is always 25 bytes long
-        const base58Cache = Cache.alloc(25);
+        const base58Buffer = Buffer.alloc(25);
 
-        // Raw address into base58Cache
-        base58Cache.write(rawAddress, "hex");
+        // Raw address into base58Buffer
+        base58Buffer.write(rawAddress, "hex");
 
         // Encode once for checking the output
-        const addr = base58Engine.encode(base58Cache, [0, 25]);
+        const addr = base58Engine.encode(base58Buffer, [0, 25]);
 
         if (addr === address) testPassed = true;
         else testPassed = false;
 
-        benchmark(() => base58Engine.encode(base58Cache, [0, 25]), undefined, testPassed);
+        benchmark(() => base58Engine.encode(base58Buffer, [0, 25]), undefined, testPassed);
     }
 
     console.log("");

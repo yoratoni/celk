@@ -38,7 +38,7 @@ const mod = (a: bigint, b = CURVE.P): bigint => {
  */
 const invert = (number: bigint, modulo = CURVE.P): bigint => {
     if (number === 0n || modulo <= 0n) {
-        throw new Error(`[SECP256K1] invert: Expected positive integers, got n=${number} mod=${modulo}`);
+        throw new Error(`[SECP256K1] invert: Expected positive integers, got n=${number} mod=${modulo}.`);
     }
 
     // Euclidean GCD
@@ -59,7 +59,7 @@ const invert = (number: bigint, modulo = CURVE.P): bigint => {
     }
 
     const gcd = b;
-    if (gcd !== 1n) throw new Error("[SECP256K1] invert: Does not exist");
+    if (gcd !== 1n) throw new Error("[SECP256K1] invert: Does not exist.");
 
     return mod(x, modulo);
 };
@@ -80,7 +80,7 @@ const normalizeScalar = (num: number | bigint): bigint => {
     if (typeof num === "number" && num > 0 && Number.isSafeInteger(num)) return BigInt(num);
     if (typeof num === "bigint" && isWithinCurveOrder(num)) return num;
 
-    throw new TypeError("[SECP256K1] normalizeScalar: Expected valid private scalar: 0 < scalar < curve.n");
+    throw new TypeError("[SECP256K1] normalizeScalar: Expected valid private scalar: 0 < scalar < curve.n.");
 };
 
 /**
@@ -117,9 +117,7 @@ const splitScalarEndo = (k: bigint): {
     if (k1neg) k1 = n - k1;
     if (k2neg) k2 = n - k2;
 
-    if (k1 > POW_2_128 || k2 > POW_2_128) {
-        throw new Error("[SECP256K1] splitScalarEndo: Endomorphism failed");
-    }
+    if (k1 > POW_2_128 || k2 > POW_2_128) throw new Error("[SECP256K1] splitScalarEndo: Endomorphism failed");
 
     return { k1neg, k1, k2neg, k2 };
 };
@@ -215,7 +213,7 @@ export class JacobianPoint {
     /**
      * Fast algo for doubling 2 Jacobian Points when curve's a=0.
      *
-     * **Notes**:
+     * **NOTES**:
      * - Cannot be reused for other curves when a != 0.
      * - Cost: 2M + 5S + 6add + 3*2 + 1*3 + 1*8.
      *
@@ -243,7 +241,7 @@ export class JacobianPoint {
     /**
      * Fast algo for adding 2 Jacobian Points when curve's a=0.
      *
-     * **Notes**:
+     * **NOTES**:
      * - Cannot be reused for other curves when a != 0.
      * - Cost: 12M + 4S + 6add + 1*2.
      * - 2007 Bernstein-Lange (11M + 5S + 9add + 4*2) is actually *slower*. No idea why.
@@ -252,7 +250,7 @@ export class JacobianPoint {
      */
     add = (other: JacobianPoint): JacobianPoint => {
         if (!(other instanceof JacobianPoint)) {
-            throw new TypeError("[SECP256K1] JacobianPoint#add: expected JacobianPoint");
+            throw new TypeError("[SECP256K1] JacobianPoint#add: expected JacobianPoint.");
         }
 
         const X1 = this.x;

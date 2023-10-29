@@ -1,6 +1,5 @@
 import BENCHMARKS_CONFIG from "configs/benchmarks.config";
 import config from "configs/finder.config";
-import Cache from "helpers/cache";
 import { addressToRIPEMD160 } from "helpers/conversions";
 import { bigIntDiv, bigIntLength } from "helpers/maths";
 import Generator from "lib/classes/generator";
@@ -19,7 +18,7 @@ export default class Finder {
     private generatorInfo: {
         inputType: "PUBLIC_KEY" | "RIPEMD-160";
         untouchedInput: string;
-        input: Cache;
+        input: Buffer;
     };
 
 
@@ -31,23 +30,27 @@ export default class Finder {
 
         // Check if addressToFind or publicKeyToFind is defined
         if (typeof config.addressToFind !== "string" && typeof config.publicKeyToFind !== "string") {
-            throw new Error("[FINDER] Either 'addressToFind' or 'publicKeyToFind' must be defined");
+            throw new Error("[FINDER] Either addressToFind or publicKeyToFind must be defined!");
         }
 
         // Prepare the generator info (default args)
         this.generatorInfo = {
             inputType: "PUBLIC_KEY",
             untouchedInput: "",
-            input: Cache.alloc(0)
+            input: Buffer.alloc(0)
         };
 
-        // Address or public key, both converted to a cache in the end
+        // Address or public key, both converted to Buffer in the end
         if (typeof config.publicKeyToFind === "string" && (config.publicKeyToFind as string).length > 0) {
             this.generatorInfo.inputType = "PUBLIC_KEY";
             this.generatorInfo.untouchedInput = config.publicKeyToFind;
 
-            // Convert the public key to a cache
-            this.generatorInfo.input = Cache.fromString(config.publicKeyToFind);
+            // Convert the public key to Buffer (supports 0x prefix)
+            if (config.publicKeyToFind.startsWith("0x")) {
+                this.generatorInfo.input = Buffer.from(config.publicKeyToFind.slice(2), "hex");
+            } else {
+                this.generatorInfo.input = Buffer.from(config.publicKeyToFind, "hex");
+            }
         } else {
             this.generatorInfo.inputType = "RIPEMD-160";
             this.generatorInfo.untouchedInput = config.addressToFind as string;
@@ -124,12 +127,12 @@ export default class Finder {
         // Internal variables
         let privateKey = 0n;
         let found = false;
-        let value: Cache;
+        let value: Buffer;
 
         // Main loop
         for (let i = 1n; i <= loopLimit; i++) {
             privateKey = this.pkg.execute();
-            value = this.generator.execute(privateKey) as Cache;
+            value = this.generator.execute(privateKey) as Buffer;
 
             // Progress report
             if (i % config.progressReportInterval === 0n) {

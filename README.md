@@ -79,7 +79,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 
     // The private key high range (inclusive).
     // Default: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn
-    privateKeyHighRange: 2n ** 160n - 1n,
+    privateKeyHighRange: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn,
 
     // The progress report interval (in number of iterations).
     // Default: 1024n
@@ -112,24 +112,15 @@ Benchmark environment:
 | `v1.0.2`    | 850 K/s                    | **Ghost executions + Better benchmark measures**                  |
 | `v1.0.2b`   | 1.18 kK/s                  | **Upgrading Node.js from v16.20.2 to v20.9.0**                    |
 | `v1.0.3`    | 1.19 kK/s                  | **Better private key generator (str -> bigint)**                  |
-| `v1.0.4`    | 1.24 kK/s                  | **Using a single buffer for all operations**                      |
+| `v1.0.4`    | 1.24 kK/s                  | **Using a single buffer**                                         |
 | `v1.0.4b`   | N/D                        | **Allow to use the public key if known**                          |
 | `v1.0.5`    | 1.25 kK/s                  | **Reverts the address to its RIPEMD-160 hash**                    |
 | `v1.0.5b`   | N/D                        | **Better benchmarking & reports per second**                      |
 
-#### About the cache:
-> Note that I was previously using Node.js Buffers, but for better compatibility with WASM modules,
-> I decided to switch to Uin8Arrays (in `v1.0.6`).
-> Now, I still extended Uint8Arrays to add methods similar to the ones that can be found in the Buffer class,
-> but I kept the Uint8Array class as the main class, to avoid any conversion.
+#### About the single buffer:
+The cache itself is a 154 bytes buffer, which is enough to store all the steps of the generator.
 
-The cache itself is a 154 bytes Uint8Array, which is enough to store all the steps of the generator.
-
-Note that the `Cache` class is an extension of the `Uint8Array` class supporting methods similar
-to the ones that can be found in the `Buffer` class, while totally being compatible with the `Uint8Array` class
-without the need for any conversion.
-
-The goal of the single cache update is not to directly improve the performance of the generator (for now),
+The goal of the single buffer update is not to directly improve the performance of the generator (for now),
 as the bottleneck is still the SECP256K1 algorithm, but to at least, not make it the bottleneck later,
 when the SECP256K1 algorithm will be improved.
 
@@ -188,7 +179,7 @@ here's a list of the things that could be converted:
 - The RIPEMD-160 algorithm.
 - The BASE58 encoder.
 
-Technically, I could also convert the generator, but I don't think it is necessary as it only executes operations on a single cache,
+Technically, I could also convert the generator, but I don't think it is necessary as it only executes operations on a single buffer,
 initialized only once. The Finder class could also be converted, but it's literally a loop that calls the generator,
 so I don't think it is necessary too.
 

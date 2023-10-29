@@ -1,6 +1,5 @@
 import { randomFillSync } from "crypto";
 
-import Cache from "helpers/cache";
 import General from "types/general";
 import logger from "utils/logger";
 
@@ -15,10 +14,10 @@ export default class PKG_ENGINE {
     private currAscending: bigint;
     private currDescending: bigint;
 
-    // Full random cache
-    private tmpCacheSize = 8192;
-    private tmpCache: Cache = Cache.alloc(this.tmpCacheSize);
-    private tmpCacheIndex: number = 0;
+    // Full random buffer
+    private tmpBufferSize = 8192;
+    private tmpBuffer: Buffer = Buffer.alloc(this.tmpBufferSize);
+    private tmpBufferIndex: number = 0;
 
     private executeEndpoint: () => bigint;
 
@@ -51,7 +50,7 @@ export default class PKG_ENGINE {
         this.currDescending = this.high;
 
         // Fill the buffer with random data
-        this.tmpCache.randomFill();
+        randomFillSync(this.tmpBuffer);
     }
 
 
@@ -60,13 +59,13 @@ export default class PKG_ENGINE {
      * @returns The private key.
      */
     private executeFullRandom = (): bigint => {
-        if (this.tmpCacheIndex >= this.tmpCacheSize) {
-            randomFillSync(this.tmpCache);
-            this.tmpCacheIndex = 0;
+        if (this.tmpBufferIndex >= this.tmpBufferSize) {
+            randomFillSync(this.tmpBuffer);
+            this.tmpBufferIndex = 0;
         }
 
-        this.tmpCacheIndex += 32;
-        return BigInt(`0x${this.tmpCache.subarray(this.tmpCacheIndex - 32, this.tmpCacheIndex).toString("hex")}`) % (this.high - this.low) + this.low;
+        this.tmpBufferIndex += 32;
+        return BigInt(`0x${this.tmpBuffer.subarray(this.tmpBufferIndex - 32, this.tmpBufferIndex).toString("hex")}`) % (this.high - this.low) + this.low;
     };
 
     /**
