@@ -186,7 +186,7 @@ export default class SHA256_ENGINE {
     };
 
     /**
-     * Converts an input cache to an array of big-endian words
+     * Converts an input cache to an array of big endian words
      * using the predefined input array as an output.
      * @param cache The input cache.
      */

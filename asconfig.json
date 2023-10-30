@@ -1,19 +1,20 @@
 {
     "entries": [
-        "src/lib/assembly/src/index.ts"
+        "src/assembly/src/index.ts"
     ],
     "targets": {
         "dev": {
-            "outFile": "src/lib/assembly/build/assembly.wasm",
-            "textFile": "src/lib/assembly/build/assembly.wat",
+            "outFile": "src/assembly/build/index.wasm",
+            "textFile": "src/assembly/build/index.wat",
+            "sourceMap": true,
             "debug": true
         },
         "prod": {
-            "outFile": "src/lib/assembly/build/assembly.wasm",
-            "textFile": "src/lib/assembly/build/assembly.wat",
+            "outFile": "src/assembly/build/index.wasm",
+            "textFile": "src/assembly/build/index.wat",
             "optimizeLevel": 3,
             "shrinkLevel": 0,
-            "converge": true,
+            "converge": false,
             "noAssert": false
         }
     },

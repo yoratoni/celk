@@ -3,9 +3,9 @@ import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
 
 
 /**
- * Writes an array of big-endian words into a cache.
+ * Writes an array of big endian words into a cache.
  * @param input The cache.
- * @param bigEndianWords The array of big-endian words.
+ * @param bigEndianWords The array of big endian words.
  * @param writeToOffset The offset to write to (optional, defaults to 0).
  */
 export const bigEndianWordsToCache = (input: Cache, bigEndianWords: number[], writeToOffset = 0) => {

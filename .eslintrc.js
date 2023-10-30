@@ -22,7 +22,7 @@ module.exports = {
         "import/resolver": {
             "typescript": {
                 "alwaysTryTypes": true,
-                "project": "./tsconfig.json"
+                "directory": [ "tsconfig.json", "src/assembly/tsconfig.json" ]
             }
         },
     },

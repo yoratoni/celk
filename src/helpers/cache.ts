@@ -194,7 +194,7 @@ export default class Cache extends Uint8Array {
     };
 
     /**
-     * Writes a 32-bit Big Endian unsigned integer to the cache.
+     * Writes a 32-bit big endian unsigned integer to the cache.
      * @param value The value to write.
      * @param offset The offset to write to.
      * @returns The cache.
@@ -209,9 +209,9 @@ export default class Cache extends Uint8Array {
     };
 
     /**
-     * Reads a 32-bit Big Endian unsigned integer from the cache.
+     * Reads a 32-bit big endian unsigned integer from the cache.
      * @param offset The offset to read from.
-     * @returns The big-endian word.
+     * @returns The big endian word.
      */
     readUint32BE = (offset: number): number => (this[offset] << 24) | (this[offset + 1] << 16) | (this[offset + 2] << 8) | this[offset + 3];
 
