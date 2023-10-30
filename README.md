@@ -152,12 +152,12 @@ I'm using two of my benchmarks to get the results:
 - `yarn benchmark:crypto`: Benchmarking of the algorithms / encoders to get their iterations per second.
 - `yarn benchmark:generator`: Benchmarking of the generator to get execution time & workload.
 
-| Algorithm / encoder | Execution time | Workload     | Evaluated iterations per second |
-|---------------------|----------------|--------------|---------------------------------|
-| **SECP256K1**       | **2.14ms**     | **99.14%**   | **472.00 IT/s**                 |
-| SHA-256             | 2.9µs          | 0.13%        | 245.60 kIT/s                    |
-| RIPEMD-160          | 5.4µs          | 0.25%        | 238.78 kIT/s                    |
-| BASE58              | 5.0µs          | 0.23%        | 216.62 kIT/s                    |
+| Algorithm / encoder | Execution time | Workload     | Iterations per second |
+|---------------------|----------------|--------------|-----------------------|
+| **SECP256K1**       | **2.14ms**     | **99.14%**   | **472.00 IT/s**       |
+| SHA-256             | 2.9µs          | 0.13%        | 245.60 kIT/s          |
+| RIPEMD-160          | 5.4µs          | 0.25%        | 238.78 kIT/s          |
+| BASE58              | 5.0µs          | 0.23%        | 216.62 kIT/s          |
 
 Now we see what the bottleneck is lol..
 
