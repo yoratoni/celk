@@ -18,6 +18,7 @@ export default class PKG_ENGINE {
     // Full random cache
     private tmpCacheSize = 8192;
     private tmpCache: Cache = Cache.alloc(this.tmpCacheSize);
+    private tmpChunk: Cache = Cache.alloc(32);
     private tmpCacheIndex: number = 0;
 
     private executeEndpoint: () => bigint;
@@ -65,8 +66,10 @@ export default class PKG_ENGINE {
             this.tmpCacheIndex = 0;
         }
 
+        this.tmpChunk = this.tmpCache.subarray(this.tmpCacheIndex, this.tmpCacheIndex + 32);
         this.tmpCacheIndex += 32;
-        return BigInt(`0x${this.tmpCache.subarray(this.tmpCacheIndex - 32, this.tmpCacheIndex).toString("hex")}`) % (this.high - this.low) + this.low;
+
+        return BigInt(`0x${Buffer.from(this.tmpChunk).toString("hex")}`) % (this.high - this.low) + this.low;
     };
 
     /**

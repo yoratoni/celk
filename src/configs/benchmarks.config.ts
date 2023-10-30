@@ -6,7 +6,7 @@ import Configs from "types/configs";
  */
 const BENCHMARKS_CONFIG: Configs.IsBenchmarksConfig = {
     // Total number of reports to display
-    nbReports: 5,
+    nbReports: 2,
 
     // Number of seconds to wait between each report (> 1)
     reportInterval: 1,
