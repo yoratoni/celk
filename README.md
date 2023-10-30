@@ -130,15 +130,15 @@ as the bottleneck is still the SECP256K1 algorithm, but to at least, not make it
 when the SECP256K1 algorithm will be improved.
 
 Here's a table that shows the reserved spaces (in bytes):
-| Step           | ID     | Start index | End index   | Length |
-|----------------|--------|-------------|-------------|--------|
-| `SECP256K1`    | `PBL`  | `000`       | `065`       | `65`   |
-| `SHA-256`      | `SHA`  | `065`       | `097`       | `32`   |
-| `NET BYTE`     | `---`  | `097`       | `098`       | `01`   |
-| `RIPEMD-160`   | `RIP`  | `098`       | `118`       | `20`   |
-| `CHECKSUM`     | `CHK`  | `118`       | `122`       | `04`   |
-| `SHA-256 CHK`  | `SC1`  | `122`       | `154`       | `32`   |
-| `SHA-256 CHK`  | `SC2`  | `122`       | `154`       | `32`   |
+| Step           | ID     | Start index | End index | Length |
+|----------------|--------|-------------|-----------|--------|
+| `SECP256K1`    | `PBL`  | `000`       | `065`     | `65`   |
+| `SHA-256`      | `SHA`  | `065`       | `097`     | `32`   |
+| `NET BYTE`     | `---`  | `097`       | `098`     | `01`   |
+| `RIPEMD-160`   | `RIP`  | `098`       | `118`     | `20`   |
+| `CHECKSUM`     | `CHK`  | `118`       | `122`     | `04`   |
+| `SHA-256 CHK`  | `SC1`  | `122`       | `154`     | `32`   |
+| `SHA-256 CHK`  | `SC2`  | `122`       | `154`     | `32`   |
 
 ### Benchmarking of the algorithms / encoders (512 ghost executions)
 This table is updated with the latest version of the toolbox.
