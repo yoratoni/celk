@@ -9,7 +9,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
     publicKeyToFind: null,
 
     // The address to find the private key for.
-    addressToFind: "13zb1hQbWVsc2S7ZTZnP2G4undNNpdh5so",
+    addressToFind: "1HduPEXZRdG26SUT5Yk83mLkPyjnZuJ7Bm",
 
     // Use compressed public key ("COMPRESSED") or uncompressed ("UNCOMPRESSED").
     // BTC addresses generally uses compressed keys.
@@ -22,15 +22,15 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 
     // The private key low range (inclusive).
     // Default: 1n
-    privateKeyLowRange: 2n ** 65n,
+    privateKeyLowRange: 2n ** 16n,
 
     // The private key high range (inclusive).
     // Default: 2n ** 256n - 0x14551231950B75FC4402DA1732FC9BEBFn
-    privateKeyHighRange: 2n ** 66n - 1n,
+    privateKeyHighRange: 2n ** 17n - 1n,
 
     // The progress report interval (in number of iterations).
     // Default: 1024n
-    progressReportInterval: 128n
+    progressReportInterval: 2048n
 };
 
 
