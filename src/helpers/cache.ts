@@ -130,6 +130,18 @@ export default class Cache extends Uint8Array {
     };
 
     /**
+     * Writes an Uint8Array to the cache.
+     * @param value The Uint8Array to write to the cache.
+     * @param start The offset to start writing at (optional, defaults to 0).
+     * @param bytes The number of bytes to write (optional, defaults to the value length).
+     */
+    writeUint8Array = (value: Uint8Array, start = 0, bytes = value.length): void => {
+        for (let i = 0; i < bytes; i++) {
+            this[start + i] = value[i];
+        }
+    };
+
+    /**
      * Overrides the default Uint8Array 'subarray' method allowing to keep the 'Cache' type.
      *
      * **Note:** We can't use the 'subarray' method directly because it returns a 'Uint8Array' object.
