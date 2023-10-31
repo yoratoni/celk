@@ -13,6 +13,7 @@ import { benchmark } from "utils/benchmarks";
 import { bigintToPrivateKey } from "utils/formats";
 import logger from "utils/logger";
 
+
 /**
  * Main function for the benchmarking of the encoders / algorithms.
  */

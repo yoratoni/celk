@@ -14,11 +14,13 @@
             "textFile": "src/assembly/build/index.wat",
             "optimizeLevel": 3,
             "shrinkLevel": 0,
+            "sourceMap": true,
             "converge": false,
             "noAssert": false
         }
     },
     "options": {
-        "bindings": "esm"
+        "bindings": "esm",
+        "uncheckedBehavior": "always"
     }
 }

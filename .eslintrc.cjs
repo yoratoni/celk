@@ -11,7 +11,6 @@ module.exports = {
     ],
     parser: "@typescript-eslint/parser",
     parserOptions: {
-        ecmaFeatures: {},
         ecmaVersion: "latest",
         sourceType: "module"
     },
@@ -22,7 +21,7 @@ module.exports = {
         "import/resolver": {
             "typescript": {
                 "alwaysTryTypes": true,
-                "directory": [ "tsconfig.json", "src/assembly/tsconfig.json" ]
+                "directory": "./tsconfig.json"
             }
         },
     },
@@ -100,7 +99,7 @@ module.exports = {
             }
         ],
         "prefer-arrow/prefer-arrow-functions": [
-            "error",
+            "warn",
             {
                 disallowPrototype: true,
                 singleReturnOnly: false,

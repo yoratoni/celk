@@ -1,29 +1,32 @@
 /**
- * Converts an array of u8 to an array of u32 (big endian).
- * @param array The array of u8 to convert.
- * @returns The array of u32.
+ * Converts a big endian Uint8Array to a big endian Uint32Array.
+ * @param input The big endian Uint8Array.
+ * @returns The big endian Uint32Array.
  */
-export const U8ToU32_BE = (array: u8[]): u32[] => {
-    const res: u32[] = new Array<u32>(array.length >> 2);
+export function BE_Uint8ArrayToUint32Array(input: Uint8Array): Uint32Array {
+    const output = new Uint32Array(input.length / 4);
 
-    for (let i = 0; i < array.length; i += 4) {
-        res[i >> 5] |= (array[i / 8] & 0xFF) << (24 - (i as u8) % 32);
+    for (let i = 0; i < output.length; i++) {
+        output[i] = input[i * 4] << 24 | input[i * 4 + 1] << 16 | input[i * 4 + 2] << 8 | input[i * 4 + 3];
     }
 
-    return res;
-};
+    return output;
+}
 
 /**
- * Converts an array of u32 to an array of u8 (big endian).
- * @param array The array of u32 to convert.
- * @returns The array of u8.
+ * Converts a big endian Uint32Array to a big endian Uint8Array.
+ * @param input The big endian Uint32Array.
+ * @returns The big endian Uint8Array.
  */
-export const U32ToU8_BE = (array: u32[]): u8[] => {
-    const res: u8[] = new Array<u8>(array.length << 2);
+export function BE_Uint32ArrayToUint8Array(input: Uint32Array): Uint8Array {
+    const output = new Uint8Array(input.length * 4);
 
-    for (let i = 0; i < res.length; i++) {
-        res[i] = ((array[i >> 2] >> (24 - (i % 4) * 8)) & 0xFF) as u8;
+    for (let i = 0; i < input.length; i++) {
+        output[i * 4] = input[i] >>> 24;
+        output[i * 4 + 1] = input[i] >>> 16;
+        output[i * 4 + 2] = input[i] >>> 8;
+        output[i * 4 + 3] = input[i];
     }
 
-    return res;
-};
+    return output;
+}

@@ -6,15 +6,16 @@
     "author": "yoratoni <yoratoni.dev@gmail.com>",
     "license": "MIT",
     "private": true,
+    "type": "module",
     "scripts": {
         "v-bump": "yarn version --patch",
-        "asbuild:dev": "asc --target dev --exportRuntime",
-        "asbuild:prod": "asc --target prod --exportRuntime",
-        "test": "ts-node src/tests/index.ts",
-        "find": "ts-node src/scripts/find.ts",
-        "benchmark:crypto": "ts-node src/benchmarks/crypto.ts",
-        "benchmark:generator": "ts-node src/benchmarks/generator.ts",
-        "benchmark:sandbox": "ts-node src/benchmarks/sandbox.ts"
+        "asbuild:dev": "asc --target dev",
+        "asbuild:prod": "asc --target prod",
+        "test": "npx tsx src/tests/index.test.ts",
+        "find": "npx tsx src/scripts/find.ts",
+        "benchmark:crypto": "npx tsx src/benchmarks/crypto.ts",
+        "benchmark:generator": "npx tsx src/benchmarks/generator.ts",
+        "benchmark:sandbox": "npx tsx src/benchmarks/sandbox.ts"
     },
     "dependencies": {
         "@assemblyscript/loader": "^0.27.14",
@@ -24,7 +25,7 @@
         "minimist": "^1.2.8",
         "mongodb": "5.8.1",
         "node-os-utils": "^1.3.7",
-        "ts-node": "^10.9.1",
+        "tsx": "^3.14.0",
         "winston": "^3.11.0"
     },
     "devDependencies": {

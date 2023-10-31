@@ -1,4 +1,4 @@
-import sha256 from "crypto/SHA256";
+import sha256 from "./crypto/SHA256";
 
 
 export {

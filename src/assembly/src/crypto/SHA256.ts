@@ -11,11 +11,14 @@
  * - https://gist.github.com/bryanchow/1649353
  */
 
-import { U32ToU8_BE, U8ToU32_BE } from "../helpers/conversions";
+import { BE_Uint32ArrayToUint8Array, BE_Uint8ArrayToUint32Array } from "../helpers/conversions";
 
 
 /** SHA-256 64-bit words constants. */
-const K: u32[] = [
+const K: Uint32Array = new Uint32Array(64);
+
+// Initialize SHA-256 constants
+K.set([
     0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
     0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
     0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
@@ -24,7 +27,7 @@ const K: u32[] = [
     0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070,
     0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
     0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
-];
+]);
 
 /**
  * Perform the "circular right shift" (ROTR in FIPS 180-4) operation, needed for the hash computation.
@@ -86,19 +89,25 @@ const safeAdd = (x: u32, y: u32): u32 => {
 };
 
 /**
- * SHA-256 internal hash computation.
- * @param m The message to hash previously converted to an u32 array.
- * @param l The original message length (u8 array length * 8).
- * @returns The hash of the message (u32 array).
+ * SHA-256 internal hash computation (Uint32Array => Uint32Array)
+ * @param m The message to hash (Uint32Array).
+ * @param len The original message length.
+ * @returns The hash of the message (Uint32Array).
  */
-const __sha256 = (m: u32[], l: u32): u32[] => {
-    const HASH: u32[] = [
+const _sha256 = (m: Uint32Array, len: u32): Uint32Array => {
+    const HASH = new Uint32Array(8);
+
+    // Initialize hash values
+    HASH.set([
         0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
         0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
-    ];
+    ]);
 
     // W Array (message schedule)
-    const W: u32[] = new Array<u32>(64);
+    const W: Uint32Array = new Uint32Array(64);
+
+    // Original message length * 8
+    const l = len * 8;
 
     // Indexes
     let i: i32;
@@ -192,20 +201,17 @@ const __sha256 = (m: u32[], l: u32): u32[] => {
 };
 
 /**
- * Hash a message using SHA-256.
- * @param message The message to hash (u8 array).
- * @returns The hash of the message (u8 array).
+ * Hash a message using SHA-256 (Uint8Array => Uint8Array).
+ * @param message The message to hash.
+ * @returns The hash of the message.
  */
-const sha256 = (message: u8[]): u8[] => {
-    // Convert the message to an u32 array
-    const m = U8ToU32_BE(message);
+export default function sha256(message: Uint8Array): Uint8Array {
+    // Convert the message to an Uint32Array array
+    const m = BE_Uint8ArrayToUint32Array(message);
 
     // Hash the message
-    const hash: u32[] = __sha256(m, message.length * 8);
+    const hash: Uint32Array = _sha256(m, message.length * 8);
 
-    // Convert the hash to an u8 array and return it
-    return U32ToU8_BE(hash);
+    // Convert the hash to an Uint8Array and return it
+    return BE_Uint32ArrayToUint8Array(hash);
 };
-
-
-export default sha256;

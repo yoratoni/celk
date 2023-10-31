@@ -1,34 +1,30 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable arrow-body-style */
 
+import { sha256 } from "assembly/build";
 import Cache from "helpers/cache";
+import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
 import { benchmark } from "utils/benchmarks";
 import logger from "utils/logger";
 
 
-/**
- * Test cache.
- */
-const cache = Cache.alloc(4096);
-
-/**
- * Test Buffer.
- */
-const buffer = Buffer.alloc(4096);
-
+const input = new Uint8Array(64);
 
 /**
  * **[FN 0]** Test function to benchmark.
  */
 const testFn_0 = () => {
-    cache.write("0xFF");
+    sha256(input);
 };
+
+const engine = new SHA256_ENGINE();
+const cache = Cache.alloc(64);
 
 /**
  * **[FN 1]** Test function to benchmark.
  */
 const testFn_1 = () => {
-    buffer.write("0xFF");
+    engine.execute(cache);
 };
 
 
