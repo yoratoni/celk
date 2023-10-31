@@ -101,7 +101,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
     if (mode === "all" || mode === "algorithms" || mode === "sha256") {
         console.log("");
-        logger.info("> SHA-256 ALGORITHM:");
+        logger.info("> SHA-256 ALGORITHM (65 bytes input):");
         const sha256Engine = new SHA256_ENGINE();
 
         // Input from SECP256K1 algorithm.
@@ -128,7 +128,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
     if (mode === "all" || mode === "algorithms" || mode === "ripemd160") {
         console.log("");
-        logger.info("> RIPEMD-160 ALGORITHM:");
+        logger.info("> RIPEMD-160 ALGORITHM (32 bytes input):");
         const ripemd160Engine = new RIPEMD160_ENGINE();
 
         // Input from SHA-256 algorithm.
