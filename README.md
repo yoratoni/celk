@@ -175,21 +175,7 @@ because it is not the bottleneck of the toolbox. I would be glad if it becomes o
 
 Ideas of future updates
 -----------------------
-### 1. From TS to AssemblyScript
-I need to choose what part of the toolbox I want to convert to AssemblyScript, the best would be to convert only the low level stuff,
-here's a list of the things that could be converted:
-- The private key generator.
-- The SECP256K1 algorithm.
-- The SHA-256 algorithm.
-- The RIPEMD-160 algorithm.
-- The BASE58 encoder.
-
-Technically, I could also convert the generator, but I don't think it is necessary as it only executes operations on a single cache,
-initialized only once. The Finder class could also be converted, but it's literally a loop that calls the generator,
-so I don't think it is necessary too.
-
-### 2. Workers
-Thinking about it, but after a lot of performance improvements..
+...
 
 1000 BTC Bitcoin Challenge
 --------------------------

@@ -14,7 +14,8 @@ import logger from "utils/logger";
  */
 export const benchmark = (
     fn: () => unknown,
-    formatFn?: (input: unknown) => string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    formatFn?: (input?: any) => string,
     testPassed?: boolean
 ): number => {
     let res: unknown;
@@ -68,8 +69,10 @@ export const benchmark = (
             );
 
             // Format the result if a function is provided and if the result is valid
-            if (res) {
-                if (formatFn) formattedRes = formatFn(res);
+            // Also accept a formatting function only as the function could write elsewhere
+            // than in its return value
+            if (formatFn || res) {
+                if (formatFn) formattedRes = formatFn();
                 else formattedRes = `${res}`;
             }
 
