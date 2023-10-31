@@ -92,7 +92,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 - The `privateKeyGenMode` can be set to `FULL_RANDOM`, `ASCENDING` or `DESCENDING`. Ascending & descending will start from the beginning
   / end of the private key range, and full random will generate.. a random number in the range.
 - If you do not know the private key range, just let them like this, these are the default values for the `SECP256K1` algorithm.
-- The report interval is the number of iterations to skip before showing the report, if you produces 55 kK/s, and set it at `55_000n`,
+- The report interval is the number of iterations to skip before showing the report, if you produces 55 kA/s, and set it at `55_000n`,
   it will show the report every second.
 
 Performances
@@ -165,8 +165,8 @@ Now we see what the bottleneck is lol..
 From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
 because it is not the bottleneck of the toolbox. I would be glad if it becomes one day lol.
 
-| Version     | `FULL_RANDOM` | `ASCENDING`    | `DESCENDING`     |
-|-------------|---------------|----------------|------------------|
+| Version     | `FULL_RANDOM`  | `ASCENDING`     | `DESCENDING`      |
+|-------------|----------------|-----------------|-------------------|
 | `v1.0.0`    | 575.7 kK/s    | 4.80 MK/s      | 4.76 MK/s        |
 | `v1.0.1`    | 590.2 kK/s    | 4.12 MK/s      | 4.60 MK/s        |
 | `v1.0.2`    | 584.4 kK/s    | 4.75 MK/s      | 4.65 MK/s        |

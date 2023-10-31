@@ -10,13 +10,15 @@ import logger from "utils/logger";
  * @param fn The function to run.
  * @param formatFn The function to format the result (optional).
  * @param testPassed Whether the test passed (optional).
+ * @param unit The unit of the result (optional, defaults to "IT").
  * @returns The length of the log (for further formatting).
  */
 export const benchmark = (
     fn: () => unknown,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     formatFn?: (input?: any) => string,
-    testPassed?: boolean
+    testPassed?: boolean,
+    unit: string = "IT"
 ): number => {
     let res: unknown;
     let formattedRes = "N/D";
@@ -62,7 +64,7 @@ export const benchmark = (
             // Format the number of iterations per second
             const formattedIterationsPerSecond = formatUnitPerTimeUnit(
                 1_000_000_000 / averageTime,
-                "IT",
+                unit,
                 "s",
                 14,
                 true
@@ -72,7 +74,7 @@ export const benchmark = (
             // Also accept a formatting function only as the function could write elsewhere
             // than in its return value
             if (formatFn || res) {
-                if (formatFn) formattedRes = formatFn();
+                if (formatFn) formattedRes = formatFn(res);
                 else formattedRes = `${res}`;
             }
 
@@ -103,7 +105,7 @@ export const benchmark = (
     // Format the average number of iterations per second
     const formattedAvgIterationsPerSecond = formatUnitPerTimeUnit(
         avgIterationsPerSecondAdder / currReportNb,
-        "IT",
+        unit,
         "s",
         14,
         true
@@ -118,7 +120,7 @@ export const benchmark = (
     const log = `EXECUTION: ${formattedAvgTime} | ITERATIONS: ${formattedAvgIterationsPerSecond} | TEST:   ${testPassedStr.padStart(formattedRes.length, " ")}`;
 
     logger.info("=".repeat(maxLogLength));
-    if (testPassed) logger.info(log);
+    if (testPassedStr === "N/D" || testPassed) logger.info(log);
     else logger.error(log);
 
     return maxLogLength;

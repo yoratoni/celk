@@ -1,9 +1,9 @@
 /**
  * Converts a bigint to a prefixed private key string (64 characters).
- * @param bigint The bigint to convert.
+ * @param biggie The bigint to convert.
  * @returns The prefixed private key string.
  */
-export const bigintToPrivateKey = (bigint: bigint): `0x${string}` => `0x${bigint.toString(16).padStart(64, "0")}`;
+export const bigintToPrivateKey = (biggie: bigint): `0x${string}` => `0x${biggie.toString(16).padStart(64, "0")}`;
 
 /**
  * Insert a string into another string at a specific index.
