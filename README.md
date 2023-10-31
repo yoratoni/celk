@@ -92,7 +92,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 - The `privateKeyGenMode` can be set to `FULL_RANDOM`, `ASCENDING` or `DESCENDING`. Ascending & descending will start from the beginning
   / end of the private key range, and full random will generate.. a random number in the range.
 - If you do not know the private key range, just let them like this, these are the default values for the `SECP256K1` algorithm.
-- The report interval is the number of iterations to skip before showing the report, if you produces 55 kA/s, and set it at `55_000n`,
+- The report interval is the number of iterations to skip before showing the report, if you produces 55 kK/s, and set it at `55_000n`,
   it will show the report every second.
 
 Performances
