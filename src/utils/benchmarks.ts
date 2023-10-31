@@ -115,8 +115,11 @@ export const benchmark = (
     else if (testPassed === true) testPassedStr = "OK";
 
     // Conclusion
+    const log = `EXECUTION: ${formattedAvgTime} | ITERATIONS: ${formattedAvgIterationsPerSecond} | TEST:   ${testPassedStr.padStart(formattedRes.length, " ")}`;
+
     logger.info("=".repeat(maxLogLength));
-    logger.info(`EXECUTION: ${formattedAvgTime} | ITERATIONS: ${formattedAvgIterationsPerSecond} | TEST:   ${testPassedStr.padStart(formattedRes.length, " ")}`);
+    if (testPassed) logger.info(log);
+    else logger.error(log);
 
     return maxLogLength;
 };

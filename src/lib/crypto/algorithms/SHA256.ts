@@ -3,7 +3,7 @@ import { bigEndianWordsToCache } from "helpers/conversions";
 
 
 /**
- * A TypeScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-2.
+ * A TypeScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-4.
  *
  * Based on the SHA-256 explanation by Quadibloc:
  *   - http://www.quadibloc.com/crypto/mi060501.htm
@@ -37,51 +37,26 @@ export default class SHA256_ENGINE {
     constructor() { }
 
 
-    /**
-     * Perform the "circular shift right" (CSR) operation, needed for the hash computation.
-     * @param x The number to shift.
-     * @param n The number of bits to shift.
-     * @returns The shifted number.
-     */
-    private CSR = (x: number, n: number): number => (x >>> n) | (x << (32 - n));
+    /** Perform the rotate right operation (named "rotr" in FIPS 180-4). */
+    private rotr = (x: number, n: number): number => (x >>> n) | (x << (32 - n));
 
-    /**
-     * Perform the "logical right shift" (LRS) operation, needed for the hash computation.
-     * @param x The number to shift.
-     * @param n The number of bits to shift.
-     * @returns The shifted number.
-     */
-    private LRS = (x: number, n: number): number => (x >>> n);
+    /** Perform the "choose" operation. */
+    private choose = (x: number, y: number, z: number): number => (x & y) ^ (~x & z);
 
-    /**
-     * Perform the "choose" operation, needed for the hash computation.
-     * @param x The first number.
-     * @param y The second number.
-     * @param z The third number.
-     * @returns The result of the "choose" operation.
-     */
-    private choose = (x: number, y: number, z: number): number => (x & y) ^ ((~x) & z);
-
-    /**
-     * Perform the "majority" operation, needed for the hash computation.
-     * @param x The first number.
-     * @param y The second number.
-     * @param z The third number.
-     * @returns The result of the "majority" operation.
-     */
+    /** Perform the "majority" operation. */
     private majority = (x: number, y: number, z: number): number => (x & y) ^ (x & z) ^ (y & z);
 
     /** Perform the "SIGMA 0" operation. */
-    private sigma0 = (x: number): number => this.CSR(x, 2) ^ this.CSR(x, 13) ^ this.CSR(x, 22);
+    private sigma0 = (x: number): number => this.rotr(x, 2) ^ this.rotr(x, 13) ^ this.rotr(x, 22);
 
     /** Perform the "SIGMA 1" operation. */
-    private sigma1 = (x: number): number => this.CSR(x, 6) ^ this.CSR(x, 11) ^ this.CSR(x, 25);
+    private sigma1 = (x: number): number => this.rotr(x, 6) ^ this.rotr(x, 11) ^ this.rotr(x, 25);
 
     /** Perform the "GAMMA 0" operation. */
-    private gamma0 = (x: number): number => this.CSR(x, 7) ^ this.CSR(x, 18) ^ this.LRS(x, 3);
+    private gamma0 = (x: number): number => this.rotr(x, 7) ^ this.rotr(x, 18) ^ (x >>> 3);
 
     /** Perform the "GAMMA 1" operation. */
-    private gamma1 = (x: number): number => this.CSR(x, 17) ^ this.CSR(x, 19) ^ this.LRS(x, 10);
+    private gamma1 = (x: number): number => this.rotr(x, 17) ^ this.rotr(x, 19) ^ (x >>> 10);
 
     /**
      * Safe addition operation, needed for the hash computation.
