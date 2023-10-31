@@ -45,7 +45,7 @@ export default class Generator {
      */
     private cache = Cache.alloc(154).fill(0);
 
-    /** Number of bytes for the public key */
+    /** Number of bytes for the public key. */
     private pkB: number;
 
 
