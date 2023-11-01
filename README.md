@@ -133,16 +133,16 @@ as the bottleneck is still the SECP256K1 algorithm, but to at least, not make it
 when the SECP256K1 algorithm will be improved.
 
 Here's a table that shows the reserved spaces (in bytes):
-| Step           | ID     | Start (inclusive) | End (exclusive) | Len  |
-|----------------|--------|-------------------|-----------------|------|
-| `PKG`          | `PKG`  | `000`             | `032`           | `32` |
-| `SECP256K1`    | `PBL`  | `032`             | `097`           | `65` |
-| `SHA-256`      | `SHA`  | `097`             | `129`           | `32` |
-| `NET BYTE`     | `NTB`  | `129`             | `130`           | `01` |
-| `RIPEMD-160`   | `RIP`  | `130`             | `150`           | `20` |
-| `CHECKSUM`     | `CHK`  | `150`             | `154`           | `04` |
-| `SHA-256 CHK1` | `SC1`  | `154`             | `186`           | `32` |
-| `SHA-256 CHK2` | `SC2`  | `154`             | `186`           | `32` |
+| Step           | ID     | Start (incl) | End (excl) | Len  |
+|----------------|--------|--------------|------------|------|
+| `PKG`          | `PKG`  | `000`        | `032`      | `32` |
+| `SECP256K1`    | `PBL`  | `032`        | `097`      | `65` |
+| `SHA-256`      | `SHA`  | `097`        | `129`      | `32` |
+| `NET BYTE`     | `NTB`  | `129`        | `130`      | `01` |
+| `RIPEMD-160`   | `RIP`  | `130`        | `150`      | `20` |
+| `CHECKSUM`     | `CHK`  | `150`        | `154`      | `04` |
+| `SHA-256 CHK1` | `SC1`  | `154`        | `186`      | `32` |
+| `SHA-256 CHK2` | `SC2`  | `154`        | `186`      | `32` |
 
 With:
 - `129::150` being the final RIPEMD-160 hash before double SHA-256 checksum (21 bytes).
