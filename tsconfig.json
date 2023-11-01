@@ -101,11 +101,12 @@
         // "skipLibCheck": true                              /* Skip type checking all .d.ts files. */
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "src/assembly/src"
     ],
     "include": [
-        "./src/*.ts",
-        "./src/**/*.ts",
-        "./src/**/*.json"
+        "src/*.ts",
+        "src/**/*.ts",
+        "src/**/*.json"
     ]
 }

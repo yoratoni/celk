@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable arrow-body-style */
 
+import { generateRandomUint8Array } from "assembly/build";
 import { benchmark } from "utils/benchmarks";
 import logger from "utils/logger";
 
@@ -11,6 +12,7 @@ import logger from "utils/logger";
 const testFn_0 = () => {
 
 };
+
 
 /**
  * **[FN 1]** Test function to benchmark.

@@ -18,7 +18,6 @@
         "benchmark:sandbox": "npx tsx src/benchmarks/sandbox.ts"
     },
     "dependencies": {
-        "@assemblyscript/loader": "^0.27.14",
         "date-and-time": "^3.0.3",
         "dedent-js": "^1.0.1",
         "dotenv": "^16.3.1",
