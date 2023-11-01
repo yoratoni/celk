@@ -1,6 +1,13 @@
 async function instantiate(module, imports = {}) {
   const adaptedImports = {
     env: Object.assign(Object.create(globalThis), imports.env || {}, {
+      seed() {
+        // ~lib/builtins/seed() => f64
+        return (() => {
+          // @external.js
+          return Date.now() * Math.random();
+        })();
+      },
       abort(message, fileName, lineNumber, columnNumber) {
         // ~lib/builtins/abort(~lib/string/String | null?, ~lib/string/String | null?, u32?, u32?) => void
         message = __liftString(message >>> 0);
@@ -12,53 +19,30 @@ async function instantiate(module, imports = {}) {
           throw Error(`${message} in ${fileName}:${lineNumber}:${columnNumber}`);
         })();
       },
-      seed() {
-        // ~lib/builtins/seed() => f64
-        return (() => {
-          // @external.js
-          return Date.now() * Math.random();
-        })();
-      },
     }),
   };
   const { exports } = await WebAssembly.instantiate(module, adaptedImports);
   const memory = exports.memory || imports.env.memory;
   const adaptedExports = Object.setPrototypeOf({
-    generateRandomUint16Array(length) {
-      // src/assembly/src/crypto/randomizer/generateRandomUint16Array(i32) => ~lib/typedarray/Uint16Array
-      return __liftTypedArray(Uint16Array, exports.generateRandomUint16Array(length) >>> 0);
+    randomFillUint8Array(arr) {
+      // src/assembly/src/crypto/randomizer/randomFillUint8Array(~lib/typedarray/Uint8Array) => void
+      arr = __lowerTypedArray(Uint8Array, 4, 0, arr) || __notnull();
+      exports.randomFillUint8Array(arr);
     },
-    generateRandomUint32Array(length) {
-      // src/assembly/src/crypto/randomizer/generateRandomUint32Array(i32) => ~lib/typedarray/Uint32Array
-      return __liftTypedArray(Uint32Array, exports.generateRandomUint32Array(length) >>> 0);
+    randomFillUint16Array(arr) {
+      // src/assembly/src/crypto/randomizer/randomFillUint16Array(~lib/typedarray/Uint16Array) => void
+      arr = __lowerTypedArray(Uint16Array, 5, 1, arr) || __notnull();
+      exports.randomFillUint16Array(arr);
     },
-    generateRandomUint64Array(length) {
-      // src/assembly/src/crypto/randomizer/generateRandomUint64Array(i32) => ~lib/typedarray/Uint64Array
-      return __liftTypedArray(BigUint64Array, exports.generateRandomUint64Array(length) >>> 0);
+    randomFillUint32Array(arr) {
+      // src/assembly/src/crypto/randomizer/randomFillUint32Array(~lib/typedarray/Uint32Array) => void
+      arr = __lowerTypedArray(Uint32Array, 6, 2, arr) || __notnull();
+      exports.randomFillUint32Array(arr);
     },
-    generateRandomUint8Array(length) {
-      // src/assembly/src/crypto/randomizer/generateRandomUint8Array(i32) => ~lib/typedarray/Uint8Array
-      return __liftTypedArray(Uint8Array, exports.generateRandomUint8Array(length) >>> 0);
-    },
-    randomFillUint16Array(array) {
-      // src/assembly/src/crypto/randomizer/randomFillUint16Array(~lib/typedarray/Uint16Array) => ~lib/typedarray/Uint16Array
-      array = __lowerTypedArray(Uint16Array, 4, 1, array) || __notnull();
-      return __liftTypedArray(Uint16Array, exports.randomFillUint16Array(array) >>> 0);
-    },
-    randomFillUint32Array(array) {
-      // src/assembly/src/crypto/randomizer/randomFillUint32Array(~lib/typedarray/Uint32Array) => ~lib/typedarray/Uint32Array
-      array = __lowerTypedArray(Uint32Array, 5, 2, array) || __notnull();
-      return __liftTypedArray(Uint32Array, exports.randomFillUint32Array(array) >>> 0);
-    },
-    randomFillUint64Array(array) {
-      // src/assembly/src/crypto/randomizer/randomFillUint64Array(~lib/typedarray/Uint64Array) => ~lib/typedarray/Uint64Array
-      array = __lowerTypedArray(BigUint64Array, 6, 3, array) || __notnull();
-      return __liftTypedArray(BigUint64Array, exports.randomFillUint64Array(array) >>> 0);
-    },
-    randomFillUint8Array(array) {
-      // src/assembly/src/crypto/randomizer/randomFillUint8Array(~lib/typedarray/Uint8Array) => ~lib/typedarray/Uint8Array
-      array = __lowerTypedArray(Uint8Array, 7, 0, array) || __notnull();
-      return __liftTypedArray(Uint8Array, exports.randomFillUint8Array(array) >>> 0);
+    randomFillUint64Array(arr) {
+      // src/assembly/src/crypto/randomizer/randomFillUint64Array(~lib/typedarray/Uint64Array) => void
+      arr = __lowerTypedArray(BigUint64Array, 7, 3, arr) || __notnull();
+      exports.randomFillUint64Array(arr);
     },
   }, exports);
   function __liftString(pointer) {
@@ -71,14 +55,6 @@ async function instantiate(module, imports = {}) {
       string = "";
     while (end - start > 1024) string += String.fromCharCode(...memoryU16.subarray(start, start += 1024));
     return string + String.fromCharCode(...memoryU16.subarray(start, end));
-  }
-  function __liftTypedArray(constructor, pointer) {
-    if (!pointer) return null;
-    return new constructor(
-      memory.buffer,
-      __getU32(pointer + 4),
-      __dataview.getUint32(pointer + 8, true) / constructor.BYTES_PER_ELEMENT
-    ).slice();
   }
   function __lowerTypedArray(constructor, id, align, values) {
     if (values == null) return 0;
@@ -105,26 +81,19 @@ async function instantiate(module, imports = {}) {
       __dataview.setUint32(pointer, value, true);
     }
   }
-  function __getU32(pointer) {
-    try {
-      return __dataview.getUint32(pointer, true);
-    } catch {
-      __dataview = new DataView(memory.buffer);
-      return __dataview.getUint32(pointer, true);
-    }
-  }
   return adaptedExports;
 }
 export const {
   memory,
-  generateRandomUint16Array,
-  generateRandomUint32Array,
-  generateRandomUint64Array,
-  generateRandomUint8Array,
+  __new,
+  __pin,
+  __unpin,
+  __collect,
+  __rtti_base,
+  randomFillUint8Array,
   randomFillUint16Array,
   randomFillUint32Array,
   randomFillUint64Array,
-  randomFillUint8Array,
 } = await (async url => instantiate(
   await (async () => {
     try { return await globalThis.WebAssembly.compileStreaming(globalThis.fetch(url)); }

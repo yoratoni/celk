@@ -16,11 +16,12 @@
             "shrinkLevel": 0,
             "sourceMap": true,
             "converge": false,
-            "noAssert": false
+            "noAssert": false,
+            "exportRuntime": true
         }
     },
     "options": {
-        "bindings": "esm",
-        "uncheckedBehavior": "always"
+        "exportRuntime": true,
+        "bindings": "esm"
     }
 }

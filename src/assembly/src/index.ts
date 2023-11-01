@@ -1,8 +1,4 @@
 import {
-    generateRandomUint16Array,
-    generateRandomUint32Array,
-    generateRandomUint64Array,
-    generateRandomUint8Array,
     randomFillUint16Array,
     randomFillUint32Array,
     randomFillUint64Array,
@@ -11,12 +7,8 @@ import {
 
 
 export {
-    generateRandomUint16Array,
-    generateRandomUint32Array,
-    generateRandomUint64Array,
-    generateRandomUint8Array,
+    randomFillUint8Array,
     randomFillUint16Array,
     randomFillUint32Array,
-    randomFillUint64Array,
-    randomFillUint8Array
+    randomFillUint64Array
 };
