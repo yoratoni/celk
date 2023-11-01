@@ -122,23 +122,31 @@ Benchmark environment:
 > I decided to switch to Uin8Arrays (in `v1.0.6`).
 > Now, I still extended Uint8Arrays to add methods similar to the ones that can be found in the Buffer class,
 > but I kept the Uint8Array class as the main class, to avoid any need for some conversions.
+>
+> Also note that this cache is an instance of the memory buffer of the WASM module, allowing
+> data sharing between JavaScript & the WASM modules.
 
-The cache itself is a 154 bytes Uint8Array, which is enough to store all the steps of the generator.
+The cache itself is a 186 bytes Uint8Array, which is enough to store all the steps of the generator.
 
 The goal of the single cache update is not to directly improve the performance of the generator (for now),
 as the bottleneck is still the SECP256K1 algorithm, but to at least, not make it the bottleneck later,
 when the SECP256K1 algorithm will be improved.
 
 Here's a table that shows the reserved spaces (in bytes):
-| Step           | ID     | Start | End   | Len  |
-|----------------|--------|-------|-------|------|
-| `SECP256K1`    | `PBL`  | `000` | `065` | `65` |
-| `SHA-256`      | `SHA`  | `065` | `097` | `32` |
-| `NET BYTE`     | `---`  | `097` | `098` | `01` |
-| `RIPEMD-160`   | `RIP`  | `098` | `118` | `20` |
-| `CHECKSUM`     | `CHK`  | `118` | `122` | `04` |
-| `SHA-256 CHK`  | `SC1`  | `122` | `154` | `32` |
-| `SHA-256 CHK`  | `SC2`  | `122` | `154` | `32` |
+| Step           | ID     | Start (inclusive) | End (exclusive) | Len  |
+|----------------|--------|-------------------|-----------------|------|
+| `PKG`          | `PKG`  | `000`             | `032`           | `32` |
+| `SECP256K1`    | `PBL`  | `032`             | `097`           | `65` |
+| `SHA-256`      | `SHA`  | `097`             | `129`           | `32` |
+| `NET BYTE`     | `NTB`  | `129`             | `130`           | `01` |
+| `RIPEMD-160`   | `RIP`  | `130`             | `150`           | `20` |
+| `CHECKSUM`     | `CHK`  | `150`             | `154`           | `04` |
+| `SHA-256 CHK1` | `SC1`  | `154`             | `186`           | `32` |
+| `SHA-256 CHK2` | `SC2`  | `154`             | `186`           | `32` |
+
+With:
+- `129::150` being the final RIPEMD-160 hash before double SHA-256 checksum (21 bytes).
+- `129::154` being the final Bitcoin hash before BASE58 (25 bytes).
 
 ### Benchmarking of the algorithms / encoders (512 ghost executions)
 This table is updated with the latest version of the toolbox.

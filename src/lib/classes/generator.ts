@@ -5,6 +5,7 @@ import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
 import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
 import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
+import PKG_ENGINE from "lib/crypto/generators/PKG";
 import General from "types/general";
 import { formatHRTime } from "utils/formats";
 import logger from "utils/logger";
@@ -13,13 +14,15 @@ import logger from "utils/logger";
 /**
  * Used to generate Bitcoin addresses (mainnet).
  *
- * Based on the three algorithms & 1 encoder implemented by myself:
+ * Based on the generator, the 3 algorithms & 1 encoder implemented by myself:
+ *   - PKG (Private Key Generator)
  *   - SECP256K1
  *   - SHA-256
  *   - RIPEMD-160
  *   - BASE58
  */
 export default class Generator {
+    private pkg: PKG_ENGINE;
     private secp256k1Engine: SECP256K1_ENGINE;
     private sha256Engine: SHA256_ENGINE;
     private ripemd160Engine: RIPEMD160_ENGINE;
@@ -30,34 +33,30 @@ export default class Generator {
     /**
      * Reusable cache used as a cache for all operations (186 bytes).
      *
-     * Spaces are reserved as follows (end index exclusive):
-     * - `000::065` -> SECP256K1 public key (33/65 bytes).
-     * - `065::097` -> SHA-256 output (32 bytes).
-     * - `097::098` -> 0x00 -> Network byte (1 byte).
-     * - `098::118` -> RIPEMD-160 output (20 bytes).
-     * - `118::122` -> Checksum (4 bytes).
-     * - `122::154` -> Double SHA-256 checksum (step 1 -> 32 bytes).
-     * - `122::154` -> Double SHA-256 checksum (step 2 -> 32 bytes -> overwrites step 1).
-     *
-     * With:
-     * - `097::118` being the final RIPEMD-160 hash before double SHA-256 checksum (21 bytes).
-     * - `097::122` being the final Bitcoin hash before BASE58 (25 bytes).
+     * See [here](https://github.com/yoratoni/celk#about-the-cache) for more information.
      */
     private cache = Cache.alloc(154).fill(0);
 
     /** Number of bytes for the public key. */
-    private pkB: number;
+    private pkB: 33 | 65;
 
 
     /**
      * Construct a new Bitcoin address generator.
+     * @param privateKeyGenMode The private key generation mode (PKG).
+     * @param privateKeyLowRange The low range of the private key.
+     * @param privateKeyHighRange The high range of the private key.
      * @param publicKeyGenMode The public key generation mode (compressed or uncompressed).
      * @param generatorGenMode The generator generation mode (public key, RIPEMD-160 hash or Bitcoin address).
      */
     constructor(
+        privateKeyGenMode: General.IsPrivateKeyGenMode,
+        privateKeyLowRange: bigint,
+        privateKeyHighRange: bigint,
         publicKeyGenMode: General.IsPublicKeyGenMode,
         generatorGenMode: General.IsGeneratorGenMode
     ) {
+        this.pkg = new PKG_ENGINE(privateKeyGenMode, privateKeyLowRange, privateKeyHighRange);
         this.secp256k1Engine = new SECP256K1_ENGINE(publicKeyGenMode);
         this.sha256Engine = new SHA256_ENGINE();
         this.ripemd160Engine = new RIPEMD160_ENGINE();
@@ -80,15 +79,20 @@ export default class Generator {
 
     /**
      * Bitcoin address debugging generation process with a complete report.
-     * @param privateKey The private key to generate the address from.
      * @returns The Bitcoin address.
      */
-    executeReport = (privateKey: bigint): void => {
+    executeReport = (): void => {
         const VALUES: { [key: string]: string; } = {};
         const TIMES: { [key: string]: bigint; } = {};
 
         // Run the ghost execution n times to to warm up the engine
         for (let i = 0; i <= BENCHMARKS_CONFIG.generatorGhostExecutionIterations; i++) {
+            // PKG
+            const pkgStart = process.hrtime.bigint();
+            this.pkg.execute(this.cache);
+            TIMES.pkg = process.hrtime.bigint() - pkgStart;
+            VALUES.pkg = this.cache.subarray(0, 32).toString("hex");
+
             // SECP256K1
             const pblStart = process.hrtime.bigint();
             this.secp256k1Engine.execute(this.cache, privateKey);
@@ -136,7 +140,6 @@ export default class Generator {
             VALUES.adr = this.base58Engine.encode(this.cache, [97, 122]);
             TIMES.rad = process.hrtime.bigint() - adrStart;
             VALUES.rad = this.cache.subarray(97, 122).toString("hex");
-
         }
 
         // Report variables
@@ -177,17 +180,20 @@ export default class Generator {
 
     /**
      * Generate a Bitcoin address from a private key.
-     * @param privateKey The private key to generate the address from.
-     * @returns The public key (cache), RIPEMD-160 hash (cache) or Bitcoin address (string).
+     * @returns The public key (cache), RIPEMD-160 hash (cache) or Bitcoin address (string),
+     * .
      */
-    execute = (privateKey: bigint): Cache | string => {
+    execute = (): Cache | string => {
+        // PKG
+        this.pkg.execute(this.cache, 0);
+
         // SECP256K1
-        this.secp256k1Engine.execute(this.cache, privateKey);
+        this.secp256k1Engine.execute(this.cache, [0, 32], this.pkB);
 
         // Stops here if we only want the public key
         if (this.mode === "PUBLIC_KEY") return this.cache.subarray(0, this.pkB);
 
-        // SHA-256
+        // SHA-256 (executed only on PkB size but space still reserved for uncompressed public key)
         this.sha256Engine.execute(this.cache, [0, this.pkB], 65);
 
         // RIPEMD-160

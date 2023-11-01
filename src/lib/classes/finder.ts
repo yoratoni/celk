@@ -4,7 +4,6 @@ import Cache from "helpers/cache";
 import { addressToRIPEMD160 } from "helpers/conversions";
 import { bigIntDiv, bigIntLength } from "helpers/maths";
 import Generator from "lib/classes/generator";
-import PKG_ENGINE from "lib/crypto/generators/PKG";
 import { bigintToPrivateKey, formatUnitPerTimeUnit } from "utils/formats";
 import logger from "utils/logger";
 
@@ -13,7 +12,6 @@ import logger from "utils/logger";
  * Used to find a private key from a given Bitcoin address.
  */
 export default class Finder {
-    private pkg: PKG_ENGINE;
     private generator: Generator;
 
     private generatorInfo: {
@@ -27,8 +25,6 @@ export default class Finder {
      * Construct a new Bitcoin address finder (based on FINDER_CONFIG).
      */
     constructor() {
-        this.pkg = new PKG_ENGINE(config.privateKeyGenMode, config.privateKeyLowRange, config.privateKeyHighRange);
-
         // Check if addressToFind or publicKeyToFind is defined
         if (typeof config.addressToFind !== "string" && typeof config.publicKeyToFind !== "string") {
             throw new Error("[FINDER] Either 'addressToFind' or 'publicKeyToFind' must be defined");
@@ -56,7 +52,13 @@ export default class Finder {
             this.generatorInfo.input = addressToRIPEMD160(config.addressToFind as string);
         }
 
-        this.generator = new Generator(config.publicKeyGenMode, this.generatorInfo.inputType);
+        this.generator = new Generator(
+            config.privateKeyGenMode,
+            config.privateKeyLowRange,
+            config.privateKeyHighRange,
+            config.publicKeyGenMode,
+            this.generatorInfo.inputType
+        );
     }
 
     /**
@@ -82,7 +84,7 @@ export default class Finder {
         console.log("");
         const ghostIterations = `${BENCHMARKS_CONFIG.generatorGhostExecutionIterations.toLocaleString("en-US")} ghost executions`;
         logger.info(`Ghost execution (${ghostIterations}):`);
-        this.generator.executeReport(this.pkg.execute());
+        this.generator.executeReport();
 
         console.log("");
         logger.info("Beginning the search...");
@@ -122,14 +124,12 @@ export default class Finder {
         const initialTime = Date.now();
 
         // Internal variables
-        let privateKey = 0n;
         let found = false;
         let value: Cache;
 
         // Main loop
         for (let i = 1n; i <= loopLimit; i++) {
-            privateKey = this.pkg.execute();
-            value = this.generator.execute(privateKey) as Cache;
+            value = this.generator.execute() as Cache;
 
             // Progress report
             if (i % config.progressReportInterval === 0n) {
