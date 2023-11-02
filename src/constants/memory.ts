@@ -42,7 +42,7 @@ const MEMORY_TABLE: IsMemoryTable = {
     },
     SC2: {
         start: 154,
-        end: 182,
+        end: 186,
         len: 32
     },
     FINAL_RIPEMD_HASH: {

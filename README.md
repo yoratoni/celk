@@ -126,23 +126,17 @@ Benchmark environment:
 > Also note that this cache is an instance of the memory buffer of the WASM module, allowing
 > data sharing between JavaScript & the WASM modules.
 
-The cache itself is a 186 bytes Uint8Array, which is enough to store all the steps of the generator.
-
-The goal of the single cache update is not to directly improve the performance of the generator (for now),
-as the bottleneck is still the SECP256K1 algorithm, but to at least, not make it the bottleneck later,
-when the SECP256K1 algorithm will be improved.
-
 Here's a table that shows the reserved spaces (in bytes):
-| Step           | ID     | Start | End*  | Len  |
-|----------------|--------|-------|-------|------|
-| `PKG`          | `PKG`  | `000` | `032` | `32` |
-| `SECP256K1`    | `PBL`  | `032` | `097` | `65` |
-| `SHA-256`      | `SHA`  | `097` | `129` | `32` |
-| `NET BYTE`     | `NTB`  | `129` | `130` | `01` |
-| `RIPEMD-160`   | `RIP`  | `130` | `150` | `20` |
-| `CHECKSUM`     | `CHK`  | `150` | `154` | `04` |
-| `SHA-256 CHK1` | `SC1`  | `154` | `186` | `32` |
-| `SHA-256 CHK2` | `SC2`  | `154` | `186` | `32` |
+| Step           | ID     | Start | End*   | Len    |
+|----------------|--------|-------|--------|--------|
+| `PKG`          | `PKG`  | `000` | `0032` | `0032` |
+| `SECP256K1`    | `PBL`  | `032` | `0097` | `0065` |
+| `SHA-256`      | `SHA`  | `097` | `0129` | `0032` |
+| `NET BYTE`     | `NTB`  | `129` | `0130` | `0001` |
+| `RIPEMD-160`   | `RIP`  | `130` | `0150` | `0020` |
+| `CHECKSUM`     | `CHK`  | `150` | `0154` | `0004` |
+| `SHA-256 CHK1` | `SC1`  | `154` | `0186` | `0032` |
+| `SHA-256 CHK2` | `SC2`  | `154` | `0186` | `0032` |
 
 With:
 - `129::150` being the final RIPEMD-160 hash before double SHA-256 checksum (21 bytes).
