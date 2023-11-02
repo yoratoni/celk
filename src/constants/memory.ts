@@ -1,12 +1,18 @@
 /**
+ * Interface for a single memory slot.
+ */
+export interface IsMemorySlot {
+    start: number;
+    end: number;
+    len: number;
+}
+
+
+/**
  * Interface for the memory table.
  */
-interface IsMemoryTable {
-    [key: string]: {
-        start: number;
-        end: number;
-        len: number;
-    }
+export interface IsMemoryTable {
+    [key: string]: IsMemorySlot
 }
 
 /**

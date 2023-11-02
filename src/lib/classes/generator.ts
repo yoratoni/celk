@@ -15,13 +15,6 @@ import logger from "utils/logger";
 
 /**
  * Used to generate Bitcoin addresses (mainnet).
- *
- * Based on the generator, the 3 algorithms & 1 encoder implemented by myself:
- *   - PKG (Private Key Generator)
- *   - SECP256K1
- *   - SHA-256
- *   - RIPEMD-160
- *   - BASE58
  */
 export default class Generator {
     private pkg: PKG_ENGINE;
@@ -97,7 +90,7 @@ export default class Generator {
 
             // SECP256K1
             const pblStart = process.hrtime.bigint();
-            this.secp256k1Engine.execute(this.cache, privateKey);
+            // TODO
             TIMES.pbl = process.hrtime.bigint() - pblStart;
             VALUES.pbl = this.cache.subarray(0, this.pkB).toString("hex");
 
@@ -190,7 +183,7 @@ export default class Generator {
         this.pkg.execute(this.cache, MEMORY_TABLE.PKG);
 
         // SECP256K1
-        this.secp256k1Engine.execute(this.cache, MEMORY_TABLE.PBL);
+        // TODO
 
         // Stops here if we only want the public key
         if (this.mode === "PUBLIC_KEY") return this.cache.subarray(

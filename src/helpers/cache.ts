@@ -87,6 +87,26 @@ export default class Cache extends Uint8Array {
     };
 
     /**
+     * Creates a new Cache object from a big integer.
+     * @param value The big integer to create the cache from.
+     * @param size The size of the cache (optional, defaults to the big integer size).
+     * @returns A new Cache object.
+     */
+    static fromBigInt = (value: bigint, size?: number): Cache => {
+        if (size === undefined) {
+            size = Math.ceil(Number(value).toString(16).length / 2);
+        }
+
+        const cache = new Cache(size);
+
+        for (let i = 0; i < size; i++) {
+            cache[i] = Number(value >> BigInt(8 * (size - i - 1)) & BigInt(0xFF));
+        }
+
+        return cache;
+    };
+
+    /**
      * A private method that writes an hexadecimal string to the cache.
      * @param value The hexadecimal string to write to the cache.
      * @param start The offset to start writing at.
