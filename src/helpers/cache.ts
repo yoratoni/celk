@@ -15,11 +15,22 @@ export default class Cache extends Uint8Array {
 
 
     /**
-     * Creates a new Cache object of the specified size.
-     * @param size The size of the cache (in bytes).
+     * Creates a new Cache object based on an input (supported by the Uint8Array constructor).
+     *
+     * **Note:** The Uint8Array constructor interface has been modified to be more permissive,
+     * as TS still doesn't support multiple constructor signatures.
+     * @param input The input to create the cache from.
+     * @param options The options to use (optional).
      */
-    constructor(size: number) {
-        super(size);
+    constructor(
+        input: ArrayBufferLike | ArrayLike<number> | number,
+        options?: {
+            byteOffset?: number;
+            length?: number;
+        }
+    ) {
+        if (!options) super(input);
+        else super(input as ArrayBufferLike, options?.byteOffset, options?.length);
     }
 
 
@@ -29,6 +40,15 @@ export default class Cache extends Uint8Array {
      * @returns A new Cache object.
      */
     static alloc = (size: number): Cache => new Cache(size);
+
+    /**
+     * Creates a new Cache object from an ArrayBuffer.
+     * @param buffer The ArrayBuffer to create the cache from.
+     * @param byteOffset The offset to start reading from (optional, defaults to 0).
+     * @param length The number of bytes to read (optional, defaults to the buffer length).
+     * @returns A new Cache object.
+     */
+    static fromArrayBuffer = (buffer: ArrayBuffer, byteOffset?: number, length?: number): Cache => new Cache(buffer, { byteOffset, length });
 
     /**
      * Creates a new Cache object from the specified string and encoding.

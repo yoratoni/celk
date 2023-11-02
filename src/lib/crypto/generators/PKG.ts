@@ -21,7 +21,7 @@ export default class PKG_ENGINE {
     private tmpChunk: Cache = Cache.alloc(32);
     private tmpCacheIndex: number = 0;
 
-    private executeEndpoint: () => bigint;
+    private executeEndpoint: (cache: Cache) => void;
 
 
     /**
@@ -60,7 +60,7 @@ export default class PKG_ENGINE {
      * **[FULL RANDOM]** Generate a private key between a given range (defined in the constructor).
      * @returns The private key.
      */
-    private executeFullRandom = (): bigint => {
+    private executeFullRandom = (): void => {
         if (this.tmpCacheIndex >= this.tmpCacheSize) {
             randomFillSync(this.tmpCache);
             this.tmpCacheIndex = 0;
@@ -69,33 +69,33 @@ export default class PKG_ENGINE {
         this.tmpChunk = this.tmpCache.subarray(this.tmpCacheIndex, this.tmpCacheIndex + 32);
         this.tmpCacheIndex += 32;
 
-        return BigInt(`0x${Buffer.from(this.tmpChunk).toString("hex")}`) % (this.high - this.low) + this.low;
+        // TODO
     };
 
     /**
      * **[ASCENDING]** Generate a private key between a given range (defined in the constructor).
      * @returns The private key.
      */
-    private executeAscending = (): bigint => {
+    private executeAscending = (): void => {
         if (this.currAscending > this.high) {
             logger.warn(`[PKG] executeAscending: Generated private key is out of bounds (${this.low} - ${this.high}). Resetting..`);
             this.currAscending = this.low;
         }
 
-        return this.currAscending++;
+        // TODO
     };
 
     /**
      * **[DESCENDING]** Generate a private key between a given range (defined in the constructor).
      * @returns The private key.
      */
-    private executeDescending = (): bigint => {
+    private executeDescending = (): void => {
         if (this.currDescending < this.low) {
             logger.warn(`[PKG] executeDescending: Generated private key is out of bounds (${this.low} - ${this.high}). Resetting..`);
             this.currDescending = this.high;
         }
 
-        return this.currDescending--;
+        // TODO
     };
 
     /**
@@ -133,7 +133,7 @@ export default class PKG_ENGINE {
 
     /**
      * Main endpoint to generate a private key between a given range (defined in the constructor).
-     * @returns The private key.
+     * @param cache The cache to write the private key to (32 bytes).
      */
-    execute = (): bigint => this.executeEndpoint();
+    execute = (cache: Cache): void => this.executeEndpoint(cache);
 }

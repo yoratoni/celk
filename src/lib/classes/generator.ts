@@ -1,4 +1,6 @@
+import { memory } from "assembly/build";
 import BENCHMARKS_CONFIG from "configs/benchmarks.config";
+import MEMORY_TABLE, { CHECKSUM } from "constants/memory";
 import Cache from "helpers/cache";
 import { bigIntDiv } from "helpers/maths";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
@@ -35,7 +37,7 @@ export default class Generator {
      *
      * See [here](https://github.com/yoratoni/celk#about-the-cache) for more information.
      */
-    private cache = Cache.alloc(154).fill(0);
+    private cache = Cache.fromArrayBuffer(memory.buffer, 0, 186);
 
     /** Number of bytes for the public key. */
     private pkB: 33 | 65;
@@ -185,31 +187,40 @@ export default class Generator {
      */
     execute = (): Cache | string => {
         // PKG
-        this.pkg.execute(this.cache, 0);
+        this.pkg.execute(this.cache, MEMORY_TABLE.PKG);
 
         // SECP256K1
-        this.secp256k1Engine.execute(this.cache, [0, 32], this.pkB);
+        this.secp256k1Engine.execute(this.cache, MEMORY_TABLE.PBL);
 
         // Stops here if we only want the public key
-        if (this.mode === "PUBLIC_KEY") return this.cache.subarray(0, this.pkB);
+        if (this.mode === "PUBLIC_KEY") return this.cache.subarray(
+            MEMORY_TABLE.PBL.start,
+            MEMORY_TABLE.PBL.end
+        );
 
         // SHA-256 (executed only on PkB size but space still reserved for uncompressed public key)
-        this.sha256Engine.execute(this.cache, [0, this.pkB], 65);
+        this.sha256Engine.execute(this.cache, MEMORY_TABLE.SHA);
 
         // RIPEMD-160
-        this.ripemd160Engine.execute(this.cache, [65, 97], 98);
+        this.ripemd160Engine.execute(this.cache, MEMORY_TABLE.RIP);
 
         // Stops here if we only want the RIPEMD-160 hash
-        if (this.mode === "RIPEMD-160") return this.cache.subarray(98, 118);
+        if (this.mode === "RIPEMD-160") return this.cache.subarray(
+            MEMORY_TABLE.FINAL_RIPEMD_HASH.start,
+            MEMORY_TABLE.FINAL_RIPEMD_HASH.end
+        );
 
         // Double SHA-256 checksum (step 1)
-        this.sha256Engine.execute(this.cache, [97, 118], 122);
+        this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC1);
 
         // Double SHA-256 checksum (step 2 -> overwrites step 1)
-        this.sha256Engine.execute(this.cache, [122, 154], 122);
+        this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC2);
 
         // Take the first 4 bytes of the double SHA-256 checksum
-        this.cache.writeUint32BE(this.cache.readUint32BE(122), 118);
+        this.cache.writeUint32BE(
+            this.cache.readUint32BE(CHECKSUM.read),
+            CHECKSUM.write
+        );
 
         // Base58 encoding
         return this.base58Engine.encode(this.cache, [97, 122]);
