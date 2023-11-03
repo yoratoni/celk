@@ -1,3 +1,4 @@
+import { IsMemorySlot } from "constants/memory";
 import Cache from "helpers/cache";
 
 
@@ -67,11 +68,11 @@ export default class BASE58_ENGINE {
     /**
      * Execute the BASE58 encoder.
      * @param cache The cache to use as input.
-     * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end].
+     * @param slot The memory slot to take from the cache.
      * @returns The BASE58 encoded version of the bytes.
      */
-    encode = (cache: Cache, bytesToTakeFromCache: [number, number]): string => {
-        const bytes = cache.subarray(...bytesToTakeFromCache);
+    encode = (cache: Cache, slot: IsMemorySlot): string => {
+        const bytes = cache.subarray(slot.offset, slot.end);
         const digits = [0];
 
         for (let i = 0; i < bytes.length; i++) {

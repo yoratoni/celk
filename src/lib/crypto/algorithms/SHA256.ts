@@ -1,3 +1,4 @@
+import { IsMemorySlot } from "constants/memory";
 import Cache from "helpers/cache";
 import { bigEndianWordsToCache } from "helpers/conversions";
 
@@ -75,9 +76,9 @@ export default class SHA256_ENGINE {
      * SHA-256 internal hash computation.
      * @param cache The cache to write to.
      * @param subarray The subarray to use as an input.
-     * @param writeToOffset The offset to write to (optional, defaults to 0).
+     * @param offset The offset to write to.
      */
-    private sha256 = (cache: Cache, subarray: Cache, writeToOffset?: number): void => {
+    private sha256 = (cache: Cache, subarray: Cache, offset: number): void => {
         const HASH = [
             0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
             0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
@@ -157,7 +158,7 @@ export default class SHA256_ENGINE {
         }
 
         // Write to cache at offset
-        bigEndianWordsToCache(cache, HASH, writeToOffset);
+        bigEndianWordsToCache(cache, HASH, offset);
     };
 
     /**
@@ -175,15 +176,14 @@ export default class SHA256_ENGINE {
     /**
      * Execute the SHA-256 algorithm.
      * @param cache The cache to use (input & output).
-     * @param bytesToTakeFromCache The number of bytes to take from the cache as [start, end] (optional).
-     * @param writeToOffset The offset to write to (optional, defaults to 0).
+     * @param slot The memory slot to write to.
      */
-    execute = (cache: Cache, bytesToTakeFromCache?: [number, number], writeToOffset?: number): void => {
+    execute = (cache: Cache, slot: IsMemorySlot): void => {
         // Empty the input array by keeping the reference
         this.inputArray.length = 0;
 
-        const subarray = cache.subarray(bytesToTakeFromCache?.[0] || 0, bytesToTakeFromCache?.[1]);
+        const subarray = cache.subarray(slot.offset, slot.end);
         this.cacheToBigEndianWords(subarray);
-        this.sha256(cache, subarray, writeToOffset);
+        this.sha256(cache, subarray, slot.offset);
     };
 }

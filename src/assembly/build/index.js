@@ -1,13 +1,6 @@
 async function instantiate(module, imports = {}) {
   const adaptedImports = {
     env: Object.assign(Object.create(globalThis), imports.env || {}, {
-      seed() {
-        // ~lib/builtins/seed() => f64
-        return (() => {
-          // @external.js
-          return Date.now() * Math.random();
-        })();
-      },
       abort(message, fileName, lineNumber, columnNumber) {
         // ~lib/builtins/abort(~lib/string/String | null?, ~lib/string/String | null?, u32?, u32?) => void
         message = __liftString(message >>> 0);
@@ -43,7 +36,6 @@ export const {
   __unpin,
   __collect,
   __rtti_base,
-  randomFill,
 } = await (async url => instantiate(
   await (async () => {
     try { return await globalThis.WebAssembly.compileStreaming(globalThis.fetch(url)); }

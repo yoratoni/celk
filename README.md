@@ -4,6 +4,10 @@ A toolbox to work with Bitcoin addresses & private keys, entirely written in Typ
 Note that, for now, the performance of the toolbox is not the best as I decided to focus on the architecture first,
 and only then, on the actual performance.
 
+As for the SECP256K algorithm, I decided to use the `secp256k1-node` module, my own implementation is, for now,
+really slow, as it is a simple JS implementation, and for it to be fast, it needs to be either written in AssemblyScript,
+either with GPU.js, but I'll see that later, it is not something easy to do.
+
 Commands
 --------
 ### Main commands
@@ -127,16 +131,16 @@ Benchmark environment:
 > data sharing between JavaScript & the WASM modules.
 
 Here's a table that shows the reserved spaces (in bytes):
-| Step           | ID     | Start | End*   | Len    |
-|----------------|--------|-------|--------|--------|
-| `PKG`          | `PKG`  | `000` | `0032` | `0032` |
-| `SECP256K1`    | `PBL`  | `032` | `0097` | `0065` |
-| `SHA-256`      | `SHA`  | `097` | `0129` | `0032` |
-| `NET BYTE`     | `NTB`  | `129` | `0130` | `0001` |
-| `RIPEMD-160`   | `RIP`  | `130` | `0150` | `0020` |
-| `CHECKSUM`     | `CHK`  | `150` | `0154` | `0004` |
-| `SHA-256 CHK1` | `SC1`  | `154` | `0186` | `0032` |
-| `SHA-256 CHK2` | `SC2`  | `154` | `0186` | `0032` |
+| Step           | ID     | Offset | End*  | Bytes |
+|----------------|--------|--------|-------|-------|
+| `PKG`          | `PKG`  | `000`  | `032` | `32`  |
+| `SECP256K1`    | `PBL`  | `032`  | `097` | `65`  |
+| `SHA-256`      | `SHA`  | `097`  | `129` | `32`  |
+| `NET BYTE`     | `NTB`  | `129`  | `130` | `01`  |
+| `RIPEMD-160`   | `RIP`  | `130`  | `150` | `20`  |
+| `CHECKSUM`     | `CHK`  | `150`  | `154` | `04`  |
+| `SHA-256 CHK1` | `SC1`  | `154`  | `186` | `32`  |
+| `SHA-256 CHK2` | `SC2`  | `154`  | `186` | `32`  |
 
 With:
 - `129::150` being the final RIPEMD-160 hash before double SHA-256 checksum (21 bytes).
@@ -144,7 +148,7 @@ With:
 
 `*` Note that the `End` index is exclusive.
 
-### Benchmarking of the algorithms / encoders (512 ghost executions)
+### Benchmarking of the different steps of the generator
 This table is updated with the latest version of the toolbox.
 
 Note that, since `v1.0.5`, the input address is reversed to its RIPEMD-160 hash,
@@ -158,7 +162,7 @@ I'm using two of my benchmarks to get the results:
 
 | Algorithm / encoder | Execution time | Workload     | Iterations per second |
 |---------------------|----------------|--------------|-----------------------|
-| **SECP256K1**       | **2.14ms**     | **99.14%**   | **472.00 IT/s**       |
+| SECP256K1           | -------------- | ------------ | --------------------- |
 | SHA-256             | 2.9µs          | 0.13%        | 245.60 kIT/s          |
 | RIPEMD-160          | 5.4µs          | 0.25%        | 238.78 kIT/s          |
 | BASE58              | 5.0µs          | 0.23%        | 216.62 kIT/s          |
@@ -166,16 +170,18 @@ I'm using two of my benchmarks to get the results:
 Now we see what the bottleneck is lol..
 
 ### Benchmarking of the Private Key Generator (PKG) (5 seconds)
-From `v1.0.3`, it seems not necessary to improve / benchmark the private key generator anymore,
-because it is not the bottleneck of the toolbox. I would be glad if it becomes one day lol.
+From `v1.0.6`, the private key generator also writes the private key into a 32 bytes chunk of memory,
+which is then, written into the cache, it makes it a lot more slower but it is necessary for a better
+secp256k1 algorithm implementation. I'll deal with it later if it becomes a problem.
 
 | Version     | `FULL_RANDOM`  | `ASCENDING`     | `DESCENDING`      |
 |-------------|----------------|-----------------|-------------------|
-| `v1.0.0`    | 575.7 kK/s    | 4.80 MK/s      | 4.76 MK/s        |
-| `v1.0.1`    | 590.2 kK/s    | 4.12 MK/s      | 4.60 MK/s        |
-| `v1.0.2`    | 584.4 kK/s    | 4.75 MK/s      | 4.65 MK/s        |
-| `v1.0.2b`   | 592.1 kK/s    | 4.24 MK/s      | 4.68 MK/s        |
-| `v1.0.3`    | **1.67 MK/s** | **11.15 MK/s** | **11.41 MK/s**   |
+| `v1.0.0`    | 575.7 kK/s     | 4.80 MK/s       | 4.76 MK/s         |
+| `v1.0.1`    | 590.2 kK/s     | 4.12 MK/s       | 4.60 MK/s         |
+| `v1.0.2`    | 584.4 kK/s     | 4.75 MK/s       | 4.65 MK/s         |
+| `v1.0.2b`   | 592.1 kK/s     | 4.24 MK/s       | 4.68 MK/s         |
+| `v1.0.3`    | 1.67 MK/s      | 11.15 MK/s      | 11.41 MK/s        |
+| `v1.0.6`    | 162.1 kK/s     | 404.7 kK/s      | 413.8 kK/s        |
 
 Ideas of future updates
 -----------------------

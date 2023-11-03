@@ -6,14 +6,6 @@ import { randomFillSync } from "crypto";
  * methods similar to the ones that can be found in the Node.js Buffer class.
  */
 export default class Cache extends Uint8Array {
-    private HEX_MAP: { [key: string]: number; } = {
-        "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6,
-        "7": 7, "8": 8, "9": 9, "a": 10, "b": 11, "c": 12, "d": 13,
-        "e": 14, "f": 15, "A": 10, "B": 11, "C": 12, "D": 13,
-        "E": 14, "F": 15
-    };
-
-
     /**
      * Creates a new Cache object based on an input (supported by the Uint8Array constructor).
      *
@@ -113,13 +105,11 @@ export default class Cache extends Uint8Array {
      * @param bytes The number of bytes to write.
      */
     private writeHex = (value: string, start: number, bytes: number): void => {
-        for (let i = 0; i < bytes; i += 2) {
-            // Sanity check
-            if (this.HEX_MAP[value[i]] === undefined || this.HEX_MAP[value[i + 1]] === undefined) {
-                throw new Error("Invalid hex string input");
-            }
+        const arr = value.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16));
+        if (!arr) throw new Error("Invalid hexadecimal string input");
 
-            this[start + (i / 2)] = (this.HEX_MAP[value[i]] << 4) | this.HEX_MAP[value[i + 1]];
+        for (let i = 0; i < bytes; i++) {
+            this[start + i] = arr[i];
         }
     };
 
@@ -170,12 +160,12 @@ export default class Cache extends Uint8Array {
     };
 
     /**
-     * Writes an Uint8Array to the cache.
-     * @param value The Uint8Array to write to the cache.
+     * Writes an Uint8Array / cache to the cache.
+     * @param value The Uint8Array / cache to write to the cache.
      * @param start The offset to start writing at (optional, defaults to 0).
      * @param bytes The number of bytes to write (optional, defaults to the value length).
      */
-    writeUint8Array = (value: Uint8Array, start = 0, bytes = value.length): void => {
+    writeTypedArray = (value: Uint8Array | Cache, start = 0, bytes = value.length): void => {
         for (let i = 0; i < bytes; i++) {
             this[start + i] = value[i];
         }

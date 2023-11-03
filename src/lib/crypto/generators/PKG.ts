@@ -7,70 +7,73 @@ import logger from "utils/logger";
 
 
 /**
+ * Interface for the PKG return value.
+ */
+export interface IsPKGReturnValue {
+    dec: bigint;
+    arr: Cache;
+}
+
+
+/**
  * Used to generate a private key between a given range.
  */
 export default class PKG_ENGINE {
-    // Range
+    // Ranges
     private low: bigint;
     private high: bigint;
 
-    // Positions in the range (ascending and descending modes)
+    // Chunk to store the private key as an Uint8Array (cache extension)
+    private chunk: Cache;
+
+    // Ascending & descending current positions
     private currAscending: bigint;
     private currDescending: bigint;
 
-    // Chunk that stores the generated private key
-    private pkChunk: Cache;
-
-    // Temporary cache used to generate the private key (full random mode)
+    // Full random cache
     private tmpCacheSize = 8192;
-    private tmpCache: Cache = Cache.alloc(this.tmpCacheSize);
+    private tmpCache = Cache.alloc(this.tmpCacheSize);
     private tmpCacheIndex: number = 0;
 
-    // Execute endpoint depending on the private key generation mode
-    private executeEndpoint: (cache: Cache, memorySlot: IsMemorySlot) => void;
+    // Endpoint to generate the private key based on the current mode
+    private executeEndpoint: (cache: Cache, slot: IsMemorySlot) => bigint;
 
 
     /**
      * Construct a new Private Key Generator (PKG) engine.
-     * @param privateKeyGenMode The private key generation mode.
+     * @param privateKeyGenMode The private key generation mode (FULL_RANDOM, ASCENDING, DESCENDING).
+     * @param privateLengthInBytes The length of the private key in bytes.
      * @param low The low range to generate the private key from.
      * @param high The high range to generate the private key from.
      */
     constructor(
         privateKeyGenMode: General.IsPrivateKeyGenMode,
+        privateLengthInBytes: number,
         low: bigint,
         high: bigint
     ) {
         switch (privateKeyGenMode) {
             case "FULL_RANDOM":
                 this.executeEndpoint = this.executeFullRandom;
-
-                // Initialize the chunk with 32 bytes of random data
-                this.pkChunk = Cache.alloc(32);
-                randomFillSync(this.pkChunk);
-
                 break;
             case "ASCENDING":
                 this.executeEndpoint = this.executeAscending;
-
-                // Initialize the chunk with the low range
-                this.pkChunk = Cache.fromBigInt(low, 32);
-
                 break;
             case "DESCENDING":
                 this.executeEndpoint = this.executeDescending;
-
-                // Initialize the chunk with the high range
-                this.pkChunk = Cache.fromBigInt(high, 32);
-
                 break;
             default:
                 throw new Error(`[PKG] Invalid private key generation mode: '${privateKeyGenMode}'`);
         }
 
+        // Ranges
         this.low = low;
         this.high = high;
 
+        // Chunk to store the private key as an Uint8Array (cache extension)
+        this.chunk = Cache.alloc(privateLengthInBytes);
+
+        // Ascending & descending current positions
         this.currAscending = this.low;
         this.currDescending = this.high;
 
@@ -81,63 +84,88 @@ export default class PKG_ENGINE {
 
     /**
      * **[FULL RANDOM]** Generate a private key between a given range (defined in the constructor),
-     * and write it to the cache.
+     * and write it into a given memory slot in a given cache, also returning the private key as a bigint.
      * @param cache The cache to write the private key to.
-     * @param memorySlot The memory slot to write the private key to.
+     * @param slot The memory slot to write to.
+     * @returns The private key as a bigint.
      */
-    private executeFullRandom = (cache: Cache, memorySlot: IsMemorySlot): void => {
+    private executeFullRandom = (cache: Cache, slot: IsMemorySlot): bigint => {
         if (this.tmpCacheIndex >= this.tmpCacheSize) {
             randomFillSync(this.tmpCache);
             this.tmpCacheIndex = 0;
         }
 
-        this.pkChunk = this.tmpCache.subarray(this.tmpCacheIndex, this.tmpCacheIndex + 32);
-        this.tmpCacheIndex += 32;
+        const hexString = this.tmpCache.subarray(this.tmpCacheIndex, this.tmpCacheIndex + slot.bytes).toString("hex");
+        const boundedValue = BigInt(`0x${hexString}`) % (this.high - this.low) + this.low;
 
-        // Write the private key to the cache
-        cache.set(this.pkChunk, memorySlot.start);
+        // Write to the chunk
+        this.chunk.write(
+            boundedValue.toString(16).padStart(slot.bytes, "0"),
+            0,
+            slot.bytes,
+            "hex"
+        );
+
+        // Write to the cache
+        cache.writeTypedArray(this.chunk, slot.offset, slot.bytes);
+
+        this.tmpCacheIndex += slot.bytes;
+
+        return boundedValue;
     };
 
     /**
-     * **[ASCENDING]** Generate a private key between a given range (defined in the constructor).
+     * **[ASCENDING]** Generate a private key between a given range (defined in the constructor),
+     * and write it into a given memory slot in a given cache, also returning the private key as a bigint.
      * @param cache The cache to write the private key to.
-     * @param memorySlot The memory slot to write the private key to.
+     * @param slot The memory slot to write to.
+     * @returns The private key as a bigint.
      */
-    private executeAscending = (cache: Cache, memorySlot: IsMemorySlot): void => {
-        if (this.currAscending >= this.high) {
-            logger.warn("[PKG] Reached the end of the range, resetting to the beginning");
+    private executeAscending = (cache: Cache, slot: IsMemorySlot): bigint => {
+        if (this.currAscending > this.high) {
+            logger.warn("[PKG] executeAscending: Generated private key is out of bounds. Resetting..");
             this.currAscending = this.low;
-        } else {
-            this.currAscending++;
         }
 
-        for (let i = 0; i < 32; i++) {
-            this.pkChunk[i] = Number((this.currAscending >> BigInt(i * 8)) & BigInt(0xFF));
-        }
+        // Write to the chunk
+        this.chunk.write(
+            this.currAscending.toString(16).padStart(slot.bytes, "0"),
+            0,
+            slot.bytes,
+            "hex"
+        );
 
-        // Write the private key to the cache
-        cache.set(this.pkChunk, memorySlot.start);
+        // Write to the cache
+        cache.writeTypedArray(this.chunk, slot.offset, slot.bytes);
+
+        return this.currAscending++;
     };
 
     /**
-     * **[DESCENDING]** Generate a private key between a given range (defined in the constructor).
+     * **[DESCENDING]** Generate a private key between a given range (defined in the constructor),
+     * and write it into a given memory slot in a given cache, also returning the private key as a bigint.
      * @param cache The cache to write the private key to.
-     * @param memorySlot The memory slot to write the private key to.
+     * @param slot The memory slot to write to.
+     * @returns The private key as a bigint.
      */
-    private executeDescending = (cache: Cache, memorySlot: IsMemorySlot): void => {
-        if (this.currDescending <= this.low) {
-            logger.warn("[PKG] Reached the end of the range, resetting to the beginning");
+    private executeDescending = (cache: Cache, slot: IsMemorySlot): bigint => {
+        if (this.currDescending < this.low) {
+            logger.warn("[PKG] executeDescending: Generated private key is out of bounds. Resetting..");
             this.currDescending = this.high;
-        } else {
-            this.currDescending--;
         }
 
-        for (let i = 0; i < 32; i++) {
-            this.pkChunk[i] = Number((this.currDescending >> BigInt(i * 8)) & BigInt(0xFF));
-        }
+        // Write to the chunk
+        this.chunk.write(
+            this.currAscending.toString(16).padStart(slot.bytes, "0"),
+            0,
+            slot.bytes,
+            "hex"
+        );
 
-        // Write the private key to the cache
-        cache.set(this.pkChunk, memorySlot.start);
+        // Write to the cache
+        cache.writeTypedArray(this.chunk, slot.offset, slot.bytes);
+
+        return this.currDescending--;
     };
 
     /**
@@ -174,9 +202,11 @@ export default class PKG_ENGINE {
     };
 
     /**
-     * Main endpoint to generate a private key between a given range (defined in the constructor).
+     * Main endpoint to generate a private key between a given range (defined in the constructor),
+     * and write it into a given memory slot in a given cache, also returning the private key as a bigint.
      * @param cache The cache to write the private key to.
-     * @param memorySlot The memory slot to write the private key to.
+     * @param slot The memory slot to write to.
+     * @returns The private key as a bigint.
      */
-    execute = (cache: Cache, memorySlot: IsMemorySlot): void => this.executeEndpoint(cache, memorySlot);
+    execute = (cache: Cache, slot: IsMemorySlot): bigint => this.executeEndpoint(cache, slot);
 }
