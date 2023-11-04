@@ -189,14 +189,6 @@ Now, another puzzle that is interesting is the puzzle #130, which is the followi
 - Private key range: `2^129...2^130-1`.
 - Balance / Price: `13 BTC`.
 
-Notes about it:
-- This puzzle is a lot more complex than the puzzle #66, with a range from 2^129 to 2^130-1,
-but one thing that matters is that some of the public keys has been shared by the author,
-and the first available public key in the list (wallet still full) is from the puzzle #130.
-- A difference between no public key and an available public key is the computation time, because, to convert the public key
-into a valid Bitcoin address, it is necessary to compute `3 * SHA-256 + RIPEMD-160 + BASE58` too, which takes a bit more time.
-- Now, the thing that always takes most of the computation time is the SECP256K1 algorithm..
-
 Sources & Credits
 -----------------
 - [A scheme about public keys to BTC addresses](https://en.bitcoin.it/w/images/en/9/9b/PubKeyToAddr.png).
