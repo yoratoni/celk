@@ -124,13 +124,13 @@ Benchmark environment:
 | `v1.0.6`    | 15.42 kK/s                 | **Using secp256k1 module and WASM / JS shared memory space** |
 
 #### About the cache:
-> Note that I was previously using Node.js Buffers, but for better compatibility with WASM modules,
-> I decided to switch to Uin8Arrays (in `v1.0.6`).
+> Note that I was previously using Node.js Buffers (`v1.0.4`), but for better compatibility with WASM modules,
+> I decided to switch to Uin8Arrays (`v1.0.5`).
 > Now, I still extended Uint8Arrays to add methods similar to the ones that can be found in the Buffer class,
 > but I kept the Uint8Array class as the main class, to avoid any need for conversions.
 >
 > Also note that this cache is an instance of the memory buffer of the WASM module, allowing
-> data sharing between JavaScript & the WASM modules.
+> data sharing between JavaScript & the WASM modules (`v1.0.6`).
 
 Here's a table that shows the reserved spaces (in bytes):
 | Step           | ID     | Offset | End*  | Bytes |
@@ -168,8 +168,8 @@ I'm using two of my benchmarks to get the results:
 | SHA-256      | 05.6µs         | 08.99%   | 245.60 kIT/s          |
 | RIPEMD-160   | 05.6µs         | 08.99%   | 238.78 kIT/s          |
 
-Note that the private key used to benchmark the `sec256k1` algorithm is 2^255,
-which is a pretty high number, and that's why it takes so much time to compute.
+Note that the private key used to benchmark the `secp256k1` algorithm is in the range `2^250 <-> 2^255`,
+and that's why it takes so much time to compute.
 
 1000 BTC Bitcoin Challenge
 --------------------------
