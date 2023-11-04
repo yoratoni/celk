@@ -164,7 +164,7 @@ I'm using two of my benchmarks to get the results:
 
 | Step              | Execution time  | Workload     | Iterations per second |
 |-------------------|-----------------|--------------|-----------------------|
-| PKG (FULL RANDOM) | 06.0µs          | 10.21%       | 164.87 kIT/s          |
+| PKG (RANDOM)      | 06.0µs          | 10.21%       | 164.87 kIT/s          |
 | SECP256K1         | 44.8µs          | 62.66%       | 22.62 kIT/s           |
 | SHA-256           | 02.9µs          | 0.13%        | 245.60 kIT/s          |
 | RIPEMD-160        | 05.4µs          | 0.25%        | 238.78 kIT/s          |
