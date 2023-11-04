@@ -24,7 +24,7 @@
         "exportRuntime": true,
         "initialMemory": 64,
         "maximumMemory": 64,
-        "memoryBase": 154,
+        "memoryBase": 8192,
         "bindings": "esm"
     }
 }
