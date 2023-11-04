@@ -1,6 +1,5 @@
 import { IsMemorySlot } from "constants/memory";
 import Cache from "helpers/cache";
-import { littleEndianWordsToCache } from "helpers/conversions";
 
 
 /**
@@ -189,7 +188,7 @@ export default class RIPEMD160_ENGINE {
         }
 
         // Write to cache at offset
-        littleEndianWordsToCache(cache, HASH, offset);
+        cache.writeLittleEndianWords(HASH, offset);
     };
 
     /**
@@ -214,8 +213,8 @@ export default class RIPEMD160_ENGINE {
         // Empty the input array by keeping the reference
         this.inputArray.length = 0;
 
-        const subarray = cache.subarray(slot.offset, slot.end);
+        const subarray = cache.subarray(slot.readFrom.offset, slot.readFrom.end);
         this.cacheToLittleEndianWords(subarray);
-        this.ripemd160(cache, subarray, slot.offset);
+        this.ripemd160(cache, subarray, slot.writeTo.offset);
     };
 }

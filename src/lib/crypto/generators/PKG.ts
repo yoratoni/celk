@@ -1,5 +1,3 @@
-import { randomFillSync } from "crypto";
-
 import { IsMemorySlot } from "constants/memory";
 import Cache from "helpers/cache";
 import General from "types/general";
@@ -31,7 +29,7 @@ export default class PKG_ENGINE {
     private currDescending: bigint;
 
     // Full random cache
-    private tmpCacheSize = 8192;
+    private tmpCacheSize = 32_768;
     private tmpCache = Cache.alloc(this.tmpCacheSize);
     private tmpCacheIndex: number = 0;
 
@@ -91,26 +89,20 @@ export default class PKG_ENGINE {
      */
     private executeFullRandom = (cache: Cache, slot: IsMemorySlot): bigint => {
         if (this.tmpCacheIndex >= this.tmpCacheSize) {
-            randomFillSync(this.tmpCache);
+            this.tmpCache.randomFill();
             this.tmpCacheIndex = 0;
         }
 
-        const hexString = this.tmpCache.subarray(this.tmpCacheIndex, this.tmpCacheIndex + slot.bytes).toString("hex");
+        const hexString = this.tmpCache.subarray(this.tmpCacheIndex, this.tmpCacheIndex + slot.writeTo.bytes).toString("hex");
         const boundedValue = BigInt(`0x${hexString}`) % (this.high - this.low) + this.low;
 
         // Write to the chunk
-        this.chunk.write(
-            boundedValue.toString(16).padStart(slot.bytes, "0"),
-            0,
-            slot.bytes,
-            "hex"
-        );
+        this.chunk.writeBigInt(boundedValue, 0, slot.writeTo.bytes);
 
         // Write to the cache
-        cache.writeTypedArray(this.chunk, slot.offset, slot.bytes);
+        cache.writeBigInt(boundedValue, slot.writeTo.offset, slot.writeTo.bytes);
 
-        this.tmpCacheIndex += slot.bytes;
-
+        this.tmpCacheIndex += slot.writeTo.bytes;
         return boundedValue;
     };
 
@@ -128,15 +120,10 @@ export default class PKG_ENGINE {
         }
 
         // Write to the chunk
-        this.chunk.write(
-            this.currAscending.toString(16).padStart(slot.bytes, "0"),
-            0,
-            slot.bytes,
-            "hex"
-        );
+        this.chunk.writeBigInt(this.currAscending, 0, slot.writeTo.bytes);
 
         // Write to the cache
-        cache.writeTypedArray(this.chunk, slot.offset, slot.bytes);
+        cache.writeBigInt(this.currAscending, slot.writeTo.offset, slot.writeTo.bytes);
 
         return this.currAscending++;
     };
@@ -155,15 +142,10 @@ export default class PKG_ENGINE {
         }
 
         // Write to the chunk
-        this.chunk.write(
-            this.currAscending.toString(16).padStart(slot.bytes, "0"),
-            0,
-            slot.bytes,
-            "hex"
-        );
+        this.chunk.writeBigInt(this.currDescending, 0, slot.writeTo.bytes);
 
         // Write to the cache
-        cache.writeTypedArray(this.chunk, slot.offset, slot.bytes);
+        cache.writeBigInt(this.currDescending, slot.writeTo.offset, slot.writeTo.bytes);
 
         return this.currDescending--;
     };

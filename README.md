@@ -30,6 +30,7 @@ Commands
 Notes about the benchmarking:
 - What I call the `ghost execution report` in some of my benchmarks results,
   is a single showed execution of the generator with multiple previous hidden executions.
+  It is generally named "warm up" in other benchmarks, but I prefer to call it "ghost execution" (cooler).
   It allows the JIT compiler to optimize the code, and to show the real performance of the generator.
 
 ### Other commands
@@ -120,12 +121,13 @@ Benchmark environment:
 | `v1.0.4b`   | N/D                        | **Allow to use the public key if known**                          |
 | `v1.0.5`    | 1.25 kK/s                  | **Reverts the address to its RIPEMD-160 hash**                    |
 | `v1.0.5b`   | N/D                        | **Better benchmarking & reports per second**                      |
+| `v1.0.6`    | 15.42 kK/s                 | **Using secp256k1 module for now, and using shared memory**       |
 
 #### About the cache:
 > Note that I was previously using Node.js Buffers, but for better compatibility with WASM modules,
 > I decided to switch to Uin8Arrays (in `v1.0.6`).
 > Now, I still extended Uint8Arrays to add methods similar to the ones that can be found in the Buffer class,
-> but I kept the Uint8Array class as the main class, to avoid any need for some conversions.
+> but I kept the Uint8Array class as the main class, to avoid any need for conversions.
 >
 > Also note that this cache is an instance of the memory buffer of the WASM module, allowing
 > data sharing between JavaScript & the WASM modules.
@@ -160,32 +162,16 @@ I'm using two of my benchmarks to get the results:
 - `yarn benchmark:crypto`: Benchmarking of the algorithms / encoders to get their iterations per second.
 - `yarn benchmark:generator`: Benchmarking of the generator to get execution time & workload.
 
-| Algorithm / encoder | Execution time | Workload     | Iterations per second |
-|---------------------|----------------|--------------|-----------------------|
-| SECP256K1           | -------------- | ------------ | --------------------- |
-| SHA-256             | 2.9µs          | 0.13%        | 245.60 kIT/s          |
-| RIPEMD-160          | 5.4µs          | 0.25%        | 238.78 kIT/s          |
-| BASE58              | 5.0µs          | 0.23%        | 216.62 kIT/s          |
+| Step              | Execution time  | Workload     | Iterations per second |
+|-------------------|-----------------|--------------|-----------------------|
+| PKG (FULL RANDOM) | 06.0µs          | 10.21%       | 164.87 kIT/s          |
+| SECP256K1         | 44.8µs          | 62.66%       | 22.62 kIT/s           |
+| SHA-256           | 02.9µs          | 0.13%        | 245.60 kIT/s          |
+| RIPEMD-160        | 05.4µs          | 0.25%        | 238.78 kIT/s          |
+| BASE58            | 05.0µs          | 0.23%        | 216.62 kIT/s          |
 
-Now we see what the bottleneck is lol..
-
-### Benchmarking of the Private Key Generator (PKG) (5 seconds)
-From `v1.0.6`, the private key generator also writes the private key into a 32 bytes chunk of memory,
-which is then, written into the cache, it makes it a lot more slower but it is necessary for a better
-secp256k1 algorithm implementation. I'll deal with it later if it becomes a problem.
-
-| Version     | `FULL_RANDOM`  | `ASCENDING`     | `DESCENDING`      |
-|-------------|----------------|-----------------|-------------------|
-| `v1.0.0`    | 575.7 kK/s     | 4.80 MK/s       | 4.76 MK/s         |
-| `v1.0.1`    | 590.2 kK/s     | 4.12 MK/s       | 4.60 MK/s         |
-| `v1.0.2`    | 584.4 kK/s     | 4.75 MK/s       | 4.65 MK/s         |
-| `v1.0.2b`   | 592.1 kK/s     | 4.24 MK/s       | 4.68 MK/s         |
-| `v1.0.3`    | 1.67 MK/s      | 11.15 MK/s      | 11.41 MK/s        |
-| `v1.0.6`    | 162.1 kK/s     | 404.7 kK/s      | 413.8 kK/s        |
-
-Ideas of future updates
------------------------
-...
+Note that the private key used to benchmark the `sec256k1` algorithm is 2^255,
+which is a pretty high number, and that's why it takes so much time to compute.
 
 1000 BTC Bitcoin Challenge
 --------------------------

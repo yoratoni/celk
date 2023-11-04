@@ -1,11 +1,10 @@
-import secp256k1 from "secp256k1";
-
 import { memory } from "assembly/build";
 import BENCHMARKS_CONFIG from "configs/benchmarks.config";
-import MEMORY_TABLE, { CHECKSUM } from "constants/memory";
+import MEMORY_TABLE from "constants/memory";
 import Cache from "helpers/cache";
 import { bigIntDiv } from "helpers/maths";
 import RIPEMD160_ENGINE from "lib/crypto/algorithms/RIPEMD160";
+import SECP256K1_ENGINE from "lib/crypto/algorithms/SECP256K1";
 import SHA256_ENGINE from "lib/crypto/algorithms/SHA256";
 import BASE58_ENGINE from "lib/crypto/encoders/BASE58";
 import PKG_ENGINE from "lib/crypto/generators/PKG";
@@ -19,10 +18,12 @@ import logger from "utils/logger";
  */
 export default class Generator {
     private pkg: PKG_ENGINE;
+    private secp256k1Engine: SECP256K1_ENGINE;
     private sha256Engine: SHA256_ENGINE;
     private ripemd160Engine: RIPEMD160_ENGINE;
     private base58Engine: BASE58_ENGINE;
 
+    // The generator generation mode
     private mode: General.IsGeneratorGenMode;
 
     /**
@@ -53,11 +54,12 @@ export default class Generator {
     ) {
         this.pkg = new PKG_ENGINE(
             privateKeyGenMode,
-            MEMORY_TABLE.PKG.bytes,
+            MEMORY_TABLE.PKG.writeTo.bytes,
             privateKeyLowRange,
             privateKeyHighRange
         );
 
+        this.secp256k1Engine = new SECP256K1_ENGINE(publicKeyGenMode);
         this.sha256Engine = new SHA256_ENGINE();
         this.ripemd160Engine = new RIPEMD160_ENGINE();
         this.base58Engine = new BASE58_ENGINE();
@@ -92,28 +94,43 @@ export default class Generator {
             const pkgStart = process.hrtime.bigint();
             this.pkg.execute(this.cache, MEMORY_TABLE.PKG);
             TIMES.pkg = process.hrtime.bigint() - pkgStart;
-            VALUES.pkg = this.cache.subarray(0, 32).toString("hex");
+            VALUES.pkg = this.cache.subarray(
+                MEMORY_TABLE.PKG.writeTo.offset,
+                MEMORY_TABLE.PKG.writeTo.end
+            ).toString("hex");
 
             // SECP256K1
             const pblStart = process.hrtime.bigint();
-            // TODO
+            this.secp256k1Engine.execute(this.cache, MEMORY_TABLE.PBL);
             TIMES.pbl = process.hrtime.bigint() - pblStart;
-            VALUES.pbl = this.cache.subarray(0, this.pkB).toString("hex");
+            VALUES.pbl = this.cache.subarray(
+                MEMORY_TABLE.PBL.writeTo.offset,
+                MEMORY_TABLE.PBL.writeTo.offset + this.pkB
+            ).toString("hex");
 
             // Stops here if we only want the public key
             if (this.mode === "PUBLIC_KEY") break;
+
+            // Replace the "bytes" value of the SHA memory slot by the public key size
+            MEMORY_TABLE.SHA.readFrom.bytes = this.pkB;
 
             // SHA-256 (executed only on PkB size but space still reserved for uncompressed public key)
             const shaStart = process.hrtime.bigint();
             this.sha256Engine.execute(this.cache, MEMORY_TABLE.SHA);
             TIMES.sha = process.hrtime.bigint() - shaStart;
-            VALUES.sha = this.cache.subarray(65, 97).toString("hex");
+            VALUES.sha = this.cache.subarray(
+                MEMORY_TABLE.SHA.writeTo.offset,
+                MEMORY_TABLE.SHA.writeTo.end
+            ).toString("hex");
 
             // RIPEMD-160
             const ripStart = process.hrtime.bigint();
             this.ripemd160Engine.execute(this.cache, MEMORY_TABLE.RIP);
             TIMES.rip = process.hrtime.bigint() - ripStart;
-            VALUES.rip = this.cache.subarray(98, 118).toString("hex");
+            VALUES.rip = this.cache.subarray(
+                MEMORY_TABLE.RIP.writeTo.offset,
+                MEMORY_TABLE.RIP.writeTo.end
+            ).toString("hex");
 
             // Stops here if we only want the RIPEMD-160 hash
             if (this.mode === "RIPEMD-160") break;
@@ -122,19 +139,31 @@ export default class Generator {
             const sc1Start = process.hrtime.bigint();
             this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC1);
             TIMES.sc1 = process.hrtime.bigint() - sc1Start;
-            VALUES.sc1 = this.cache.subarray(122, 154).toString("hex");
+            VALUES.sc1 = this.cache.subarray(
+                MEMORY_TABLE.SC1.writeTo.offset,
+                MEMORY_TABLE.SC1.writeTo.end
+            ).toString("hex");
 
             // Double SHA-256 checksum (step 2 -> overwrites step 1)
             const sc2Start = process.hrtime.bigint();
             this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC2);
             TIMES.sc2 = process.hrtime.bigint() - sc2Start;
-            VALUES.sc2 = this.cache.subarray(122, 154).toString("hex");
+            VALUES.sc2 = this.cache.subarray(
+                MEMORY_TABLE.SC2.writeTo.offset,
+                MEMORY_TABLE.SC2.writeTo.end
+            ).toString("hex");
 
             // Take the first 4 bytes of the double SHA-256 checksum
             const chkStart = process.hrtime.bigint();
-            this.cache.writeUint32BE(this.cache.readUint32BE(CHECKSUM.readFrom), CHECKSUM.writeTo);
+            this.cache.writeUint32BE(
+                this.cache.readUint32BE(MEMORY_TABLE.CHECKSUM.readFrom.offset),
+                MEMORY_TABLE.CHECKSUM.writeTo.offset
+            );
             TIMES.chk = process.hrtime.bigint() - chkStart;
-            VALUES.chk = this.cache.subarray(118, 122).toString("hex");
+            VALUES.chk = this.cache.subarray(
+                MEMORY_TABLE.CHECKSUM.writeTo.offset,
+                MEMORY_TABLE.CHECKSUM.writeTo.end
+            ).toString("hex");
 
             // Base58 encoding
             const adrStart = process.hrtime.bigint();
@@ -184,18 +213,27 @@ export default class Generator {
      * @returns The public key (cache), RIPEMD-160 hash (cache) or Bitcoin address (string),
      * .
      */
-    execute = (): Cache | string => {
+    execute = (): {
+        privateKey: bigint;
+        value: Cache | string;
+    } => {
         // PKG
-        this.pkg.execute(this.cache, MEMORY_TABLE.PKG);
+        const currPrivateKey = this.pkg.execute(this.cache, MEMORY_TABLE.PKG);
 
         // SECP256K1
-        // TODO
+        this.secp256k1Engine.execute(this.cache, MEMORY_TABLE.PBL);
 
         // Stops here if we only want the public key
-        if (this.mode === "PUBLIC_KEY") return this.cache.subarray(
-            MEMORY_TABLE.PBL.offset,
-            MEMORY_TABLE.PBL.end
-        );
+        if (this.mode === "PUBLIC_KEY") return {
+            privateKey: currPrivateKey,
+            value: this.cache.subarray(
+                MEMORY_TABLE.PBL.readFrom.offset,
+                MEMORY_TABLE.PBL.readFrom.offset + this.pkB
+            )
+        };
+
+        // Replace the "bytes" value of the SHA memory slot by the public key size
+        MEMORY_TABLE.SHA.readFrom.bytes = this.pkB;
 
         // SHA-256 (executed only on PkB size but space still reserved for uncompressed public key)
         this.sha256Engine.execute(this.cache, MEMORY_TABLE.SHA);
@@ -204,10 +242,13 @@ export default class Generator {
         this.ripemd160Engine.execute(this.cache, MEMORY_TABLE.RIP);
 
         // Stops here if we only want the RIPEMD-160 hash
-        if (this.mode === "RIPEMD-160") return this.cache.subarray(
-            MEMORY_TABLE.FINAL_RIPEMD_HASH.offset,
-            MEMORY_TABLE.FINAL_RIPEMD_HASH.end
-        );
+        if (this.mode === "RIPEMD-160") return {
+            privateKey: currPrivateKey,
+            value: this.cache.subarray(
+                MEMORY_TABLE.FINAL_RIPEMD_HASH.readFrom.offset,
+                MEMORY_TABLE.FINAL_RIPEMD_HASH.readFrom.offset + MEMORY_TABLE.FINAL_RIPEMD_HASH.readFrom.bytes
+            )
+        };
 
         // Double SHA-256 checksum (step 1)
         this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC1);
@@ -216,9 +257,15 @@ export default class Generator {
         this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC2);
 
         // Take the first 4 bytes of the double SHA-256 checksum
-        this.cache.writeUint32BE(this.cache.readUint32BE(CHECKSUM.readFrom), CHECKSUM.writeTo);
+        this.cache.writeUint32BE(
+            this.cache.readUint32BE(MEMORY_TABLE.CHECKSUM.readFrom.offset),
+            MEMORY_TABLE.CHECKSUM.writeTo.offset
+        );
 
         // Base58 encoding
-        return this.base58Engine.encode(this.cache, MEMORY_TABLE.FINAL_BTC_HASH);
+        return {
+            privateKey: currPrivateKey,
+            value: this.base58Engine.encode(this.cache, MEMORY_TABLE.FINAL_BTC_HASH)
+        };
     };
 }

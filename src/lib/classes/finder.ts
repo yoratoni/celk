@@ -42,8 +42,16 @@ export default class Finder {
             this.generatorInfo.inputType = "PUBLIC_KEY";
             this.generatorInfo.untouchedInput = config.publicKeyToFind;
 
+            let publicKeyToFind: `0x${string}`;
+
+            if ((config.publicKeyToFind as string).startsWith("0x")) {
+                publicKeyToFind = config.publicKeyToFind as `0x${string}`;
+            } else {
+                publicKeyToFind = `0x${config.publicKeyToFind as string}`;
+            }
+
             // Convert the public key to a cache
-            this.generatorInfo.input = Cache.fromString(config.publicKeyToFind);
+            this.generatorInfo.input = Cache.fromHex(publicKeyToFind);
         } else {
             this.generatorInfo.inputType = "RIPEMD-160";
             this.generatorInfo.untouchedInput = config.addressToFind as string;
@@ -125,11 +133,11 @@ export default class Finder {
 
         // Internal variables
         let found = false;
-        let value: Cache;
+        let res: { privateKey: bigint; value: Cache | string; } = { privateKey: 0n, value: Cache.alloc(0) };
 
         // Main loop
         for (let i = 1n; i <= loopLimit; i++) {
-            value = this.generator.execute() as Cache;
+            res = this.generator.execute();
 
             // Progress report
             if (i % config.progressReportInterval === 0n) {
@@ -137,7 +145,7 @@ export default class Finder {
             }
 
             // Check if the value matches the one we're looking for
-            if (this.generatorInfo.input.equals(value)) {
+            if (this.generatorInfo.input.equals(res.value as Cache)) {
                 found = true;
                 break;
             };
@@ -150,7 +158,7 @@ export default class Finder {
             logger.error(`Couldn't find the private key of '${this.generatorInfo.untouchedInput}' within the given range!`);
         } else {
             logger.warn(`Found the private key of '${this.generatorInfo.untouchedInput}'!`);
-            logger.warn(`>> Private key: ${bigintToPrivateKey(privateKey)}`);
+            logger.warn(`>> Private key: ${bigintToPrivateKey(res.privateKey)}`);
         }
 
         console.log("");

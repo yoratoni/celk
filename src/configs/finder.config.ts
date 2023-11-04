@@ -30,7 +30,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 
     // The progress report interval (in number of iterations).
     // Default: 1024n
-    progressReportInterval: 512n
+    progressReportInterval: 7500n
 };
 
 

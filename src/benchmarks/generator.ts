@@ -15,7 +15,7 @@ const main = () => {
         "FULL_RANDOM",
         0n,
         2n ** 256n - 1n,
-        "COMPRESSED",
+        "UNCOMPRESSED",
         "PUBLIC_KEY"
     );
 

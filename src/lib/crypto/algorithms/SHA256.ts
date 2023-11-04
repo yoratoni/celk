@@ -1,6 +1,5 @@
 import { IsMemorySlot } from "constants/memory";
 import Cache from "helpers/cache";
-import { bigEndianWordsToCache } from "helpers/conversions";
 
 
 /**
@@ -158,7 +157,7 @@ export default class SHA256_ENGINE {
         }
 
         // Write to cache at offset
-        bigEndianWordsToCache(cache, HASH, offset);
+        cache.writeBigEndianWords(HASH, offset);
     };
 
     /**
@@ -182,8 +181,8 @@ export default class SHA256_ENGINE {
         // Empty the input array by keeping the reference
         this.inputArray.length = 0;
 
-        const subarray = cache.subarray(slot.offset, slot.end);
+        const subarray = cache.subarray(slot.readFrom.offset, slot.readFrom.end);
         this.cacheToBigEndianWords(subarray);
-        this.sha256(cache, subarray, slot.offset);
+        this.sha256(cache, subarray, slot.writeTo.offset);
     };
 }

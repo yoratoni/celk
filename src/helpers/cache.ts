@@ -34,78 +34,28 @@ export default class Cache extends Uint8Array {
     static alloc = (size: number): Cache => new Cache(size);
 
     /**
-     * Creates a new Cache object from an ArrayBuffer.
-     * @param buffer The ArrayBuffer to create the cache from.
-     * @param byteOffset The offset to start reading from (optional, defaults to 0).
-     * @param length The number of bytes to read (optional, defaults to the buffer length).
-     * @returns A new Cache object.
+     * Writes an array of numbers to the cache (< 256).
+     * @param value The array of numbers to write to the cache.
+     * @param start The offset to start writing at (optional, defaults to 0).
+     * @param bytes The number of bytes to write (optional, defaults to the value length).
      */
-    static fromArrayBuffer = (buffer: ArrayBuffer, byteOffset?: number, length?: number): Cache => new Cache(buffer, { byteOffset, length });
-
-    /**
-     * Creates a new Cache object from the specified string and encoding.
-     *
-     * **Note:** If the string begins with "0x",
-     * it will be automatically treated as an hexadecimal string.
-     *
-     * @param value The string to create the cache from.
-     * @param encoding The encoding to use (optional, defaults to "hex").
-     * @returns A new Cache object.
-     */
-    static fromString = (value: string | `0x${string}`, encoding: "utf8" | "hex" = "hex"): Cache => {
-        if (value.startsWith("0x")) {
-            encoding = "hex";
-            value = value.slice(2);
+    writeNumbers = (value: number[], start = 0, bytes = value.length): void => {
+        for (let i = 0; i < bytes; i++) {
+            if (value[i] > 255) throw new Error("Invalid number input (should be < 256)");
+            this[start + i] = value[i];
         }
-
-        const cache = new Cache(value.length);
-        cache.write(value, 0, value.length, encoding);
-        return cache;
     };
 
     /**
-     * Creates a new Cache object from the specified array of numbers.
-     * @param numbers The array of numbers to create the cache from.
-     * @returns A new Cache object.
-     */
-    static fromNumbers = (numbers: number[]): Cache => {
-        const cache = new Cache(numbers.length);
-
-        for (let i = 0; i < numbers.length; i++) {
-            cache[i] = numbers[i];
-        }
-
-        return cache;
-    };
-
-    /**
-     * Creates a new Cache object from a big integer.
-     * @param value The big integer to create the cache from.
-     * @param size The size of the cache (optional, defaults to the big integer size).
-     * @returns A new Cache object.
-     */
-    static fromBigInt = (value: bigint, size?: number): Cache => {
-        if (size === undefined) {
-            size = Math.ceil(Number(value).toString(16).length / 2);
-        }
-
-        const cache = new Cache(size);
-
-        for (let i = 0; i < size; i++) {
-            cache[i] = Number(value >> BigInt(8 * (size - i - 1)) & BigInt(0xFF));
-        }
-
-        return cache;
-    };
-
-    /**
-     * A private method that writes an hexadecimal string to the cache.
+     * Writes an hexadecimal string to the cache (should start with "0x").
      * @param value The hexadecimal string to write to the cache.
-     * @param start The offset to start writing at.
-     * @param bytes The number of bytes to write.
+     * @param start The offset to start writing at (optional, defaults to 0).
+     * @param bytes The number of bytes to write (optional, defaults to the value length).
      */
-    private writeHex = (value: string, start: number, bytes: number): void => {
-        const arr = value.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16));
+    writeHex = (value: `0x${string}`, start = 0, bytes = value.length): void => {
+        if (!value.startsWith("0x")) throw new Error("Invalid hexadecimal string input (missing '0x' prefix)");
+
+        const arr = value.slice(2).match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16));
         if (!arr) throw new Error("Invalid hexadecimal string input");
 
         for (let i = 0; i < bytes; i++) {
@@ -114,48 +64,14 @@ export default class Cache extends Uint8Array {
     };
 
     /**
-     * A private method that writes a UTF-8 string to the cache.
+     * Writes a UTF-8 string to the cache.
      * @param value The UTF-8 string to write to the cache.
-     * @param offset The offset to start writing at.
-     * @param bytes The number of bytes to write.
-     */
-    private writeUtf8 = (value: string, start: number, bytes: number): void => {
-        for (let i = 0; i < bytes; i++) {
-            this[start + i] = value.charCodeAt(i);
-        }
-    };
-
-    /**
-     * Writes a string to the cache, at the specified offset.
-     *
-     * **Note:** If the string begins with "0x",
-     * it will be automatically treated as an hexadecimal string.
-     *
-     * @param value The string to write to the cache.
      * @param offset The offset to start writing at (optional, defaults to 0).
      * @param bytes The number of bytes to write (optional, defaults to the value length).
-     * @param encoding The encoding to use (optional, defaults to "hex").
      */
-    write = (value: string | `0x${string}`, offset = 0, bytes?: number, encoding: "utf8" | "hex" = "hex"): void => {
-        if (value.startsWith("0x")) {
-            encoding = "hex";
-            value = value.slice(2);
-
-            // Sanity check
-            if (value.length % 2 !== 0) {
-                throw new Error("Invalid hexadecimal string input length, expected it to be a multiple of 2");
-            }
-        }
-
-        switch (encoding) {
-            case "utf8":
-                this.writeUtf8(value, offset, bytes || value.length);
-                break;
-            case "hex":
-                this.writeHex(value, offset, bytes || value.length);
-                break;
-            default:
-                throw new Error("Invalid encoding");
+    writeUtf8 = (value: string, start = 0, bytes = value.length): void => {
+        for (let i = 0; i < bytes; i++) {
+            this[start + i] = value.charCodeAt(i);
         }
     };
 
@@ -165,11 +81,140 @@ export default class Cache extends Uint8Array {
      * @param start The offset to start writing at (optional, defaults to 0).
      * @param bytes The number of bytes to write (optional, defaults to the value length).
      */
-    writeTypedArray = (value: Uint8Array | Cache, start = 0, bytes = value.length): void => {
+    writeUint8Array = (value: Uint8Array | Cache, start = 0, bytes = value.length): void => {
         for (let i = 0; i < bytes; i++) {
             this[start + i] = value[i];
         }
     };
+
+    /**
+     * Writes an array of 32-bit Big Endian words to the cache
+     * @param value The array of 32-bit Big Endian words to write to the cache.
+     * @param start The offset to start writing at (optional, defaults to 0).
+     * @param bytes The number of bytes to write (optional, defaults to the value length).
+     */
+    writeBigEndianWords = (value: number[], start = 0, bytes = value.length): void => {
+        for (let i = 0; i < bytes * 32; i += 8) {
+            this[start + i / 8] = (value[i >> 5] >>> (24 - i % 32)) & 0xFF;
+        }
+    };
+
+    /**
+     * Writes an array of 32-bit Little Endian words to the cache
+     * @param value The array of 32-bit Little Endian words to write to the cache.
+     * @param start The offset to start writing at (optional, defaults to 0).
+     * @param bytes The number of bytes to write (optional, defaults to the value length).
+     */
+    writeLittleEndianWords = (value: number[], start = 0, bytes = value.length): void => {
+        for (let i = 0; i < bytes * 32; i += 8) {
+            this[start + i / 8] = (value[i >> 5] >>> (i % 32)) & 0xFF;
+        }
+    };
+
+    /**
+     * Writes a big integer to the cache.
+     * @param value The big integer to write to the cache.
+     * @param start The offset to start writing at (optional, defaults to 0).
+     * @param bytes The number of bytes to write (optional, defaults to the value length).
+     */
+    writeBigInt = (value: bigint, start = 0, bytes = Math.ceil(Number(value).toString(16).length / 2)): void => {
+        for (let i = 0; i < bytes; i++) {
+            this[start + i] = Number(value >> BigInt(8 * (bytes - i - 1)) & BigInt(0xFF));
+        }
+    };
+
+    /**
+     * Creates a new Cache object from an array of numbers.
+     * @param value The array of numbers to create the cache from.
+     * @param start The offset to start reading from (optional, defaults to 0).
+     * @param bytes The number of bytes to read (optional, defaults to the value length).
+     */
+    static fromNumbers = (value: number[], start = 0, bytes = value.length): Cache => {
+        const cache = new Cache(bytes);
+        cache.writeNumbers(value, start, bytes);
+        return cache;
+    };
+
+    /**
+     * Creates a new Cache object from an hexadecimal string (should start with "0x").
+     * @param value The hexadecimal string to create the cache from.
+     * @param start The offset to start reading from (optional, defaults to 0).
+     * @param bytes The number of bytes to read (optional, defaults to the value length).
+     */
+    static fromHex = (value: `0x${string}`, start = 0, bytes = value.length): Cache => {
+        const cache = new Cache(bytes);
+        cache.writeHex(value, start, bytes);
+        return cache;
+    };
+
+    /**
+     * Creates a new Cache object from a UTF-8 string.
+     * @param value The UTF-8 string to create the cache from.
+     * @param start The offset to start reading from (optional, defaults to 0).
+     * @param bytes The number of bytes to read (optional, defaults to the value length).
+     */
+    static fromUtf8 = (value: string, start = 0, bytes = value.length): Cache => {
+        const cache = new Cache(bytes);
+        cache.writeUtf8(value, start, bytes);
+        return cache;
+    };
+
+    /**
+     * Creates a new Cache object from an Uint8Array / cache.
+     * @param value The Uint8Array / cache to create the cache from.
+     * @param start The offset to start reading from (optional, defaults to 0).
+     * @param bytes The number of bytes to read (optional, defaults to the value length).
+     */
+    static fromUint8Array = (value: Uint8Array | Cache, start = 0, bytes = value.length): Cache => {
+        const cache = new Cache(bytes);
+        cache.writeUint8Array(value, start, bytes);
+        return cache;
+    };
+
+    /**
+     * Creates a new Cache object from an array of 32-bit Big Endian words.
+     * @param value The array of 32-bit Big Endian words to create the cache from.
+     * @param start The offset to start reading from (optional, defaults to 0).
+     * @param bytes The number of bytes to read (optional, defaults to the value length).
+     */
+    static fromBigEndianWords = (value: number[], start = 0, bytes = value.length): Cache => {
+        const cache = new Cache(bytes);
+        cache.writeBigEndianWords(value, start, bytes);
+        return cache;
+    };
+
+    /**
+     * Creates a new Cache object from an array of 32-bit Little Endian words.
+     * @param value The array of 32-bit Little Endian words to create the cache from.
+     * @param start The offset to start reading from (optional, defaults to 0).
+     * @param bytes The number of bytes to read (optional, defaults to the value length).
+     */
+    static fromLittleEndianWords = (value: number[], start = 0, bytes = value.length): Cache => {
+        const cache = new Cache(bytes);
+        cache.writeLittleEndianWords(value, start, bytes);
+        return cache;
+    };
+
+    /**
+     * Creates a new Cache object from a big integer.
+     * @param value The big integer to create the cache from.
+     * @param start The offset to start reading from (optional, defaults to 0).
+     * @param bytes The number of bytes to read (optional, defaults to the value length).
+     */
+    static fromBigInt = (value: bigint, start = 0, bytes = Math.ceil(Number(value).toString(16).length / 2)): Cache => {
+        const cache = new Cache(bytes);
+        cache.writeBigInt(value, start, bytes);
+        return cache;
+    };
+
+    /**
+     * Creates a new Cache object from an ArrayBuffer.
+     * @param buffer The ArrayBuffer to create the cache from.
+     * @param byteOffset The offset to start reading from (optional, defaults to 0).
+     * @param length The number of bytes to read (optional, defaults to the buffer length).
+     * @returns A new Cache object.
+     */
+    static fromArrayBuffer = (buffer: ArrayBuffer, byteOffset?: number, length?: number): Cache => new Cache(buffer, { byteOffset, length });
 
     /**
      * Overrides the default Uint8Array 'subarray' method allowing to keep the 'Cache' type.

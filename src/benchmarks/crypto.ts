@@ -27,23 +27,27 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
     let testPassed = true;
 
     // Test values
-    const secp256k1_compressedOutput = "03513BA6E632B03D116D8BD9B96B1E64D39BA15A3CD56E371A2852D1B1331280D3";
-    const secp256k1_uncompressedOutput = "04513BA6E632B03D116D8BD9B96B1E64D39BA15A3CD56E371A2852D1B1331280D3547D6E528F9CDACE903849DF2E9D7AAF5DAE533949F6DF47327E3DD1EF6679E3";
-    const sha256_output = "776FED35A3E1CF19DC0FDED97AF8BE0898B061559F994C75D7CE8129A3462E92";
-    const ripemd160_output = "621BCDEADDACC0C8EF640D0B44C5C45CC0DCA1F0";
-    const rawAddress = "00621BCDEADDACC0C8EF640D0B44C5C45CC0DCA1F083731B27";
+    const secp256k1_compressedOutput = "0x02B23790A42BE63E1B251AD6C94FDEF07271EC0AADA31DB6C3E8BD32043F8BE384";
+    const secp256k1_uncompressedOutput = "0x04B23790A42BE63E1B251AD6C94FDEF07271EC0AADA31DB6C3E8BD32043F8BE384FC6B694919D55EDBE8D50F88AA81F94517F004F4149ECB58D10A473DEB19880E";
+    const sha256_output = "0x776FED35A3E1CF19DC0FDED97AF8BE0898B061559F994C75D7CE8129A3462E92";
+    const ripemd160_output = "0x621BCDEADDACC0C8EF640D0B44C5C45CC0DCA1F0";
+    const rawAddress = "0x00621BCDEADDACC0C8EF640D0B44C5C45CC0DCA1F083731B27";
     const address = "19wkXgUJjR82ZSdn9gufFNRM2f2A3aAMuQ";
 
 
     if (mode === "all" || mode === "pkg") {
         const pkgEngine = new PKG_ENGINE("FULL_RANDOM", 32, 1n, 2n ** 256n - 1n);
-
         const pkgCache = Cache.alloc(32);
+
+        const slot = {
+            readFrom: { offset: -1, bytes: -1, end: -1 },
+            writeTo: { offset: 0, bytes: 32, end: 32 }
+        };
 
         console.log("");
         logger.info("> PRIVATE KEY GENERATOR (Full random mode):");
         benchmark(
-            () => pkgEngine.execute(pkgCache, { offset: 0, bytes: 32, end: 32 }),
+            () => pkgEngine.execute(pkgCache, slot),
             (input: bigint) => bigintToPrivateKey(input)
         );
 
@@ -52,7 +56,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         logger.info("> PRIVATE KEY GENERATOR (Ascending mode):");
         pkgEngine.setPrivateKeyGenMode("ASCENDING");
         benchmark(
-            () => pkgEngine.execute(pkgCache, { offset: 0, bytes: 32, end: 32 }),
+            () => pkgEngine.execute(pkgCache, slot),
             (input: bigint) => bigintToPrivateKey(input)
         );
 
@@ -60,7 +64,7 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         logger.info("> PRIVATE KEY GENERATOR (Descending mode):");
         pkgEngine.setPrivateKeyGenMode("DESCENDING");
         benchmark(
-            () => pkgEngine.execute(pkgCache, { offset: 0, bytes: 32, end: 32 }),
+            () => pkgEngine.execute(pkgCache, slot),
             (input: bigint) => bigintToPrivateKey(input)
         );
     }
@@ -68,20 +72,26 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
     if (mode === "all" || mode === "algorithms" || mode === "secp256k1") {
         // Input
-        const pkgEngine = new PKG_ENGINE("DESCENDING", 32, 1n, 2n ** 256n - 1n);
+        const pkgEngine = new PKG_ENGINE("DESCENDING", 32, 0n, 2n ** 255n);
         const pkgCache = Cache.alloc(32);
-        pkgEngine.execute(pkgCache, { offset: 0, bytes: 32, end: 32 });
+
+        const slot = {
+            readFrom: { offset: -1, bytes: -1, end: -1 },
+            writeTo: { offset: 0, bytes: 32, end: 32 }
+        };
+
+        pkgEngine.execute(pkgCache, slot);
 
 
         console.log("");
-        logger.info("> SECP256K1 ALGORITHM (Compressed):");
-        logger.info("  - Private key: " + pkgCache.toString("hex"));
+        logger.info("> SECP256K1 ALGORITHM (Compressed, highest possible private key):");
+        logger.info("  > Private key: 0x" + pkgCache.toString("hex").toUpperCase());
 
         // Executes once for checking the output
         // eslint-disable-next-line import/no-named-as-default-member
         let res = secp256k1.publicKeyCreate(pkgCache, true);
 
-        if (res.toString().toUpperCase() === secp256k1_compressedOutput) testPassed = true;
+        if ("0x" + Buffer.from(res).toString("hex").toUpperCase() === secp256k1_compressedOutput) testPassed = true;
         else testPassed = false;
 
         benchmark(
@@ -93,14 +103,14 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
 
 
         console.log("");
-        logger.info("> SECP256K1 ALGORITHM (Uncompressed, largest private key on 62 bytes):");
-        logger.info("  - Private key: " + pkgCache.toString("hex"));
+        logger.info("> SECP256K1 ALGORITHM (Uncompressed, highest possible private key):");
+        logger.info("  > Private key: 0x" + pkgCache.toString("hex").toUpperCase());
 
         // Executes once for checking the output
         // eslint-disable-next-line import/no-named-as-default-member
         res = secp256k1.publicKeyCreate(pkgCache, false);
 
-        if (res.toString().toUpperCase() === secp256k1_uncompressedOutput) testPassed = true;
+        if ("0x" + Buffer.from(res).toString("hex").toUpperCase() === secp256k1_uncompressedOutput) testPassed = true;
         else testPassed = false;
 
         benchmark(
@@ -123,19 +133,24 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         const sha256Cache = Cache.alloc(65);
 
         // Secp256k1 uncompressed output into sha256Cache
-        sha256Cache.write(secp256k1_uncompressedOutput);
+        sha256Cache.writeHex(secp256k1_uncompressedOutput);
+
+        const slot = {
+            readFrom: { offset: 0, bytes: 65, end: 65 },
+            writeTo: { offset: 0, bytes: 32, end: 32 }
+        };
 
         // Executes once for checking the output
-        sha256Engine.execute(sha256Cache, { offset: 0, bytes: 65, end: 65 });
+        sha256Engine.execute(sha256Cache, slot);
 
         // Subarray is used to get the first 32 bytes of the output (256 bits)
         if (sha256Cache.subarray(0, 32).toString("hex").toUpperCase() === sha256_output) testPassed = true;
         else testPassed = false;
 
         // Secp256k1 uncompressed output into sha256Cache
-        sha256Cache.write(secp256k1_uncompressedOutput);
+        sha256Cache.writeHex(secp256k1_uncompressedOutput);
 
-        benchmark(() => sha256Engine.execute(sha256Cache, { offset: 0, bytes: 65, end: 65 }), undefined, testPassed);
+        benchmark(() => sha256Engine.execute(sha256Cache, slot), undefined, testPassed);
     }
 
 
@@ -149,19 +164,24 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         const ripemd160Cache = Cache.alloc(32);
 
         // SHA-256 output into ripemd160Cache
-        ripemd160Cache.write(sha256_output);
+        ripemd160Cache.writeHex(sha256_output);
+
+        const slot = {
+            readFrom: { offset: 0, bytes: 32, end: 32 },
+            writeTo: { offset: 0, bytes: 20, end: 20 }
+        };
 
         // Executes once for checking the output
-        ripemd160Engine.execute(ripemd160Cache, { offset: 0, bytes: 32, end: 32 });
+        ripemd160Engine.execute(ripemd160Cache, slot);
 
         // Subarray is used to get the first 20 bytes of the output (160 bits)
         if (ripemd160Cache.subarray(0, 20).toString("hex").toUpperCase() === ripemd160_output) testPassed = true;
         else testPassed = false;
 
         // SHA-256 output into ripemd160Cache
-        ripemd160Cache.write(sha256_output);
+        ripemd160Cache.writeHex(sha256_output);
 
-        benchmark(() => ripemd160Engine.execute(ripemd160Cache, { offset: 0, bytes: 32, end: 32 }), undefined, testPassed);
+        benchmark(() => ripemd160Engine.execute(ripemd160Cache, slot), undefined, testPassed);
     }
 
 
@@ -175,15 +195,20 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         const base58Cache = Cache.alloc(25);
 
         // Raw address into base58Cache
-        base58Cache.write(rawAddress);
+        base58Cache.writeHex(rawAddress);
+
+        const slot = {
+            readFrom: { offset: 0, bytes: 25, end: 25 },
+            writeTo: { offset: -1, bytes: -1, end: -1 }
+        };
 
         // Encode once for checking the output
-        const addr = base58Engine.encode(base58Cache, { offset: 0, bytes: 25, end: 25 });
+        const addr = base58Engine.encode(base58Cache, slot);
 
         if (addr === address) testPassed = true;
         else testPassed = false;
 
-        benchmark(() => base58Engine.encode(base58Cache, { offset: 0, bytes: 25, end: 25 }), undefined, testPassed);
+        benchmark(() => base58Engine.encode(base58Cache, slot), undefined, testPassed);
     }
 
     console.log("");

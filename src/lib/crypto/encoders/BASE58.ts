@@ -72,7 +72,7 @@ export default class BASE58_ENGINE {
      * @returns The BASE58 encoded version of the bytes.
      */
     encode = (cache: Cache, slot: IsMemorySlot): string => {
-        const bytes = cache.subarray(slot.offset, slot.end);
+        const bytes = cache.subarray(slot.readFrom.offset, slot.readFrom.end);
         const digits = [0];
 
         for (let i = 0; i < bytes.length; i++) {
