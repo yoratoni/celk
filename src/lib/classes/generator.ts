@@ -109,7 +109,7 @@ export default class Generator {
             ).toString("hex");
 
             // Stops here if we only want the public key
-            if (this.mode === "PUBLIC_KEY") break;
+            if (this.mode === "PUBLIC_KEY") continue;
 
             // Replace the "bytes" value of the SHA memory slot by the public key size
             MEMORY_TABLE.SHA.readFrom.bytes = this.pkB;
@@ -133,7 +133,7 @@ export default class Generator {
             ).toString("hex");
 
             // Stops here if we only want the RIPEMD-160 hash
-            if (this.mode === "RIPEMD-160") break;
+            if (this.mode === "RIPEMD-160") continue;
 
             // Double SHA-256 checksum (step 1)
             const sc1Start = process.hrtime.bigint();

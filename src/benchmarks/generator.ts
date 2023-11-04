@@ -13,8 +13,8 @@ const main = () => {
 
     const generator = new Generator(
         "FULL_RANDOM",
-        0n,
-        2n ** 256n - 1n,
+        2n ** 200n,
+        2n ** 255n,
         "UNCOMPRESSED",
         "PUBLIC_KEY"
     );

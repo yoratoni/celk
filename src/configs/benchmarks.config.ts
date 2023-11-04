@@ -12,7 +12,7 @@ const BENCHMARKS_CONFIG: Configs.IsBenchmarksConfig = {
     reportInterval: 1,
 
     // Generator ghost executions to warm up the engine
-    generatorGhostExecutionIterations: 1024
+    generatorGhostExecutionIterations: 8192
 };
 
 
