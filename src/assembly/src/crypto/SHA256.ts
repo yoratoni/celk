@@ -5,9 +5,6 @@ import { loadUint32BE } from "../helpers/storage";
 /**
  * An AssemblyScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-4.
  *
- * **Note:** Instead of padding to the next multiple of 512 bits, this implementation uses multiple
- * blocks of 512 bits.
- *
  * Based on the FIPS 180-4 specification:
  * - https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
  *
@@ -39,8 +36,8 @@ class SHA256_ENGINE {
     /** The current number of blocks left to process. */
     private blocksToProcess: usize;
 
-    /** Stores the 16 32-bit words of the current block. */
-    private W = new Uint32Array(16);
+    /** The current block number. */
+    private blockNumber = 0;
 
     /** Stores the hash values (H[0]..H[7]). */
     private H = new Uint32Array(8);
@@ -57,7 +54,6 @@ class SHA256_ENGINE {
         // Calculate the initial number of blocks to process
         // (+ 1 bit for the padding indicator + 64 bits for the message length)
         this.blocksToProcess = Math.ceil((slot.readFrom.bytes * 8 + 1 + 64) / 512);
-
     }
 
 
@@ -78,6 +74,23 @@ class SHA256_ENGINE {
 
     /** Perform the `σ(1)` operation. */
     private sig1 = (x: number): number => rotr(x, 17) ^ rotr(x, 19) ^ (x >>> 10);
+
+    /**
+     * Reads an unsigned 32-bit integer from the given memory slot,
+     * by imitating the padding of the block without having to copy / fill anything.
+     * @param slot The memory slot to read from.
+     * @param blockOffset The current offset in the block (as a number of Uint32 values).
+     */
+    private readUint32BE = (slot: IsMemorySlot, offsetInBlock: u32): u32 => {
+        // Calculate the offset in the memory slot
+        const offsetInSlot = slot.readFrom.offset + offsetInBlock * 4;
+
+        // Check if the offset is within the slot
+        if (offsetInSlot < slot.readFrom.end) {
+            // Read the value from the slot
+            return loadUint32BE(slot.readFrom.offset, offsetInBlock);
+        }
+    };
 
     /**
      * Hash a single block.
