@@ -4,8 +4,8 @@
  * Based on the FIPS 180-4 specification:
  * - https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
  *
- * And the AS implementation by Cayman:
- * - https://github.com/ChainSafe/ssz/tree/master/packages/as-sha256
+ * Here's a good explanation of the algorithm:
+ * - https://enlear.academy/blockchain-deep-dive-into-sha-256-secure-hash-algorithm-256-bit
  */
 export default class SHA256_ENGINE {
 

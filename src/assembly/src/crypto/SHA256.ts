@@ -1,15 +1,19 @@
+import { IsMemorySlot } from "../../../constants/memory";
+import { loadUint32BE } from "../helpers/storage";
+
+
 /**
  * An AssemblyScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-4.
  *
  * Based on the FIPS 180-4 specification:
  * - https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
  *
- * And the AS implementation by Cayman:
- * - https://github.com/ChainSafe/ssz/tree/master/packages/as-sha256
+ * Here's a good explanation of the algorithm:
+ * - https://enlear.academy/blockchain-deep-dive-into-sha-256-secure-hash-algorithm-256-bit
  */
-class SHA256_AS {
+class SHA256_ENGINE {
     /** 64-bit words constant. */
-    private readonly K: number[] = [
+    private readonly K: u32[] = [
         0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
         0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
         0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
@@ -20,22 +24,41 @@ class SHA256_AS {
         0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
     ];
 
-    /** Intermediate hash values (0-7). */
-    private HASH: u32[] = [
+    /** Initial hash values. */
+    private readonly INITIAL_H: u32[] = [
         0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
         0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
     ];
 
-    /** Pointer for the 64-bit words constant */
-    private K_PTR = this.K.dataStart;
+    /** The current number of blocks left to process. */
+    private blocksToProcess: usize;
 
-    /** Pointer for the intermediate hash values (0-7). */
-    private HASH_PTR = this.HASH.dataStart;
+    /** Stores the 16 32-bit words of the current block. */
+    private W = new Uint32Array(16);
 
-    /** Perform the choose operation (named `Ch` in FIPS 180-4). */
+    /** Stores the hash values. */
+    private H: Uint32Array = new Uint32Array(8);
+
+    /** Working variables storage (a..h) */
+    private WoV = new Uint32Array(8);
+
+
+    /**
+     * Initialize the SHA-256 engine.
+     * @param slot The memory slot to use.
+     */
+    constructor(slot: IsMemorySlot) {
+        // Calculate the initial number of blocks to process
+        // (+ 1 bit for the padding indicator + 64 bits for the message length)
+        this.blocksToProcess = Math.ceil((slot.readFrom.bytes * 8 + 1 + 64) / 512);
+
+    }
+
+
+    /** Perform the `Ch` (choose) operation. */
     private Ch = (x: number, y: number, z: number): number => (x & y) ^ (~x & z);
 
-    /** Perform the majority operation (named `Maj` in FIPS 180-4). */
+    /** Perform the `Maj` (majority) operation. */
     private Maj = (x: number, y: number, z: number): number => (x & y) ^ (x & z) ^ (y & z);
 
     /** Perform the `Σ(0)` operation. */
@@ -49,4 +72,16 @@ class SHA256_AS {
 
     /** Perform the `σ(1)` operation. */
     private sig1 = (x: number): number => rotr(x, 17) ^ rotr(x, 19) ^ (x >>> 10);
+
+    /**
+     * Execute the SHA-256 algorithm on the given memory slot.
+     */
+    execute = (): void => {
+        // Initialize the hash values
+        this.H.set(this.INITIAL_H);
+
+        // Initialize the working variables
+        this.WoV.set(this.INITIAL_H);
+
+    };
 }

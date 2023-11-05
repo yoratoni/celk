@@ -36,7 +36,7 @@ const MEMORY_TABLE: IsMemoryTable = {
         writeTo: { offset: 32, bytes: 65, end: 97 }
     },
     SHA: {
-        readFrom: { offset: 32, bytes: -1, end: 97 },  // Bytes depends if the public key is compressed or not
+        readFrom: { offset: 32, bytes: -1, end: 97 },  // Bytes vary depending if the PBL is compressed or not
         writeTo: { offset: 97, bytes: 32, end: 129 }
     },
     RIP: {
