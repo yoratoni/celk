@@ -5,11 +5,17 @@ import { loadUint32BE } from "../helpers/storage";
 /**
  * An AssemblyScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-4.
  *
+ * **Note:** Instead of padding to the next multiple of 512 bits, this implementation uses multiple
+ * blocks of 512 bits.
+ *
  * Based on the FIPS 180-4 specification:
  * - https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
  *
  * Here's a good explanation of the algorithm:
- * - https://enlear.academy/blockchain-deep-dive-into-sha-256-secure-hash-algorithm-256-bit
+ * - https://enlear.academy/blockchain-deep-dive-into-sha-256-secure-hash-algorithm-256-bit-824ac0e90b24
+ *
+ * And here's a tool that shows all the steps of the algorithm:
+ * - https://sha256algorithm.com/
  */
 class SHA256_ENGINE {
     /** 64-bit words constant. */
@@ -36,8 +42,8 @@ class SHA256_ENGINE {
     /** Stores the 16 32-bit words of the current block. */
     private W = new Uint32Array(16);
 
-    /** Stores the hash values. */
-    private H: Uint32Array = new Uint32Array(8);
+    /** Stores the hash values (H[0]..H[7]). */
+    private H = new Uint32Array(8);
 
     /** Working variables storage (a..h) */
     private WoV = new Uint32Array(8);
@@ -74,14 +80,20 @@ class SHA256_ENGINE {
     private sig1 = (x: number): number => rotr(x, 17) ^ rotr(x, 19) ^ (x >>> 10);
 
     /**
+     * Hash a single block.
+     */
+    private hashBlock = (): void => {
+        // Initialize the hash values / working variables
+        this.H.set(this.INITIAL_H);
+        this.WoV.set(this.INITIAL_H);
+
+    };
+
+    /**
      * Execute the SHA-256 algorithm on the given memory slot.
      */
     execute = (): void => {
-        // Initialize the hash values
-        this.H.set(this.INITIAL_H);
 
-        // Initialize the working variables
-        this.WoV.set(this.INITIAL_H);
 
     };
 }
