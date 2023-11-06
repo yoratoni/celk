@@ -1,5 +1,5 @@
 import { IsMemorySlot } from "../../../constants/memory";
-import { loadUint32BE } from "../helpers/storage";
+import { loadUint32BE, loadUint8 } from "../helpers/storage";
 
 
 /**
@@ -33,11 +33,32 @@ class SHA256_ENGINE {
         0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
     ];
 
-    /** The current number of blocks left to process. */
-    private blocksToProcess: usize;
+    /** Stores the memory slot to use. */
+    private slot: IsMemorySlot;
 
-    /** The current block number. */
-    private blockNumber = 0;
+    /**
+     * Number of Uint32s of data that can be read before reaching padding in the block,
+     * or a part of the data followed by the padding.
+     *
+     * Example:
+     * - If we have 65 bytes, it corresponds to 16.25 Uint32s, so we can read 16 Uint32s of data
+     *   before reaching the padding.
+     * - In this case, 1 byte of data is left, followed by the padding (starting with 0x10000000).
+     * - In this case, this value is 16.
+     */
+    private uint32sToRead: u32 = 0;
+
+    /**
+     * Corresponds to the number of bytes of data that can be read after the complete Uint32s of data,
+     * before reaching the padding.
+     *
+     * Example:
+     * - If we have 65 bytes, it corresponds to 16.25 Uint32s, so we can read 16 Uint32s of data
+     *   before reaching the padding.
+     * - In this case, 1 byte of data is left, followed by the padding (starting with 0x10000000).
+     * - In this case, this value is 1.
+     */
+    private remainingBytesToRead: u32 = 0;
 
     /** Stores the hash values (H[0]..H[7]). */
     private H = new Uint32Array(8);
@@ -51,9 +72,10 @@ class SHA256_ENGINE {
      * @param slot The memory slot to use.
      */
     constructor(slot: IsMemorySlot) {
-        // Calculate the initial number of blocks to process
-        // (+ 1 bit for the padding indicator + 64 bits for the message length)
-        this.blocksToProcess = Math.ceil((slot.readFrom.bytes * 8 + 1 + 64) / 512);
+        this.slot = slot;
+
+        this.uint32sToRead = slot.readFrom.bytes >>> alignof<u32>();
+        this.remainingBytesToRead = slot.readFrom.bytes % alignof<u32>();
     }
 
 
@@ -76,19 +98,38 @@ class SHA256_ENGINE {
     private sig1 = (x: number): number => rotr(x, 17) ^ rotr(x, 19) ^ (x >>> 10);
 
     /**
-     * Reads an unsigned 32-bit integer from the given memory slot,
-     * by imitating the padding of the block without having to copy / fill anything.
-     * @param slot The memory slot to read from.
-     * @param blockOffset The current offset in the block (as a number of Uint32 values).
+     * Reads an unsigned 32-bit integer from the given memory slot in the constructor,
+     * by imitating the padding of the blocks without having to copy / fill anything.
+     * @param offset The offset to read from (as a number of Uint32 in the block).
      */
-    private readUint32BE = (slot: IsMemorySlot, offsetInBlock: u32): u32 => {
-        // Calculate the offset in the memory slot
-        const offsetInSlot = slot.readFrom.offset + offsetInBlock * 4;
+    private readUint32BE = (offset: u32): u32 => {
+        if (offset < this.uint32sToRead) {
+            // In this case, we can directly read the data as a Uint32
+            return loadUint32BE(this.slot.readFrom.offset, offset);
+        } else if (offset == this.uint32sToRead) {
+            // In this case, we have to read the data byte by byte
+            // and generate an Uint32 from it
+            let result: u32 = 0;
 
-        // Check if the offset is within the slot
-        if (offsetInSlot < slot.readFrom.end) {
-            // Read the value from the slot
-            return loadUint32BE(slot.readFrom.offset, offsetInBlock);
+            // Read the remaining bytes
+            for (let i: u32 = 0; i < this.remainingBytesToRead; i++) {
+                const byte = loadUint8(this.slot.readFrom.offset, (offset << alignof<u32>()) + i);
+                result = (result << 8) | byte;
+            }
+
+            // Append the padding
+            result = (result << 8) | 0x80;
+
+            // And if there's still space (< 4 bytes), append 0s
+            if (this.remainingBytesToRead < 3) {
+                result = (result << 8) | 0x00;
+            }
+
+            return result;
+        } else {
+            // In this case, we have to append the padding
+            // and return 0
+            return 0;
         }
     };
 
