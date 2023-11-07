@@ -1,4 +1,3 @@
-import { IsMemorySlot } from "../../../constants/memory";
 import { loadUint32BE, loadUint8 } from "../helpers/storage";
 
 
@@ -36,6 +35,9 @@ class SHA256_ENGINE {
     /** Stores the memory slot to use. */
     private slot: IsMemorySlot;
 
+    /** The block length, in bytes (a multiple of 512 bits as described in FIPS 180-4). */
+    private block_length: u32;
+
     /**
      * Number of Uint32s of data that can be read before reaching padding in the block,
      * or a part of the data followed by the padding.
@@ -43,7 +45,7 @@ class SHA256_ENGINE {
      * Example:
      * - If we have 65 bytes, it corresponds to 16.25 Uint32s, so we can read 16 Uint32s of data
      *   before reaching the padding.
-     * - In this case, 1 byte of data is left, followed by the padding (starting with 0x10000000).
+     * - 1 byte of data is left, followed by the padding (starting with 0x10000000).
      * - In this case, this value is 16.
      */
     private uint32sToRead: u32 = 0;
@@ -55,16 +57,16 @@ class SHA256_ENGINE {
      * Example:
      * - If we have 65 bytes, it corresponds to 16.25 Uint32s, so we can read 16 Uint32s of data
      *   before reaching the padding.
-     * - In this case, 1 byte of data is left, followed by the padding (starting with 0x10000000).
+     * - 1 byte of data is left, followed by the padding (starting with 0x10000000).
      * - In this case, this value is 1.
      */
     private remainingBytesToRead: u32 = 0;
 
     /** Stores the hash values (H[0]..H[7]). */
-    private H = new Uint32Array(8);
+    private H: Uint32Array = new Uint32Array(8);
 
     /** Working variables storage (a..h) */
-    private WoV = new Uint32Array(8);
+    private WoV: Uint32Array = new Uint32Array(8);
 
 
     /**
@@ -74,35 +76,52 @@ class SHA256_ENGINE {
     constructor(slot: IsMemorySlot) {
         this.slot = slot;
 
+        // Calculate the block length
+        this.block_length = Math.ceil((slot.readFrom.bytes * 8 + 1 + 64) / 512) * 64;
+
         this.uint32sToRead = slot.readFrom.bytes >>> alignof<u32>();
         this.remainingBytesToRead = slot.readFrom.bytes % alignof<u32>();
     }
 
 
     /** Perform the `Ch` (choose) operation. */
-    private Ch = (x: number, y: number, z: number): number => (x & y) ^ (~x & z);
+    private Ch(x: number, y: number, z: number): number {
+        return (x & y) ^ (~x & z);
+    }
 
     /** Perform the `Maj` (majority) operation. */
-    private Maj = (x: number, y: number, z: number): number => (x & y) ^ (x & z) ^ (y & z);
+    private Maj(x: number, y: number, z: number): number {
+        return (x & y) ^ (x & z) ^ (y & z);
+    }
 
     /** Perform the `Σ(0)` operation. */
-    private SIG0 = (x: number): number => rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22);
+    private SIG0(x: number): number {
+        return rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22);
+    }
 
     /** Perform the `Σ(1)` operation. */
-    private SIG1 = (x: number): number => rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25);
+    private SIG1(x: number): number {
+        return rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25);
+    }
 
     /** Perform the `σ(0)` operation. */
-    private sig0 = (x: number): number => rotr(x, 7) ^ rotr(x, 18) ^ (x >>> 3);
+    private sig0(x: number): number {
+        return rotr(x, 7) ^ rotr(x, 18) ^ (x >>> 3);
+    }
 
     /** Perform the `σ(1)` operation. */
-    private sig1 = (x: number): number => rotr(x, 17) ^ rotr(x, 19) ^ (x >>> 10);
+    private sig1(x: number): number {
+        return rotr(x, 17) ^ rotr(x, 19) ^ (x >>> 10);
+    }
 
     /**
      * Reads an unsigned 32-bit integer from the given memory slot in the constructor,
      * by imitating the padding of the blocks without having to copy / fill anything.
      * @param offset The offset to read from (as a number of Uint32 in the block).
      */
-    private readUint32BE = (offset: u32): u32 => {
+    readUint32BE(offset: u32): u32 {
+        if (offset < 0 || offset > this.uint32sToRead) throw new Error("Invalid offset");
+
         if (offset < this.uint32sToRead) {
             // In this case, we can directly read the data as a Uint32
             return loadUint32BE(this.slot.readFrom.offset, offset);
@@ -127,16 +146,21 @@ class SHA256_ENGINE {
 
             return result;
         } else {
-            // In this case, we have to append the padding
-            // and return 0
-            return 0;
+            // In this case, we should either return 0s for the padding
+            // or, in the case of the last 64-bit block, return the length of the message
+            // into the last 2 Uint32s
+            if (offset * alignof<u32>() < this.block_length - 8) {
+                return 0;
+            } else {
+                return <u32>this.slot.readFrom.bytes;
+            }
         }
     };
 
     /**
      * Hash a single block.
      */
-    private hashBlock = (): void => {
+    private hashBlock(): void {
         // Initialize the hash values / working variables
         this.H.set(this.INITIAL_H);
         this.WoV.set(this.INITIAL_H);
@@ -146,8 +170,25 @@ class SHA256_ENGINE {
     /**
      * Execute the SHA-256 algorithm on the given memory slot.
      */
-    execute = (): void => {
+    execute(): void {
 
 
     };
+}
+
+export function test(): void {
+    const t = new SHA256_ENGINE({
+        readFrom: {
+            offset: 0,
+            bytes: 65,
+            end: 65
+        },
+        writeTo: {
+            offset: 0,
+            bytes: 0,
+            end: 0
+        }
+    });
+
+    t.readUint32BE(0);
 }
