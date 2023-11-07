@@ -1,5 +1,18 @@
 import { loadUint32BE, loadUint8 } from "../helpers/storage";
 
+/**
+ * Imitates a single section of a memory slot.
+ */
+class IsMemorySlotSection {
+    constructor(public offset: u32, public bytes: u32, public end: u32) {}
+}
+
+/**
+ * Imitates a single memory slot.
+ */
+class IsMemorySlot {
+    constructor(public readFrom: IsMemorySlotSection, public writeTo: IsMemorySlotSection) {}
+}
 
 /**
  * An AssemblyScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-4.
@@ -77,7 +90,7 @@ class SHA256_ENGINE {
         this.slot = slot;
 
         // Calculate the block length
-        this.block_length = Math.ceil((slot.readFrom.bytes * 8 + 1 + 64) / 512) * 64;
+        this.block_length = <u32>Math.ceil((slot.readFrom.bytes * 8 + 1 + 64) / 512) * 64;
 
         this.uint32sToRead = slot.readFrom.bytes >>> alignof<u32>();
         this.remainingBytesToRead = slot.readFrom.bytes % alignof<u32>();
@@ -176,19 +189,13 @@ class SHA256_ENGINE {
     };
 }
 
-export function test(): void {
-    const t = new SHA256_ENGINE({
-        readFrom: {
-            offset: 0,
-            bytes: 65,
-            end: 65
-        },
-        writeTo: {
-            offset: 0,
-            bytes: 0,
-            end: 0
-        }
-    });
+export function test(readPtr: u32): u32 {
+    const t = new SHA256_ENGINE(
+        new IsMemorySlot(
+            new IsMemorySlotSection(0, 32, 32),
+            new IsMemorySlotSection(32, 65, 97)
+        )
+    );
 
-    t.readUint32BE(0);
+    return t.readUint32BE(readPtr);
 }

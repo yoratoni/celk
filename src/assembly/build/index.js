@@ -16,6 +16,12 @@ async function instantiate(module, imports = {}) {
   };
   const { exports } = await WebAssembly.instantiate(module, adaptedImports);
   const memory = exports.memory || imports.env.memory;
+  const adaptedExports = Object.setPrototypeOf({
+    test(readPtr) {
+      // src/assembly/src/crypto/SHA256/test(u32) => u32
+      return exports.test(readPtr) >>> 0;
+    },
+  }, exports);
   function __liftString(pointer) {
     if (!pointer) return null;
     const
@@ -27,7 +33,7 @@ async function instantiate(module, imports = {}) {
     while (end - start > 1024) string += String.fromCharCode(...memoryU16.subarray(start, start += 1024));
     return string + String.fromCharCode(...memoryU16.subarray(start, end));
   }
-  return exports;
+  return adaptedExports;
 }
 export const {
   memory,
@@ -36,6 +42,7 @@ export const {
   __unpin,
   __collect,
   __rtti_base,
+  test,
 } = await (async url => instantiate(
   await (async () => {
     try { return await globalThis.WebAssembly.compileStreaming(globalThis.fetch(url)); }
