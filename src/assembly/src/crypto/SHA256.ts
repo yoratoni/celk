@@ -4,18 +4,22 @@ import { loadUint32BE, loadUint8 } from "../helpers/storage";
  * Imitates a single section of a memory slot.
  */
 class IsMemorySlotSection {
-    constructor(public offset: u32, public bytes: u32, public end: u32) {}
+    constructor(public offset: u64, public bytes: u64, public end: u64) { }
 }
 
 /**
  * Imitates a single memory slot.
  */
 class IsMemorySlot {
-    constructor(public readFrom: IsMemorySlotSection, public writeTo: IsMemorySlotSection) {}
+    constructor(public readFrom: IsMemorySlotSection, public writeTo: IsMemorySlotSection) { }
 }
 
 /**
  * An AssemblyScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-4.
+ *
+ * **Note:** This implementation simulates the preprocessing of the data, as well as the padding of the blocks,
+ * without having to copy / fill anything, by reading the data directly from the memory
+ * and imitating the padding of the blocks depending on the current offset of the data to read.
  *
  * Based on the FIPS 180-4 specification:
  * - https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
@@ -45,11 +49,14 @@ class SHA256_ENGINE {
         0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
     ];
 
+    /** Whether to print the steps of the algorithm. */
+    private verbose: boolean = false;
+
     /** Stores the memory slot to use. */
     private slot: IsMemorySlot;
 
     /** The block length, in bytes (a multiple of 512 bits as described in FIPS 180-4). */
-    private block_length: u32;
+    private blockLen: u64;
 
     /**
      * Number of Uint32s of data that can be read before reaching padding in the block,
@@ -61,7 +68,7 @@ class SHA256_ENGINE {
      * - 1 byte of data is left, followed by the padding (starting with 0x10000000).
      * - In this case, this value is 16.
      */
-    private uint32sToRead: u32 = 0;
+    private uint32sToRead: u64 = 0;
 
     /**
      * Corresponds to the number of bytes of data that can be read after the complete Uint32s of data,
@@ -73,7 +80,7 @@ class SHA256_ENGINE {
      * - 1 byte of data is left, followed by the padding (starting with 0x10000000).
      * - In this case, this value is 1.
      */
-    private remainingBytesToRead: u32 = 0;
+    private remainingBytesToRead: u8 = 0;
 
     /** Stores the hash values (H[0]..H[7]). */
     private H: Uint32Array = new Uint32Array(8);
@@ -85,15 +92,33 @@ class SHA256_ENGINE {
     /**
      * Initialize the SHA-256 engine.
      * @param slot The memory slot to use.
+     * @param verbose Whether to print the steps of the algorithm.
      */
-    constructor(slot: IsMemorySlot) {
+    constructor(slot: IsMemorySlot, verbose: boolean = false) {
         this.slot = slot;
+        this.verbose = verbose;
 
         // Calculate the block length
-        this.block_length = <u32>Math.ceil((slot.readFrom.bytes * 8 + 1 + 64) / 512) * 64;
+        this.blockLen = <u64>Math.ceil((<f64>slot.readFrom.bytes * 8.0 + 1.0 + 64.0) / 512.0) * 64;
 
-        this.uint32sToRead = slot.readFrom.bytes >>> alignof<u32>();
-        this.remainingBytesToRead = slot.readFrom.bytes % alignof<u32>();
+        // Calculate the number of Uint32s of data that can be read before reaching padding in the block,
+        // or a part of the data followed by the padding.
+        this.uint32sToRead = <u64>Math.floor(<f64>slot.readFrom.bytes / 4.0);
+
+        // Calculate the number of bytes of data that can be read after the complete Uint32s of data,
+        // before reaching the padding.
+        this.remainingBytesToRead = <u8>(slot.readFrom.bytes % 4);
+
+        // Log the block length
+        this.log(`Block length: ${this.blockLen} bytes`);
+        this.log(`Uint32s to read: ${this.uint32sToRead}`);
+        this.log(`Remaining bytes to read: ${this.remainingBytesToRead}`);
+    }
+
+
+    /** Console log binding if verbose enabled. */
+    private log(message: string): void {
+        if (this.verbose) console.log(message);
     }
 
 
@@ -133,40 +158,45 @@ class SHA256_ENGINE {
      * @param offset The offset to read from (as a number of Uint32 in the block).
      */
     readUint32BE(offset: u32): u32 {
-        if (offset < 0 || offset > this.uint32sToRead) throw new Error("Invalid offset");
-
+        // In this case, we can directly read the data as a Uint32
         if (offset < this.uint32sToRead) {
-            // In this case, we can directly read the data as a Uint32
-            return loadUint32BE(this.slot.readFrom.offset, offset);
-        } else if (offset == this.uint32sToRead) {
-            // In this case, we have to read the data byte by byte
-            // and generate an Uint32 from it
-            let result: u32 = 0;
+            this.log(`Reading Uint32 at offset ${offset}`);
+            return loadUint32BE(<usize>this.slot.readFrom.offset, offset * 4);
+        }
 
-            // Read the remaining bytes
+        // In this case, we have to read the data byte by byte and generate an Uint32 from it,
+        // we have to start padding the data as there's no enough data to read a full Uint32
+        // Example:
+        // If we have 1 remaining byte (let's say 0x01), we have to read 3 bytes of padding
+        // Which corresponds to "00000001 10000000 00000000 00000000"
+        else if (offset == this.uint32sToRead) {
+            this.log(`Reading Uint32 at offset ${offset} (padding)`);
+
+            let result: u32 = 0x80 << <u32>(24 - this.remainingBytesToRead * 8);
+
             for (let i: u32 = 0; i < this.remainingBytesToRead; i++) {
-                const byte = loadUint8(this.slot.readFrom.offset, (offset << alignof<u32>()) + i);
-                result = (result << 8) | byte;
-            }
-
-            // Append the padding
-            result = (result << 8) | 0x80;
-
-            // And if there's still space (< 4 bytes), append 0s
-            if (this.remainingBytesToRead < 3) {
-                result = (result << 8) | 0x00;
+                result |= <u32>loadUint8(<usize>this.slot.readFrom.offset, i << alignof<u32>()) << (24 - i * 8);
             }
 
             return result;
-        } else {
-            // In this case, we should either return 0s for the padding
-            // or, in the case of the last 64-bit block, return the length of the message
-            // into the last 2 Uint32s
-            if (offset * alignof<u32>() < this.block_length - 8) {
+        }
+
+        // In this case, we should either return 0s for the padding
+        // or, in the case of the last 64-bit block, return the length of the message
+        // into the last 2 Uint32s
+        else {
+            if (offset * 4 < this.blockLen - 4) {
+                this.log(`Reading Uint32 at offset ${offset} (0s padding)`);
                 return 0;
-            } else {
-                return <u32>this.slot.readFrom.bytes;
             }
+
+            if (offset * 4 == this.blockLen - 4) {
+                this.log(`Reading Uint32 at offset ${offset} (message length - first 32 bits)`);
+                return <u32>(this.slot.readFrom.bytes >>> 32);
+            }
+
+            this.log(`Reading Uint32 at offset ${offset} (message length - last 32 bits)`);
+            return <u32>(this.slot.readFrom.bytes & 0xFFFFFFFF);
         }
     };
 
@@ -194,7 +224,8 @@ export function test(readPtr: u32): u32 {
         new IsMemorySlot(
             new IsMemorySlotSection(0, 32, 32),
             new IsMemorySlotSection(32, 65, 97)
-        )
+        ),
+        true
     );
 
     return t.readUint32BE(readPtr);

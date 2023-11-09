@@ -29,16 +29,6 @@ export function loadUint32LE(ptr: usize, offset: usize): u32 {
 }
 
 /**
- * Loads an Uint32 as a big endian from the storage at the specified pointer & offset (aligned).
- * @param ptr Pointer to the storage.
- * @param offset Offset to the storage.
- * @returns The loaded Uint32.
- */
-export function loadUint32BE(ptr: usize, offset: usize): u32 {
-    return bswap<u32>(load<u32>(ptr + (offset << alignof<u32>())));
-}
-
-/**
  * Stores an Uint32 as a little endian to the storage at the specified pointer & offset (aligned).
  * @param ptr Pointer to the storage.
  * @param offset Offset to the storage.
@@ -46,6 +36,16 @@ export function loadUint32BE(ptr: usize, offset: usize): u32 {
  */
 export function storeUint32LE(ptr: usize, offset: usize, value: u32): void {
     store<u32>(ptr + (offset << alignof<u32>()), value);
+}
+
+/**
+ * Loads an Uint32 as a big endian from the storage at the specified pointer & offset (aligned).
+ * @param ptr Pointer to the storage.
+ * @param offset Offset to the storage.
+ * @returns The loaded Uint32.
+ */
+export function loadUint32BE(ptr: usize, offset: usize): u32 {
+    return bswap<u32>(load<u32>(ptr + (offset << alignof<u32>())));
 }
 
 /**

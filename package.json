@@ -11,6 +11,7 @@
         "v-bump": "yarn version --patch",
         "asbuild:dev": "asc --target dev",
         "asbuild:prod": "asc --target prod",
+        "asbuild:test": "asc --target dev && npx tsx src/tests/index.test.ts",
         "test": "npx tsx src/tests/index.test.ts",
         "find": "npx tsx src/scripts/find.ts",
         "benchmark:crypto": "npx tsx src/benchmarks/crypto.ts",
