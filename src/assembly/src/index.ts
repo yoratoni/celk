@@ -1,6 +1,7 @@
-import { test } from "./crypto/SHA256";
+import { execute, init } from "./crypto/SHA256";
 
 
 export {
-    test
+    init as sha256__init,
+    execute as sha256__execute
 };

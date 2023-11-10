@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable arrow-body-style */
-
 import { benchmark } from "utils/benchmarks";
 import logger from "utils/logger";
 
@@ -29,14 +28,14 @@ const main = () => {
     logger.info("Benchmarking testFn_0:");
     benchmark(
         testFn_0,
-        (input: bigint) => input.toString()
+        () => "N/D"
     );
 
     console.log("");
     logger.info("Benchmarking testFn_1:");
     benchmark(
         testFn_1,
-        (input: bigint) => input.toString()
+        () => "N/D"
     );
 };
 

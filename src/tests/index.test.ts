@@ -1,12 +1,12 @@
-import { memory , test } from "assembly/build";
+import { memory, sha256__execute, sha256__init } from "assembly/build";
 
 
-const buf = new Uint8Array(memory.buffer);
-buf[0] = 0x01;
+const cache = new Uint8Array(memory.buffer);
+cache[0] = 0x01;
 
-let val = "";
-for (let i = 1; i <= 16; i++) {
-    val += test(i).toString(2).padStart(32, "0") + "\n";
-}
+console.log(" Input:", Buffer.from(cache.subarray(0, 32)).toString("hex"));
 
-console.log(val);
+sha256__init(0n, 0n, 32n);
+sha256__execute();
+
+console.log("Output:", Buffer.from(cache.subarray(32, 64)).toString("hex"));
