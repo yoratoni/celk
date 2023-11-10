@@ -1,3 +1,7 @@
+import { sha256__execute } from "assembly/build";
+import { IsMemorySlot } from "constants/memory";
+
+
 /**
  * A wrapper around my AssemblyScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-4.
  *
@@ -11,5 +15,13 @@
  * - https://sha256algorithm.com/
  */
 export default class SHA256_ENGINE {
-
+    /**
+     * Wraps the execute function of the AssemblyScript implementation of SHA-256.
+     * @param slot The memory slot to read from and write to.
+     */
+    execute = (slot: IsMemorySlot): void => sha256__execute(
+        BigInt(slot.readFrom.offset),
+        BigInt(slot.readFrom.bytes),
+        BigInt(slot.writeTo.offset),
+    );
 }

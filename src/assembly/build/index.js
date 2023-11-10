@@ -17,12 +17,12 @@ async function instantiate(module, imports = {}) {
   const { exports } = await WebAssembly.instantiate(module, adaptedImports);
   const memory = exports.memory || imports.env.memory;
   const adaptedExports = Object.setPrototypeOf({
-    sha256__init(readFromOffset, readFromBytes, writeToOffset) {
-      // src/assembly/src/crypto/SHA256/init(u64, u64, u64) => void
-      readFromOffset = readFromOffset || 0n;
-      readFromBytes = readFromBytes || 0n;
-      writeToOffset = writeToOffset || 0n;
-      exports.sha256__init(readFromOffset, readFromBytes, writeToOffset);
+    sha256__execute(readOffset, readBytes, writeOffset) {
+      // src/assembly/src/crypto/SHA256/execute(u64, u64, u64) => void
+      readOffset = readOffset || 0n;
+      readBytes = readBytes || 0n;
+      writeOffset = writeOffset || 0n;
+      exports.sha256__execute(readOffset, readBytes, writeOffset);
     },
   }, exports);
   function __liftString(pointer) {
@@ -45,7 +45,6 @@ export const {
   __unpin,
   __collect,
   __rtti_base,
-  sha256__init,
   sha256__execute,
 } = await (async url => instantiate(
   await (async () => {
