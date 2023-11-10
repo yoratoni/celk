@@ -1,5 +1,5 @@
 # Celk
-A toolbox to work with Bitcoin addresses & private keys, entirely written in TypeScript, and soon, a bit in AssemblyScript.
+A toolbox to work with Bitcoin addresses & private keys, in Typescript & WASM.
 
 Note that, for now, the performance of the toolbox is not the best as I decided to focus on the architecture first,
 and only then, on the actual performance.
