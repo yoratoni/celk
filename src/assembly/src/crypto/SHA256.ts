@@ -110,7 +110,8 @@ class SHA256_ENGINE {
     private readUint32BE(wordIndex: u32): u32 {
         // In this case, we can directly read the data as a word
         if (wordIndex < this.wordsToRead) {
-            return loadUint32BE(<usize>this.readOffset, wordIndex);
+            // return loadUint32BE(<usize>this.readOffset, wordIndex);
+            return 0;
         }
 
         // In this case, we have to read the data byte by byte and generate a word from it,
@@ -118,7 +119,7 @@ class SHA256_ENGINE {
         if (wordIndex == this.wordsToRead) {
             // Add remaining bytes to the storage
             for (let i: u8 = 0; i < this.remainingBytesToRead; i++) {
-                this.u8Storage[i] = loadUint8(<usize>this.readOffset, wordIndex * 4 + i);
+                // this.u8Storage[i] = loadUint8(<usize>this.readOffset, wordIndex * 4 + i);
             }
 
             // Add padding
@@ -155,22 +156,23 @@ class SHA256_ENGINE {
             if (i < 16) {
                 // Copy the chunk into the message schedule (FIPS 180-4, 6.2.2, step 1 - "0 ≤ t ≤ 15")
                 this.W[i] = this.readUint32BE(this.chunkIndex * 16 + i);
-            } else {
-                // Extend the first 16 words into the remaining 48 words (FIPS 180-4, 6.2.2, step 1 - "16 ≤ t ≤ 63")
-                this.W[i] = this.sig1(this.W[i - 2]) + this.W[i - 7] + this.sig0(this.W[i - 15]) + this.W[i - 16];
             }
+            // } else {
+            //     // Extend the first 16 words into the remaining 48 words (FIPS 180-4, 6.2.2, step 1 - "16 ≤ t ≤ 63")
+            //     this.W[i] = this.sig1(this.W[i - 2]) + this.W[i - 7] + this.sig0(this.W[i - 15]) + this.W[i - 16];
+            // }
 
-            // Compression function main loop (FIPS 180-4, 6.2.2, step 3)
-            const T1 = this.WoV[7] + this.SIG1(this.WoV[4]) + this.Ch(this.WoV[4], this.WoV[5], this.WoV[6]) + this.K[i] + this.W[i];
-            const T2 = this.SIG0(this.WoV[0]) + this.Maj(this.WoV[0], this.WoV[1], this.WoV[2]);
-            this.WoV[7] = this.WoV[6];
-            this.WoV[6] = this.WoV[5];
-            this.WoV[5] = this.WoV[4];
-            this.WoV[4] = this.WoV[3] + T1;
-            this.WoV[3] = this.WoV[2];
-            this.WoV[2] = this.WoV[1];
-            this.WoV[1] = this.WoV[0];
-            this.WoV[0] = T1 + T2;
+            // // Compression function main loop (FIPS 180-4, 6.2.2, step 3)
+            // const T1 = this.WoV[7] + this.SIG1(this.WoV[4]) + this.Ch(this.WoV[4], this.WoV[5], this.WoV[6]) + this.K[i] + this.W[i];
+            // const T2 = this.SIG0(this.WoV[0]) + this.Maj(this.WoV[0], this.WoV[1], this.WoV[2]);
+            // this.WoV[7] = this.WoV[6];
+            // this.WoV[6] = this.WoV[5];
+            // this.WoV[5] = this.WoV[4];
+            // this.WoV[4] = this.WoV[3] + T1;
+            // this.WoV[3] = this.WoV[2];
+            // this.WoV[2] = this.WoV[1];
+            // this.WoV[1] = this.WoV[0];
+            // this.WoV[0] = T1 + T2;
         }
 
         // Add the compressed chunk to the current hash value (FIPS 180-4, 6.2.2, step 4)
