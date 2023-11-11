@@ -12,17 +12,22 @@ async function instantiate(module, imports = {}) {
           throw Error(`${message} in ${fileName}:${lineNumber}:${columnNumber}`);
         })();
       },
+      "console.warn"(text) {
+        // ~lib/bindings/dom/console.warn(~lib/string/String) => void
+        text = __liftString(text >>> 0);
+        console.warn(text);
+      },
     }),
   };
   const { exports } = await WebAssembly.instantiate(module, adaptedImports);
   const memory = exports.memory || imports.env.memory;
   const adaptedExports = Object.setPrototypeOf({
-    sha256__execute(readOffset, readBytes, writeOffset) {
+    AS__sha256__execute(readOffset, readBytes, writeOffset) {
       // src/assembly/src/crypto/SHA256/execute(u64, u64, u64) => void
       readOffset = readOffset || 0n;
       readBytes = readBytes || 0n;
       writeOffset = writeOffset || 0n;
-      exports.sha256__execute(readOffset, readBytes, writeOffset);
+      exports.AS__sha256__execute(readOffset, readBytes, writeOffset);
     },
   }, exports);
   function __liftString(pointer) {
@@ -45,7 +50,7 @@ export const {
   __unpin,
   __collect,
   __rtti_base,
-  sha256__execute,
+  AS__sha256__execute,
 } = await (async url => instantiate(
   await (async () => {
     try { return await globalThis.WebAssembly.compileStreaming(globalThis.fetch(url)); }

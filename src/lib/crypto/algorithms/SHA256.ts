@@ -1,4 +1,4 @@
-import { sha256__execute } from "assembly/build";
+import { AS__sha256__execute } from "assembly/build";
 import { IsMemorySlot } from "constants/memory";
 
 
@@ -16,10 +16,11 @@ import { IsMemorySlot } from "constants/memory";
  */
 export default class SHA256_ENGINE {
     /**
-     * Wraps the execute function of the AssemblyScript implementation of SHA-256.
+     * Wraps the execute function of the AssemblyScript implementation of SHA-256,
+     * reading & writing directly from the WebAssembly memory buffer at the given slot.
      * @param slot The memory slot to read from and write to.
      */
-    execute = (slot: IsMemorySlot): void => sha256__execute(
+    execute = (slot: IsMemorySlot): void => AS__sha256__execute(
         BigInt(slot.readFrom.offset),
         BigInt(slot.readFrom.bytes),
         BigInt(slot.writeTo.offset),

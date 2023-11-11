@@ -58,6 +58,9 @@ class SHA256_ENGINE {
     /** Number of bytes that needs to be read as a word from the u8 data, followed by padding. */
     private remainingBytesToRead: u8 = 0;
 
+    /** An array that stores 4 bytes, used for the conversion of 4 u8 into a single u32. */
+    private u8Storage: Uint8Array = new Uint8Array(4);
+
     /** Store the message schedule (W[0]..W[63]). */
     private W: Uint32Array = new Uint32Array(64);
 
@@ -66,6 +69,7 @@ class SHA256_ENGINE {
 
     /** Working variables storage (a..h) */
     private WoV: Uint32Array = new Uint32Array(8);
+
 
 
     /** Perform the `Ch` (choose) operation. */
@@ -101,37 +105,42 @@ class SHA256_ENGINE {
     /**
      * Reads a word (Uint32) from the memory buffer by imitating the padding of the block as described in FIPS 180-4.
      * The goal is to be able to read the data directly from the memory without having to copy any data.
-     * @param wordIndex The index of the word to read.
+     * @param wordIndex The index of the word to read (0 => 15/31/..).
      */
     private readUint32BE(wordIndex: u32): u32 {
         // In this case, we can directly read the data as a word
-        if (wordIndex < this.wordsToRead) return loadUint32BE(<usize>this.readOffset, wordIndex);
+        if (wordIndex < this.wordsToRead) {
+            return loadUint32BE(<usize>this.readOffset, wordIndex);
+        }
 
         // In this case, we have to read the data byte by byte and generate a word from it,
         // we have to start padding the data as there's no enough data to read a full word
-        else if (wordIndex == this.wordsToRead) {
-            let result: u32 = 0x80 << <u32>(24 - this.remainingBytesToRead * 8);
-
+        if (wordIndex == this.wordsToRead) {
+            // Add remaining bytes to the storage
             for (let i: u8 = 0; i < this.remainingBytesToRead; i++) {
-                result |= <u32>loadUint8(<usize>this.readOffset, i) << (24 - i * 8);
+                this.u8Storage[i] = loadUint8(<usize>this.readOffset, wordIndex * 4 + i);
             }
 
-            return result;
+            // Add padding
+            this.u8Storage[this.remainingBytesToRead] = 0x80;
+
+            // Add 0s
+            for (let i: u8 = <u8>(this.remainingBytesToRead + 1); i < 4; i++) {
+                this.u8Storage[i] = 0x00;
+            }
+
+            // Convert the storage into a word
+            return (<u32>this.u8Storage[0] << 24) | (<u32>this.u8Storage[1] << 16) | (<u32>this.u8Storage[2] << 8) | (<u32>this.u8Storage[3]);
         }
 
-        // In this case, we should either return 0s for the padding
-        // or, in the case of the last 64-bit block, return the length of the message
-        // as the last 2 words
-        else {
-            // Padding
-            if (wordIndex * 4 < this.blockLength - 8) return 0;
+        // In this case, we return padding (0s) until we reach the length of the message
+        if (wordIndex * 4 < this.blockLength - 8) return 0;
 
-            // Length of the message (first 32 bits)
-            if (wordIndex * 4 == this.blockLength - 8) return <u32>(this.readBytes * 8 >>> 32);
+        // Length of the message (first 32 bits)
+        if (wordIndex * 4 == this.blockLength - 8) return <u32>(this.readBytes * 8 >>> 32);
 
-            // Length of the message (last 32 bits)
-            return <u32>(this.readBytes * 8 & 0xFFFFFFFF);
-        }
+        // Length of the message (last 32 bits)
+        return <u32>(this.readBytes * 8 & 0xFFFFFFFF);
     };
 
     /**
@@ -141,7 +150,7 @@ class SHA256_ENGINE {
         // Initialize the working variables (FIPS 180-4, 6.2.2, step 2)
         this.WoV.set(this.H);
 
-        // Main loop doing the message schedule preparation & compression
+        // Main loop (FIPS 180-4, 6.2.2, step 1 & 3)
         for (let i = 0; i < 64; i++) {
             if (i < 16) {
                 // Copy the chunk into the message schedule (FIPS 180-4, 6.2.2, step 1 - "0 ≤ t ≤ 15")
@@ -171,18 +180,14 @@ class SHA256_ENGINE {
     };
 
     /**
-     * Execute the SHA-256 algorithm.
-     * @param readOffset Where to read inside the memory buffer.
-     * @param readBytes How many bytes to read inside the memory buffer.
-     * @param writeOffset Where to write inside the memory buffer.
+     * Sets the initial values for a single execution of the SHA-256 algorithm.
      */
-    execute(readOffset: u64, readBytes: u64, writeOffset: u64): void {
-        this.readOffset = readOffset;
-        this.readBytes = readBytes;
-        this.writeOffset = writeOffset;
-
+    private setInitialValues(): void {
         // Calculate the block length
         this.blockLength = <u64>Math.ceil((<f64>this.readBytes * 8.0 + 1.0 + 64.0) / 512.0) * 64;
+
+        // Set the chunk index to 0
+        this.chunkIndex = 0;
 
         // Calculate the number of words that can be read from the u8 input data without having to pad it.
         this.wordsToRead = <u32>Math.floor(<f64>this.readBytes / 4.0);
@@ -192,6 +197,21 @@ class SHA256_ENGINE {
 
         // Initialize the hash values (FIPS 180-4, 5.3.3)
         this.H.set(this.INITIAL_H);
+    }
+
+    /**
+     * Execute the SHA-256 algorithm on the WebAssembly memory buffer.
+     * @param readOffset Where to read inside the buffer.
+     * @param readBytes How many bytes to read inside the buffer.
+     * @param writeOffset Where to write inside the buffer (32 bytes).
+     */
+    execute(readOffset: u64, readBytes: u64, writeOffset: u64): void {
+        this.readOffset = readOffset;
+        this.readBytes = readBytes;
+        this.writeOffset = writeOffset;
+
+        // Set the initial values
+        this.setInitialValues();
 
         // Compute each chunk
         while (this.chunkIndex * 16 < this.blockLength / 4) {
@@ -207,16 +227,20 @@ class SHA256_ENGINE {
 }
 
 /** Stores the instance of the SHA-256 engine. */
-const instance: SHA256_ENGINE = new SHA256_ENGINE();
+let instance: SHA256_ENGINE = new SHA256_ENGINE();
 
 /**
  * Execute the SHA-256 algorithm.
  * @param readOffset Where to read inside the memory buffer.
  * @param readBytes How many bytes to read inside the memory buffer.
  * @param writeOffset Where to write inside the memory buffer.
- * @throws If the SHA-256 engine is not initialized.
+ * @param debugMode The debug mode (optional, defaults to `false`).
  */
 export function execute(readOffset: u64, readBytes: u64, writeOffset: u64): void {
-    if (!instance) throw new Error("SHA-256 engine not initialized");
+    if (!instance) {
+        console.warn("SHA256_ENGINE instance not found, creating a new one.");
+        instance = new SHA256_ENGINE();
+    }
+
     instance.execute(readOffset, readBytes, writeOffset);
 }

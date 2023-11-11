@@ -130,21 +130,18 @@ const execute = (mode: General.IsCryptoBenchmarkMode) => {
         const sha256Engine = new SHA256_ENGINE();
 
         // Secp256k1 uncompressed output into cache
-        cache.writeHex("0x02B23790A42BE63E1B251AD6C94FDEF07271EC0AADA31DB6C3E8BD32043F8BE384");
+        cache.writeHex(secp256k1_uncompressedOutput);
 
         const slot = {
-            readFrom: { offset: 0, bytes: 33, end: 33 },
+            readFrom: { offset: 0, bytes: 65, end: 65 },
             writeTo: { offset: 65, bytes: 32, end: 97 }
         };
 
         // Executes once for checking the output
         sha256Engine.execute(slot);
 
-        console.log(cache.subarray(0, 33).toString("hex").toUpperCase());
-        console.log(cache.subarray(65, 97).toString("hex").toUpperCase());
-
         // Subarray is used to get the first 32 bytes of the output (256 bits)
-        if (cache.subarray(65, 97).toString("hex").toUpperCase() === sha256_output) testPassed = true;
+        if ("0x" + cache.subarray(65, 97).toString("hex").toUpperCase() === sha256_output) testPassed = true;
         else testPassed = false;
 
         // Secp256k1 uncompressed output into cache

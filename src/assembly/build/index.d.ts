@@ -12,4 +12,4 @@ export declare const __rtti_base: number;
  * @param readBytes `u64`
  * @param writeOffset `u64`
  */
-export declare function sha256__execute(readOffset: bigint, readBytes: bigint, writeOffset: bigint): void;
+export declare function AS__sha256__execute(readOffset: bigint, readBytes: bigint, writeOffset: bigint): void;

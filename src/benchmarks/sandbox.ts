@@ -1,20 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable arrow-body-style */
-import { memory, sha256__execute } from "assembly/build";
+import { AS__sha256__execute, memory } from "assembly/build";
+import Cache from "helpers/cache";
 import { benchmark } from "utils/benchmarks";
 import logger from "utils/logger";
 
 
-const cache = new Uint8Array(memory.buffer);
-cache[0] = 0x01;
+const cache = Cache.fromArrayBuffer(memory.buffer);
 
-console.log(" Input:", Buffer.from(cache.subarray(0, 32)).toString("hex"));
+const input = "0x0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6";
+if ((input.length - 2) % 2 !== 0) throw new Error("Invalid input length");
+const inputBytesLength =  BigInt((input.length - 2) / 2);
+cache.writeHex(input);
+
 
 /**
  * **[FN 0]** Test function to benchmark.
  */
 const testFn_0 = () => {
-    sha256__execute(0n, 1n, 32n);
+    AS__sha256__execute(0n, inputBytesLength, 1000n);
 };
 
 /**

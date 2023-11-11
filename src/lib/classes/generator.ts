@@ -116,7 +116,7 @@ export default class Generator {
 
             // SHA-256 (executed only on PkB size but space still reserved for uncompressed public key)
             const shaStart = process.hrtime.bigint();
-            this.sha256Engine.execute(this.cache, MEMORY_TABLE.SHA);
+            this.sha256Engine.execute(MEMORY_TABLE.SHA);
             TIMES.sha = process.hrtime.bigint() - shaStart;
             VALUES.sha = this.cache.subarray(
                 MEMORY_TABLE.SHA.writeTo.offset,
@@ -137,7 +137,7 @@ export default class Generator {
 
             // Double SHA-256 checksum (step 1)
             const sc1Start = process.hrtime.bigint();
-            this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC1);
+            this.sha256Engine.execute(MEMORY_TABLE.SC1);
             TIMES.sc1 = process.hrtime.bigint() - sc1Start;
             VALUES.sc1 = this.cache.subarray(
                 MEMORY_TABLE.SC1.writeTo.offset,
@@ -146,7 +146,7 @@ export default class Generator {
 
             // Double SHA-256 checksum (step 2 -> overwrites step 1)
             const sc2Start = process.hrtime.bigint();
-            this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC2);
+            this.sha256Engine.execute(MEMORY_TABLE.SC2);
             TIMES.sc2 = process.hrtime.bigint() - sc2Start;
             VALUES.sc2 = this.cache.subarray(
                 MEMORY_TABLE.SC2.writeTo.offset,
@@ -236,7 +236,7 @@ export default class Generator {
         MEMORY_TABLE.SHA.readFrom.bytes = this.pkB;
 
         // SHA-256 (executed only on PkB size but space still reserved for uncompressed public key)
-        this.sha256Engine.execute(this.cache, MEMORY_TABLE.SHA);
+        this.sha256Engine.execute(MEMORY_TABLE.SHA);
 
         // RIPEMD-160
         this.ripemd160Engine.execute(this.cache, MEMORY_TABLE.RIP);
@@ -251,10 +251,10 @@ export default class Generator {
         };
 
         // Double SHA-256 checksum (step 1)
-        this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC1);
+        this.sha256Engine.execute(MEMORY_TABLE.SC1);
 
         // Double SHA-256 checksum (step 2 -> overwrites step 1)
-        this.sha256Engine.execute(this.cache, MEMORY_TABLE.SC2);
+        this.sha256Engine.execute(MEMORY_TABLE.SC2);
 
         // Take the first 4 bytes of the double SHA-256 checksum
         this.cache.writeUint32BE(

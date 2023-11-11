@@ -2,5 +2,5 @@ import { execute } from "./crypto/SHA256";
 
 
 export {
-    execute as sha256__execute
+    execute as AS__sha256__execute
 };
