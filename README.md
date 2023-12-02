@@ -103,7 +103,7 @@ const FINDER_CONFIG: Configs.IsFinderConfig = {
 Performances
 ------------
 Benchmark environment:
-- CPU: AMD Ryzen 5 3600x (6 cores / 12 threads) @ 3.8 GHz.
+- CPU: AMD Ryzen 7 5800x (8 cores / 16 threads) @ 3.8 GHz.
 - GPU: NVIDIA GeForce RTX 3070.
 - RAM: 32 GB DDR4 @ 3200 MHz.
 - OS: Windows 10 64 bits.
@@ -122,6 +122,7 @@ Benchmark environment:
 | `v1.0.5`    | 1.25 kK/s                  | **Reverts the address to its RIPEMD-160 hash**               |
 | `v1.0.5b`   | N/D                        | **Better benchmarking & reports per second**                 |
 | `v1.0.6`    | 15.42 kK/s                 | **Using secp256k1 module and WASM / JS shared memory space** |
+| `v1.0.7`    | 19.24 kK/s                 | **Using WASM / JS shared memory space with JS only**         |
 
 #### About the cache:
 > Note that I was previously using Node.js Buffers (`v1.0.4`), but for better compatibility with WASM modules,
@@ -163,10 +164,10 @@ I'm using two of my benchmarks to get the results:
 
 | Step         | Execution time | Workload | Iterations per second |
 |--------------|----------------|----------|-----------------------|
-| PKG (RANDOM) | 07.5µs         | 12.04%   | 164.87 kIT/s          |
-| SECP256K1    | 43.6µs         | 69.98%   | 022.62 kIT/s          |
-| SHA-256      | 05.6µs         | 08.99%   | 245.60 kIT/s          |
-| RIPEMD-160   | 05.6µs         | 08.99%   | 238.78 kIT/s          |
+| PKG (RANDOM) | 07.5µs         | 37.33%   | 211.67 kIT/s          |
+| SECP256K1    | 43.6µs         | 53.39%   | 026.45 kIT/s          |
+| SHA-256      | 05.6µs         | 05.09%   | 259.61 kIT/s          |
+| RIPEMD-160   | 05.6µs         | 04.19%   | 301.20 kIT/s          |
 
 Note that the private key used to benchmark the `secp256k1` algorithm is in the range `2^250 <-> 2^255`,
 and that's why it takes so much time to compute.
