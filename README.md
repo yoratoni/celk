@@ -107,7 +107,7 @@ Benchmark environment:
 - GPU: NVIDIA GeForce RTX 3070.
 - RAM: 32 GB DDR4 @ 3200 MHz.
 - OS: Windows 10 64 bits.
-- Node.js: v20.9.0.
+- Node.js: v20.10.0.
 
 ### Benchmarking of the Bitcoin addresses generator
 | Version     | Addresses per second (K/s) | Upgrade description                                          |
